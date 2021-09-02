@@ -19,10 +19,9 @@
  * For more information, see the following discussion:
  * https://github.com/tommcfarlin/WordPress-Plugin-Boilerplate/pull/123#issuecomment-28541913
  *
- * @link       http://example.com
- * @since      1.0.0
- *
- * @package    Plugin_Name
+ * @link              https://github.com/bchabot/wp-paradb
+ * @since             0.0.0
+ * @package           wp-paradb
  */
 
 // If uninstall not called from WordPress, then exit.
