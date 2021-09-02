@@ -8,20 +8,20 @@
  * registers the activation and deactivation functions, and defines a function
  * that starts the plugin.
  *
- * @link              http://example.com
- * @since             1.0.0
- * @package           Plugin_Name
+ * @link              https://github.com/bchabot/wp-paradb
+ * @since             0.0.0
+ * @package           wp-paradb
  *
  * @wordpress-plugin
- * Plugin Name:       WordPress Plugin Boilerplate
- * Plugin URI:        http://example.com/plugin-name-uri/
- * Description:       This is a short description of what the plugin does. It's displayed in the WordPress admin area.
- * Version:           1.0.0
- * Author:            Your Name or Your Company
- * Author URI:        http://example.com/
- * License:           GPL-2.0+
- * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
- * Text Domain:       plugin-name
+ * Plugin Name:       WordPress Paranormal Database
+ * Plugin URI:        https://github.com/bchabot/wp-paradb
+ * Description:       Plugin to add reporting, archiving, and search functionality for paranormal investigation
+ * Version:           0.0.0
+ * Author:            Brian Chabot <bchabot@gmail.com>
+ * Author URI:        https://brianchabot.org/
+ * License:           GPL-3.0+
+ * License URI:       http://www.gnu.org/licenses/gpl-3.0.txt
+ * Text Domain:       wpparadb
  * Domain Path:       /languages
  */
 
@@ -35,34 +35,34 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'PLUGIN_NAME_VERSION', '1.0.0' );
+define( 'PLUGIN_NAME_VERSION', '0.0.0' );
 
 /**
  * The code that runs during plugin activation.
  * This action is documented in includes/class-plugin-name-activator.php
  */
-function activate_plugin_name() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-plugin-name-activator.php';
-	Plugin_Name_Activator::activate();
+function activate_wpparadb() {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-wpparadb-activator.php';
+	wpparadb_Activator::activate();
 }
 
 /**
  * The code that runs during plugin deactivation.
  * This action is documented in includes/class-plugin-name-deactivator.php
  */
-function deactivate_plugin_name() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-plugin-name-deactivator.php';
-	Plugin_Name_Deactivator::deactivate();
+function deactivate_wpparadb() {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-wpparadb-deactivator.php';
+	wpparadb_Deactivator::deactivate();
 }
 
-register_activation_hook( __FILE__, 'activate_plugin_name' );
-register_deactivation_hook( __FILE__, 'deactivate_plugin_name' );
+register_activation_hook( __FILE__, 'activate_wpparadb' );
+register_deactivation_hook( __FILE__, 'deactivate_wpparadb' );
 
 /**
  * The core plugin class that is used to define internationalization,
  * admin-specific hooks, and public-facing site hooks.
  */
-require plugin_dir_path( __FILE__ ) . 'includes/class-plugin-name.php';
+require plugin_dir_path( __FILE__ ) . 'includes/class-wpparadb.php';
 
 /**
  * Begins execution of the plugin.
@@ -71,12 +71,12 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-plugin-name.php';
  * then kicking off the plugin from this point in the file does
  * not affect the page life cycle.
  *
- * @since    1.0.0
+ * @since    0.0.0
  */
-function run_plugin_name() {
+function run_wp_paradb() {
 
-	$plugin = new Plugin_Name();
+	$plugin = new wpparadb();
 	$plugin->run();
 
 }
-run_plugin_name();
+run_wpparadb();
