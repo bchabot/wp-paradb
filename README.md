@@ -56,7 +56,7 @@ hese features have been removed and will be introduced in other editions, and wi
 
 WP-ParaDB is loosely based on concepts found in ParaDB http://paradb.sourceforge.net/ https://sourceforge.net/projects/paradb/ https://github.com/szarkos/paradb Copyright (C) 2007 Stephen A. Zarkos <Obsid@Sentry.net> and distributed under GPL2.
 
-This plugin is created with the organization and leadership of Brian Chabot <bchabot#gmail.com> and released under GPL3.
+This plugin is created with the organization and leadership of Brian Chabot <bchabot@gmail.com> and released under GPL3.
 
 ## Documentation, FAQs, and More
 
