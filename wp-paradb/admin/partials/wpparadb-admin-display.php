@@ -5,10 +5,10 @@
  *
  * This file is used to markup the admin-facing aspects of the plugin.
  *
- * @link       http://example.com
- * @since      1.0.0
- *
- * @package    Plugin_Name
+ * @link              https://github.com/bchabot/wp-paradb
+ * @since             0.0.0
+ * @package           wp-paradb
+ * @author     Brian Chabot <bchabot@gmail.com>
  * @subpackage Plugin_Name/admin/partials
  */
 ?>
