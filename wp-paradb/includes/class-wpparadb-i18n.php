@@ -6,11 +6,11 @@
  * Loads and defines the internationalization files for this plugin
  * so that it is ready for translation.
  *
- * @link       http://example.com
- * @since      1.0.0
- *
- * @package    Plugin_Name
- * @subpackage Plugin_Name/includes
+ * @link              https://github.com/bchabot/wp-paradb
+ * @since             0.0.0
+ * @package           wp-paradb
+ * @subpackage        wp-paradb/includes
+ * @author     Brian Chabot <bchabot@gmail.com>
  */
 
 /**
@@ -19,23 +19,24 @@
  * Loads and defines the internationalization files for this plugin
  * so that it is ready for translation.
  *
- * @since      1.0.0
- * @package    Plugin_Name
- * @subpackage Plugin_Name/includes
- * @author     Your Name <email@example.com>
+ * @link              https://github.com/bchabot/wp-paradb
+ * @since             0.0.0
+ * @package           wp-paradb
+ * @subpackage        wp-paradb/includes
+ * @author     Brian Chabot <bchabot@gmail.com>
  */
-class Plugin_Name_i18n {
+class wpparadb_i18n {
 
 
 	/**
 	 * Load the plugin text domain for translation.
 	 *
-	 * @since    1.0.0
+	 * @since    0.0.0
 	 */
 	public function load_plugin_textdomain() {
 
 		load_plugin_textdomain(
-			'plugin-name',
+			'wpparadb',
 			false,
 			dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages/'
 		);
