@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Define the internationalization functionality
  *
@@ -7,11 +6,16 @@
  * so that it is ready for translation.
  *
  * @link              https://github.com/bchabot/wp-paradb
- * @since             0.0.0
- * @package           wp-paradb
- * @subpackage        wp-paradb/includes
- * @author     Brian Chabot <bchabot@gmail.com>
+ * @since             1.0.0
+ * @package           WP_ParaDB
+ * @subpackage        WP_ParaDB/includes
+ * @author            Brian Chabot <bchabot@gmail.com>
  */
+
+// Prevent direct access.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Define the internationalization functionality.
@@ -19,30 +23,23 @@
  * Loads and defines the internationalization files for this plugin
  * so that it is ready for translation.
  *
- * @link              https://github.com/bchabot/wp-paradb
- * @since             0.0.0
- * @package           wp-paradb
- * @subpackage        wp-paradb/includes
+ * @since      1.0.0
+ * @package    WP_ParaDB
+ * @subpackage WP_ParaDB/includes
  * @author     Brian Chabot <bchabot@gmail.com>
  */
-class wpparadb_i18n {
-
+class WP_ParaDB_i18n {
 
 	/**
 	 * Load the plugin text domain for translation.
 	 *
-	 * @since    0.0.0
+	 * @since    1.0.0
 	 */
 	public function load_plugin_textdomain() {
-
 		load_plugin_textdomain(
-			'wpparadb',
+			'wp-paradb',
 			false,
 			dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages/'
 		);
-
 	}
-
-
-
 }
