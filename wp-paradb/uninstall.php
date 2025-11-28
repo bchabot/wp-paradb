@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Fired when the plugin is uninstalled.
  *
@@ -20,11 +19,27 @@
  * https://github.com/tommcfarlin/WordPress-Plugin-Boilerplate/pull/123#issuecomment-28541913
  *
  * @link              https://github.com/bchabot/wp-paradb
- * @since             0.0.0
- * @package           wp-paradb
+ * @since             1.0.0
+ * @package           WP_ParaDB
  */
 
 // If uninstall not called from WordPress, then exit.
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
+
+// Delete plugin options.
+delete_option( 'wp_paradb_options' );
+
+// For multisite installations.
+if ( is_multisite() ) {
+	$sites = get_sites();
+	foreach ( $sites as $site ) {
+		switch_to_blog( $site->blog_id );
+		delete_option( 'wp_paradb_options' );
+		restore_current_blog();
+	}
+}
+
+// Clear any cached data.
+wp_cache_flush();
