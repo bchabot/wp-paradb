@@ -1,26 +1,12 @@
 <?php
 /**
- * The plugin bootstrap file
+ * The core plugin class
  *
- * @wordpress-plugin
- * Plugin Name:       WordPress Paranormal Database
- * Plugin URI:        https://github.com/bchabot/wp-paradb
- * Description:       A comprehensive system for recording, archiving, and sharing paranormal witness reports, investigations, and research.
- * Version:           1.0.0
- * Requires at least: 5.0
- * Requires PHP:      7.4
- * Author:            Brian Chabot
- * Author URI:        https://brianchabot.org/
- * License:           GPL v3 or later
- * License URI:       https://www.gnu.org/licenses/gpl-3.0.html
- * Text Domain:       wp-paradb
- * Domain Path:       /languages
+ * @link              https://github.com/bchabot/wp-paradb
+ * @since             1.0.0
+ * @package           WP_ParaDB
+ * @subpackage        WP_ParaDB/includes
  */
-
-// If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) ) {
-	die;
-}
 
 // Prevent direct access.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -28,50 +14,162 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Plugin version.
- */
-define( 'WP_PARADB_VERSION', '1.0.0' );
-
-/**
- * Plugin paths.
- */
-define( 'WP_PARADB_PLUGIN_FILE', __FILE__ );
-define( 'WP_PARADB_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-define( 'WP_PARADB_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'WP_PARADB_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
-
-/**
- * The code that runs during plugin activation.
- */
-function activate_wp_paradb() {
-	require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-activator.php';
-	WP_ParaDB_Activator::activate();
-}
-
-/**
- * The code that runs during plugin deactivation.
- */
-function deactivate_wp_paradb() {
-	require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-deactivator.php';
-	WP_ParaDB_Deactivator::deactivate();
-}
-
-register_activation_hook( __FILE__, 'activate_wp_paradb' );
-register_deactivation_hook( __FILE__, 'deactivate_wp_paradb' );
-
-/**
  * The core plugin class.
- */
-require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb.php';
-
-/**
- * Initialize the plugin.
  *
- * @since    1.0.0
+ * @since      1.0.0
+ * @package    WP_ParaDB
+ * @subpackage WP_ParaDB/includes
+ * @author     Brian Chabot <bchabot@gmail.com>
  */
-function run_wp_paradb() {
-	$plugin = new WP_ParaDB();
-	$plugin->run();
-}
+class WP_ParaDB {
 
-run_wp_paradb();
+	/**
+	 * The loader that's responsible for maintaining and registering all hooks.
+	 *
+	 * @since    1.0.0
+	 * @access   protected
+	 * @var      WP_ParaDB_Loader    $loader    Maintains and registers all hooks.
+	 */
+	protected $loader;
+
+	/**
+	 * The unique identifier of this plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   protected
+	 * @var      string    $plugin_name    The plugin identifier.
+	 */
+	protected $plugin_name;
+
+	/**
+	 * The current version of the plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   protected
+	 * @var      string    $version    The current version.
+	 */
+	protected $version;
+
+	/**
+	 * Define the core functionality of the plugin.
+	 *
+	 * @since    1.0.0
+	 */
+	public function __construct() {
+		if ( defined( 'WP_PARADB_VERSION' ) ) {
+			$this->version = WP_PARADB_VERSION;
+		} else {
+			$this->version = '1.0.0';
+		}
+		$this->plugin_name = 'wp-paradb';
+
+		$this->load_dependencies();
+		$this->set_locale();
+		$this->define_admin_hooks();
+		$this->define_public_hooks();
+	}
+
+	/**
+	 * Load the required dependencies for this plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 */
+	private function load_dependencies() {
+		// Core classes.
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-loader.php';
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-i18n.php';
+
+		// Handler classes.
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-database.php';
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-roles.php';
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-case-handler.php';
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-report-handler.php';
+
+		// Admin classes.
+		require_once WP_PARADB_PLUGIN_DIR . 'admin/class-wp-paradb-admin.php';
+		require_once WP_PARADB_PLUGIN_DIR . 'admin/class-wp-paradb-admin-menu.php';
+
+		// Public classes.
+		require_once WP_PARADB_PLUGIN_DIR . 'public/class-wp-paradb-public.php';
+
+		$this->loader = new WP_ParaDB_Loader();
+	}
+
+	/**
+	 * Define the locale for this plugin for internationalization.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 */
+	private function set_locale() {
+		$plugin_i18n = new WP_ParaDB_i18n();
+		$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
+	}
+
+	/**
+	 * Register all of the hooks related to the admin area functionality.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 */
+	private function define_admin_hooks() {
+		$plugin_admin = new WP_ParaDB_Admin( $this->get_plugin_name(), $this->get_version() );
+
+		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
+		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
+		$this->loader->add_action( 'admin_menu', 'WP_ParaDB_Admin_Menu', 'register_menus' );
+	}
+
+	/**
+	 * Register all of the hooks related to the public-facing functionality.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 */
+	private function define_public_hooks() {
+		$plugin_public = new WP_ParaDB_Public( $this->get_plugin_name(), $this->get_version() );
+
+		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
+		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+	}
+
+	/**
+	 * Run the loader to execute all of the hooks with WordPress.
+	 *
+	 * @since    1.0.0
+	 */
+	public function run() {
+		$this->loader->run();
+	}
+
+	/**
+	 * The name of the plugin used to uniquely identify it within WordPress.
+	 *
+	 * @since     1.0.0
+	 * @return    string    The name of the plugin.
+	 */
+	public function get_plugin_name() {
+		return $this->plugin_name;
+	}
+
+	/**
+	 * The reference to the class that orchestrates the hooks with the plugin.
+	 *
+	 * @since     1.0.0
+	 * @return    WP_ParaDB_Loader    Orchestrates the hooks of the plugin.
+	 */
+	public function get_loader() {
+		return $this->loader;
+	}
+
+	/**
+	 * Retrieve the version number of the plugin.
+	 *
+	 * @since     1.0.0
+	 * @return    string    The version number of the plugin.
+	 */
+	public function get_version() {
+		return $this->version;
+	}
+}
