@@ -1,0 +1,237 @@
+<?php
+/**
+ * Admin settings page view
+ *
+ * @link              https://github.com/bchabot/wp-paradb
+ * @since             1.0.0
+ * @package           WP_ParaDB
+ * @subpackage        WP_ParaDB/admin/partials
+ */
+
+// Prevent direct access.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+// Check user capabilities.
+if ( ! current_user_can( 'paradb_manage_settings' ) ) {
+	wp_die( esc_html__( 'You do not have permission to access this page.', 'wp-paradb' ) );
+}
+
+// Handle form submission.
+if ( isset( $_POST['save_settings'] ) && check_admin_referer( 'save_paradb_settings', 'settings_nonce' ) ) {
+	$options = get_option( 'wp_paradb_options', array() );
+	
+	// General settings.
+	$options['case_number_format'] = isset( $_POST['case_number_format'] ) ? sanitize_text_field( wp_unslash( $_POST['case_number_format'] ) ) : 'CASE-%Y-%ID%';
+	$options['require_client_consent'] = isset( $_POST['require_client_consent'] ) ? 1 : 0;
+	$options['items_per_page'] = isset( $_POST['items_per_page'] ) ? absint( $_POST['items_per_page'] ) : 20;
+	
+	// Witness submission settings.
+	$options['allow_public_submissions'] = isset( $_POST['allow_public_submissions'] ) ? 1 : 0;
+	$options['moderate_submissions'] = isset( $_POST['moderate_submissions'] ) ? 1 : 0;
+	
+	// File upload settings.
+	$options['max_upload_size'] = isset( $_POST['max_upload_size'] ) ? absint( $_POST['max_upload_size'] ) : 10485760;
+	$options['allowed_file_types'] = isset( $_POST['allowed_file_types'] ) ? array_map( 'sanitize_text_field', explode( ',', wp_unslash( $_POST['allowed_file_types'] ) ) ) : array();
+	
+	// Map settings.
+	$options['enable_geolocation'] = isset( $_POST['enable_geolocation'] ) ? 1 : 0;
+	$options['enable_moon_phase'] = isset( $_POST['enable_moon_phase'] ) ? 1 : 0;
+	
+	// Update options.
+	update_option( 'wp_paradb_options', $options );
+	
+	echo '<div class="notice notice-success"><p>' . esc_html__( 'Settings saved successfully.', 'wp-paradb' ) . '</p></div>';
+}
+
+// Get current options.
+$options = get_option( 'wp_paradb_options', array() );
+?>
+
+<div class="wrap">
+	<h1><?php esc_html_e( 'ParaDB Settings', 'wp-paradb' ); ?></h1>
+	
+	<form method="post" action="">
+		<?php wp_nonce_field( 'save_paradb_settings', 'settings_nonce' ); ?>
+		
+		<h2 class="title"><?php esc_html_e( 'General Settings', 'wp-paradb' ); ?></h2>
+		<table class="form-table">
+			<tr>
+				<th scope="row">
+					<label for="case_number_format"><?php esc_html_e( 'Case Number Format', 'wp-paradb' ); ?></label>
+				</th>
+				<td>
+					<input type="text" name="case_number_format" id="case_number_format" class="regular-text" value="<?php echo esc_attr( isset( $options['case_number_format'] ) ? $options['case_number_format'] : 'CASE-%Y-%ID%' ); ?>">
+					<p class="description">
+						<?php esc_html_e( 'Use placeholders: %Y% (year), %M% (month), %D% (day), %ID% (case ID)', 'wp-paradb' ); ?><br>
+						<?php esc_html_e( 'Example: CASE-%Y-%ID% produces CASE-2024-0001', 'wp-paradb' ); ?>
+					</p>
+				</td>
+			</tr>
+			
+			<tr>
+				<th scope="row">
+					<label for="items_per_page"><?php esc_html_e( 'Items Per Page', 'wp-paradb' ); ?></label>
+				</th>
+				<td>
+					<input type="number" name="items_per_page" id="items_per_page" min="1" max="100" value="<?php echo esc_attr( isset( $options['items_per_page'] ) ? $options['items_per_page'] : 20 ); ?>">
+					<p class="description"><?php esc_html_e( 'Number of items to display per page in listings', 'wp-paradb' ); ?></p>
+				</td>
+			</tr>
+			
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Client Consent', 'wp-paradb' ); ?></th>
+				<td>
+					<label>
+						<input type="checkbox" name="require_client_consent" value="1" <?php checked( isset( $options['require_client_consent'] ) ? $options['require_client_consent'] : 1, 1 ); ?>>
+						<?php esc_html_e( 'Require client consent before publishing case information', 'wp-paradb' ); ?>
+					</label>
+				</td>
+			</tr>
+		</table>
+		
+		<h2 class="title"><?php esc_html_e( 'Witness Submission Settings', 'wp-paradb' ); ?></h2>
+		<table class="form-table">
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Public Submissions', 'wp-paradb' ); ?></th>
+				<td>
+					<label>
+						<input type="checkbox" name="allow_public_submissions" value="1" <?php checked( isset( $options['allow_public_submissions'] ) ? $options['allow_public_submissions'] : 1, 1 ); ?>>
+						<?php esc_html_e( 'Allow public witness account submissions', 'wp-paradb' ); ?>
+					</label>
+					<p class="description"><?php esc_html_e( 'Enable the public witness submission form', 'wp-paradb' ); ?></p>
+				</td>
+			</tr>
+			
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Moderation', 'wp-paradb' ); ?></th>
+				<td>
+					<label>
+						<input type="checkbox" name="moderate_submissions" value="1" <?php checked( isset( $options['moderate_submissions'] ) ? $options['moderate_submissions'] : 1, 1 ); ?>>
+						<?php esc_html_e( 'Hold witness submissions for moderation', 'wp-paradb' ); ?>
+					</label>
+					<p class="description"><?php esc_html_e( 'Submissions will not be visible until reviewed', 'wp-paradb' ); ?></p>
+				</td>
+			</tr>
+		</table>
+		
+		<h2 class="title"><?php esc_html_e( 'File Upload Settings', 'wp-paradb' ); ?></h2>
+		<table class="form-table">
+			<tr>
+				<th scope="row">
+					<label for="max_upload_size"><?php esc_html_e( 'Maximum Upload Size', 'wp-paradb' ); ?></label>
+				</th>
+				<td>
+					<input type="number" name="max_upload_size" id="max_upload_size" min="1048576" max="104857600" step="1048576" value="<?php echo esc_attr( isset( $options['max_upload_size'] ) ? $options['max_upload_size'] : 10485760 ); ?>">
+					<p class="description">
+						<?php
+						printf(
+							esc_html__( 'Maximum file size in bytes (Current: %s)', 'wp-paradb' ),
+							size_format( isset( $options['max_upload_size'] ) ? $options['max_upload_size'] : 10485760 )
+						);
+						?>
+					</p>
+				</td>
+			</tr>
+			
+			<tr>
+				<th scope="row">
+					<label for="allowed_file_types"><?php esc_html_e( 'Allowed File Types', 'wp-paradb' ); ?></label>
+				</th>
+				<td>
+					<?php
+					$default_types = array( 'jpg', 'jpeg', 'png', 'gif', 'mp3', 'wav', 'ogg', 'mp4', 'avi', 'mov', 'pdf', 'doc', 'docx', 'txt', 'csv' );
+					$allowed_types = isset( $options['allowed_file_types'] ) ? $options['allowed_file_types'] : $default_types;
+					?>
+					<input type="text" name="allowed_file_types" id="allowed_file_types" class="large-text" value="<?php echo esc_attr( implode( ', ', $allowed_types ) ); ?>">
+					<p class="description"><?php esc_html_e( 'Comma-separated list of allowed file extensions (e.g., jpg, png, mp3, pdf)', 'wp-paradb' ); ?></p>
+				</td>
+			</tr>
+		</table>
+		
+		<h2 class="title"><?php esc_html_e( 'Feature Settings', 'wp-paradb' ); ?></h2>
+		<table class="form-table">
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Geolocation', 'wp-paradb' ); ?></th>
+				<td>
+					<label>
+						<input type="checkbox" name="enable_geolocation" value="1" <?php checked( isset( $options['enable_geolocation'] ) ? $options['enable_geolocation'] : 1, 1 ); ?>>
+						<?php esc_html_e( 'Enable geolocation features for cases', 'wp-paradb' ); ?>
+					</label>
+					<p class="description"><?php esc_html_e( 'Allow storing latitude/longitude coordinates for case locations', 'wp-paradb' ); ?></p>
+				</td>
+			</tr>
+			
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Moon Phase Tracking', 'wp-paradb' ); ?></th>
+				<td>
+					<label>
+						<input type="checkbox" name="enable_moon_phase" value="1" <?php checked( isset( $options['enable_moon_phase'] ) ? $options['enable_moon_phase'] : 1, 1 ); ?>>
+						<?php esc_html_e( 'Enable moon phase tracking in reports', 'wp-paradb' ); ?>
+					</label>
+					<p class="description"><?php esc_html_e( 'Track lunar phase during investigations', 'wp-paradb' ); ?></p>
+				</td>
+			</tr>
+		</table>
+		
+		<h2 class="title"><?php esc_html_e( 'Database Information', 'wp-paradb' ); ?></h2>
+		<table class="form-table">
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Database Version', 'wp-paradb' ); ?></th>
+				<td><?php echo esc_html( get_option( 'wp_paradb_db_version', '1.0.0' ) ); ?></td>
+			</tr>
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Plugin Version', 'wp-paradb' ); ?></th>
+				<td><?php echo esc_html( WP_PARADB_VERSION ); ?></td>
+			</tr>
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Database Tables', 'wp-paradb' ); ?></th>
+				<td>
+					<?php
+					global $wpdb;
+					$tables = array(
+						'paradb_cases',
+						'paradb_reports',
+						'paradb_clients',
+						'paradb_evidence',
+						'paradb_case_notes',
+						'paradb_case_team',
+						'paradb_witness_accounts',
+					);
+					
+					echo '<ul style="margin: 0;">';
+					foreach ( $tables as $table ) {
+						$full_table_name = $wpdb->prefix . $table;
+						$exists = $wpdb->get_var( "SHOW TABLES LIKE '{$full_table_name}'" ) === $full_table_name;
+						$status_icon = $exists ? '<span style="color: #46b450;">✓</span>' : '<span style="color: #dc3232;">✗</span>';
+						echo '<li>' . $status_icon . ' ' . esc_html( $full_table_name ) . '</li>';
+					}
+					echo '</ul>';
+					?>
+				</td>
+			</tr>
+		</table>
+		
+		<p class="submit">
+			<input type="submit" name="save_settings" class="button button-primary" value="<?php esc_attr_e( 'Save Settings', 'wp-paradb' ); ?>">
+		</p>
+	</form>
+	
+	<hr>
+	
+	<h2><?php esc_html_e( 'Advanced Tools', 'wp-paradb' ); ?></h2>
+	<p><?php esc_html_e( 'Use these tools with caution. These actions cannot be undone.', 'wp-paradb' ); ?></p>
+	
+	<table class="form-table">
+		<tr>
+			<th scope="row"><?php esc_html_e( 'Reset Plugin', 'wp-paradb' ); ?></th>
+			<td>
+				<p class="description" style="margin-bottom: 10px;">
+					<?php esc_html_e( 'This will remove all plugin data including cases, reports, clients, and evidence files. User roles will be preserved.', 'wp-paradb' ); ?>
+				</p>
+				<button type="button" class="button" onclick="if(confirm('<?php esc_attr_e( 'Are you absolutely sure? This will delete ALL ParaDB data and cannot be undone!', 'wp-paradb' ); ?>')) { alert('<?php esc_attr_e( 'Please deactivate and reactivate the plugin to reset data.', 'wp-paradb' ); ?>'); }"><?php esc_html_e( 'Reset All Data', 'wp-paradb' ); ?></button>
+			</td>
+		</tr>
+	</table>
+</div>

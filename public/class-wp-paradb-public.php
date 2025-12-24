@@ -6,7 +6,6 @@
  * @since             1.0.0
  * @package           WP_ParaDB
  * @subpackage        WP_ParaDB/public
- * @author            Brian Chabot <bchabot@gmail.com>
  */
 
 // Prevent direct access.
@@ -16,9 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * The public-facing functionality of the plugin.
- *
- * Defines the plugin name, version, and hooks for how to
- * enqueue the public-facing stylesheet and JavaScript.
  *
  * @since      1.0.0
  * @package    WP_ParaDB
@@ -55,6 +51,14 @@ class WP_ParaDB_Public {
 	public function __construct( $plugin_name, $version ) {
 		$this->plugin_name = $plugin_name;
 		$this->version     = $version;
+
+		// Register shortcodes.
+		add_shortcode( 'paradb_cases', array( $this, 'cases_shortcode' ) );
+		add_shortcode( 'paradb_witness_form', array( $this, 'witness_form_shortcode' ) );
+		add_shortcode( 'paradb_single_case', array( $this, 'single_case_shortcode' ) );
+
+		// Handle witness form submission.
+		add_action( 'init', array( $this, 'handle_witness_submission' ) );
 	}
 
 	/**
@@ -87,4 +91,100 @@ class WP_ParaDB_Public {
 		);
 	}
 
+	/**
+	 * Cases listing shortcode.
+	 *
+	 * @since    1.0.0
+	 * @param    array    $atts    Shortcode attributes.
+	 * @return   string            HTML output.
+	 */
+	public function cases_shortcode( $atts ) {
+		$atts = shortcode_atts(
+			array(
+				'limit'   => 10,
+				'orderby' => 'date_created',
+				'order'   => 'DESC',
+			),
+			$atts,
+			'paradb_cases'
+		);
+
+		ob_start();
+		include WP_PARADB_PLUGIN_DIR . 'public/partials/wp-paradb-public-cases.php';
+		return ob_get_clean();
+	}
+
+	/**
+	 * Witness submission form shortcode.
+	 *
+	 * @since    1.0.0
+	 * @param    array    $atts    Shortcode attributes.
+	 * @return   string            HTML output.
+	 */
+	public function witness_form_shortcode( $atts ) {
+		$atts = shortcode_atts( array(), $atts, 'paradb_witness_form' );
+
+		ob_start();
+		include WP_PARADB_PLUGIN_DIR . 'public/partials/wp-paradb-public-witness-form.php';
+		return ob_get_clean();
+	}
+
+	/**
+	 * Single case display shortcode.
+	 *
+	 * @since    1.0.0
+	 * @param    array    $atts    Shortcode attributes.
+	 * @return   string            HTML output.
+	 */
+	public function single_case_shortcode( $atts ) {
+		$atts = shortcode_atts(
+			array(
+				'id' => 0,
+			),
+			$atts,
+			'paradb_single_case'
+		);
+
+		ob_start();
+		include WP_PARADB_PLUGIN_DIR . 'public/partials/wp-paradb-public-case-single.php';
+		return ob_get_clean();
+	}
+
+	/**
+	 * Handle witness form submission.
+	 *
+	 * @since    1.0.0
+	 */
+	public function handle_witness_submission() {
+		if ( ! isset( $_POST['submit_witness_account'] ) ) {
+			return;
+		}
+
+		if ( ! isset( $_POST['witness_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['witness_nonce'] ) ), 'submit_witness_account' ) ) {
+			return;
+		}
+
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-witness-handler.php';
+
+		$data = array(
+			'witness_name'         => isset( $_POST['witness_name'] ) ? sanitize_text_field( wp_unslash( $_POST['witness_name'] ) ) : '',
+			'witness_email'        => isset( $_POST['witness_email'] ) ? sanitize_email( wp_unslash( $_POST['witness_email'] ) ) : '',
+			'witness_phone'        => isset( $_POST['witness_phone'] ) ? sanitize_text_field( wp_unslash( $_POST['witness_phone'] ) ) : '',
+			'incident_date'        => isset( $_POST['incident_date'] ) ? sanitize_text_field( wp_unslash( $_POST['incident_date'] ) ) : '',
+			'incident_location'    => isset( $_POST['incident_location'] ) ? sanitize_text_field( wp_unslash( $_POST['incident_location'] ) ) : '',
+			'incident_description' => isset( $_POST['incident_description'] ) ? wp_kses_post( wp_unslash( $_POST['incident_description'] ) ) : '',
+			'phenomena_type'       => isset( $_POST['phenomena_type'] ) ? sanitize_text_field( wp_unslash( $_POST['phenomena_type'] ) ) : '',
+		);
+
+		$result = WP_ParaDB_Witness_Handler::submit_account( $data );
+
+		if ( is_wp_error( $result ) ) {
+			set_transient( 'paradb_witness_error', $result->get_error_message(), 30 );
+		} else {
+			set_transient( 'paradb_witness_success', __( 'Thank you for your submission. Your account has been received and will be reviewed.', 'wp-paradb' ), 30 );
+		}
+
+		wp_safe_redirect( wp_get_referer() );
+		exit;
+	}
 }
