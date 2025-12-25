@@ -55,9 +55,9 @@ A copy of the license is included in the root of the plugin’s directory. The f
 
 When contributing or extending the plugin, please follow the established file structure:
 
-* **[`wp-paradb/includes`](wp-paradb/includes)** - Core functionality shared between admin and public areas
-* **[`wp-paradb/admin`](wp-paradb/admin)** - All admin-specific functionality and interfaces  
-* **[`wp-paradb/public`](wp-paradb/public)** - All public-facing functionality and displays
+* **[`includes/`](includes/)** - Core functionality shared between admin and public areas
+* **[`admin/`](admin/)** - All admin-specific functionality and interfaces  
+* **[`public/`](public/)** - All public-facing functionality and displays
 
 ## 👥 Credits
 
@@ -69,9 +69,9 @@ This plugin is created with the organization and leadership of **Brian Chabot** 
 
 ### Contributing
 
-We welcome contributions!
+We welcome contributions from the community!
 
-If you’re interested in writing documentation or creating tutorials, please feel free to contribute at the [project repository](https://github.com/bchabot/wp-paradb).
+Whether you’re interested in writing documentation, creating tutorials, fixing bugs, or adding new features, please feel free to get involved at the [project repository](https://github.com/bchabot/wp-paradb).
 
 ### Project Updates
 
