@@ -204,4 +204,54 @@ if ( 'edit' === $action && ! empty( $taxonomy_key ) && $taxonomy ) :
 		
 		<table class="wp-list-table widefat fixed striped">
 			<thead>
-				<tr
+				<tr>
+					<th scope="col" class="manage-column column-primary"><?php esc_html_e( 'Taxonomy', 'wp-paradb' ); ?></th>
+					<th scope="col" class="manage-column"><?php esc_html_e( 'Description', 'wp-paradb' ); ?></th>
+					<th scope="col" class="manage-column"><?php esc_html_e( 'Item Count', 'wp-paradb' ); ?></th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php
+				$taxonomies = get_option( 'wp_paradb_taxonomies', WP_ParaDB_Taxonomy_Handler::get_default_taxonomies() );
+				foreach ( $taxonomies as $key => $taxonomy ) :
+					?>
+					<tr>
+						<td class="column-primary" data-colname="<?php esc_attr_e( 'Taxonomy', 'wp-paradb' ); ?>">
+							<strong>
+								<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-taxonomies&action=edit&taxonomy=' . $key ) ); ?>">
+									<?php echo esc_html( $taxonomy['label'] ); ?>
+								</a>
+							</strong>
+							<div class="row-actions">
+								<span class="edit">
+									<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-taxonomies&action=edit&taxonomy=' . $key ) ); ?>">
+										<?php esc_html_e( 'Edit', 'wp-paradb' ); ?>
+									</a>
+								</span>
+								|
+								<span class="reset">
+									<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=wp-paradb-taxonomies&action=reset&taxonomy=' . $key ), 'reset_taxonomy_' . $key ) ); ?>" onclick="return confirm('<?php esc_attr_e( 'Are you sure you want to reset this taxonomy to defaults?', 'wp-paradb' ); ?>');">
+										<?php esc_html_e( 'Reset to Defaults', 'wp-paradb' ); ?>
+									</a>
+								</span>
+							</div>
+						</td>
+						<td data-colname="<?php esc_attr_e( 'Description', 'wp-paradb' ); ?>">
+							<?php echo esc_html( $taxonomy['description'] ); ?>
+						</td>
+						<td data-colname="<?php esc_attr_e( 'Item Count', 'wp-paradb' ); ?>">
+							<?php echo esc_html( count( $taxonomy['items'] ) ); ?>
+						</td>
+					</tr>
+				<?php endforeach; ?>
+			</tbody>
+		</table>
+		
+		<p style="margin-top: 20px;">
+			<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=wp-paradb-taxonomies&action=reset_all' ), 'reset_all_taxonomies' ) ); ?>" class="button button-secondary" onclick="return confirm('<?php esc_attr_e( 'Are you sure you want to reset ALL taxonomies to their default values? This cannot be undone!', 'wp-paradb' ); ?>');">
+				<?php esc_html_e( 'Reset All Taxonomies to Defaults', 'wp-paradb' ); ?>
+			</a>
+		</p>
+	</div>
+	
+<?php endif; ?>
