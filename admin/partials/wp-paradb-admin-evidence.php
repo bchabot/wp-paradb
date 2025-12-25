@@ -21,6 +21,8 @@ if ( ! current_user_can( 'paradb_view_cases' ) ) {
 // Load required classes.
 require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-evidence-handler.php';
 require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-case-handler.php';
+require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-activity-handler.php';
+require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-report-handler.php';
 
 // Handle file upload.
 if ( isset( $_POST['upload_evidence'] ) && check_admin_referer( 'upload_evidence', 'evidence_nonce' ) ) {
@@ -28,6 +30,7 @@ if ( isset( $_POST['upload_evidence'] ) && check_admin_referer( 'upload_evidence
 		$metadata = array(
 			'case_id'          => isset( $_POST['case_id'] ) ? absint( $_POST['case_id'] ) : 0,
 			'report_id'        => isset( $_POST['report_id'] ) ? absint( $_POST['report_id'] ) : null,
+			'activity_id'      => isset( $_POST['activity_id'] ) ? absint( $_POST['activity_id'] ) : null,
 			'evidence_type'    => isset( $_POST['evidence_type'] ) ? sanitize_text_field( wp_unslash( $_POST['evidence_type'] ) ) : 'other',
 			'title'            => isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '',
 			'description'      => isset( $_POST['description'] ) ? sanitize_textarea_field( wp_unslash( $_POST['description'] ) ) : '',
@@ -67,6 +70,8 @@ $action = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['act
 if ( 'upload' === $action ) {
 	// Show upload form.
 	$cases = WP_ParaDB_Case_Handler::get_cases( array( 'limit' => 1000 ) );
+	$reports = WP_ParaDB_Report_Handler::get_reports( array( 'limit' => 1000 ) );
+	$activities = WP_ParaDB_Activity_Handler::get_activities( array( 'limit' => 1000 ) );
 	$options = get_option( 'wp_paradb_options', array() );
 	$evidence_types = isset( $options['evidence_types'] ) ? $options['evidence_types'] : array();
 	?>
@@ -88,6 +93,38 @@ if ( 'upload' === $action ) {
 							<?php foreach ( $cases as $case ) : ?>
 								<option value="<?php echo esc_attr( $case->case_id ); ?>">
 									<?php echo esc_html( $case->case_number . ' - ' . $case->case_name ); ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row">
+						<label for="report_id"><?php esc_html_e( 'Linked Report', 'wp-paradb' ); ?></label>
+					</th>
+					<td>
+						<select name="report_id" id="report_id" class="regular-text">
+							<option value=""><?php esc_html_e( 'None', 'wp-paradb' ); ?></option>
+							<?php foreach ( $reports as $report ) : ?>
+								<option value="<?php echo esc_attr( $report->report_id ); ?>">
+									<?php echo esc_html( $report->report_title ); ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row">
+						<label for="activity_id"><?php esc_html_e( 'Linked Activity', 'wp-paradb' ); ?></label>
+					</th>
+					<td>
+						<select name="activity_id" id="activity_id" class="regular-text">
+							<option value=""><?php esc_html_e( 'None', 'wp-paradb' ); ?></option>
+							<?php foreach ( $activities as $activity ) : ?>
+								<option value="<?php echo esc_attr( $activity->activity_id ); ?>">
+									<?php echo esc_html( $activity->activity_title ); ?>
 								</option>
 							<?php endforeach; ?>
 						</select>
@@ -196,12 +233,14 @@ if ( 'upload' === $action ) {
 } else {
 	// Show list.
 	$case_filter = isset( $_GET['case_id'] ) ? absint( $_GET['case_id'] ) : 0;
+	$activity_filter = isset( $_GET['activity_id'] ) ? absint( $_GET['activity_id'] ) : 0;
 	$type_filter = isset( $_GET['evidence_type'] ) ? sanitize_text_field( wp_unslash( $_GET['evidence_type'] ) ) : '';
 	$paged = isset( $_GET['paged'] ) ? absint( $_GET['paged'] ) : 1;
 	$per_page = 30;
 	
 	$args = array(
 		'case_id'       => $case_filter,
+		'activity_id'   => $activity_filter,
 		'evidence_type' => $type_filter,
 		'limit'         => $per_page,
 		'offset'        => ( $paged - 1 ) * $per_page,
@@ -211,6 +250,7 @@ if ( 'upload' === $action ) {
 	
 	$evidence_files = WP_ParaDB_Evidence_Handler::get_evidence_files( $args );
 	$cases = WP_ParaDB_Case_Handler::get_cases( array( 'limit' => 1000 ) );
+	$activities = WP_ParaDB_Activity_Handler::get_activities( array( 'limit' => 1000 ) );
 	$options = get_option( 'wp_paradb_options', array() );
 	$evidence_types = isset( $options['evidence_types'] ) ? $options['evidence_types'] : array();
 	?>
@@ -236,6 +276,15 @@ if ( 'upload' === $action ) {
 						<?php foreach ( $cases as $case ) : ?>
 							<option value="<?php echo esc_attr( $case->case_id ); ?>" <?php selected( $case_filter, $case->case_id ); ?>>
 								<?php echo esc_html( $case->case_number ); ?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+
+					<select name="activity_id" id="filter-by-activity">
+						<option value=""><?php esc_html_e( 'All Activities', 'wp-paradb' ); ?></option>
+						<?php foreach ( $activities as $activity ) : ?>
+							<option value="<?php echo esc_attr( $activity->activity_id ); ?>" <?php selected( $activity_filter, $activity->activity_id ); ?>>
+								<?php echo esc_html( $activity->activity_title ); ?>
 							</option>
 						<?php endforeach; ?>
 					</select>
@@ -277,7 +326,19 @@ if ( 'upload' === $action ) {
 							<strong><?php echo esc_html( $evidence->title ? $evidence->title : $evidence->file_name ); ?></strong><br>
 							<small><?php echo esc_html( strtoupper( $evidence->file_type ) . ' • ' . size_format( $evidence->file_size ) ); ?></small><br>
 							<?php if ( $case ) : ?>
-								<small><?php echo esc_html( $case->case_number ); ?></small><br>
+								<small><strong><?php esc_html_e( 'Case:', 'wp-paradb' ); ?></strong> <?php echo esc_html( $case->case_number ); ?></small><br>
+							<?php endif; ?>
+							<?php if ( $evidence->report_id ) : ?>
+								<?php $report = WP_ParaDB_Report_Handler::get_report( $evidence->report_id ); ?>
+								<?php if ( $report ) : ?>
+									<small><strong><?php esc_html_e( 'Report:', 'wp-paradb' ); ?></strong> <?php echo esc_html( $report->report_title ); ?></small><br>
+								<?php endif; ?>
+							<?php endif; ?>
+							<?php if ( $evidence->activity_id ) : ?>
+								<?php $activity = WP_ParaDB_Activity_Handler::get_activity( $evidence->activity_id ); ?>
+								<?php if ( $activity ) : ?>
+									<small><strong><?php esc_html_e( 'Activity:', 'wp-paradb' ); ?></strong> <?php echo esc_html( $activity->activity_title ); ?></small><br>
+								<?php endif; ?>
 							<?php endif; ?>
 							<small><?php echo esc_html( gmdate( 'M j, Y', strtotime( $evidence->date_uploaded ) ) ); ?></small>
 							

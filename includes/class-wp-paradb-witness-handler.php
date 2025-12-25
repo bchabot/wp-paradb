@@ -90,6 +90,8 @@ class WP_ParaDB_Witness_Handler {
 		// Prepare account data.
 		$account_data = array(
 			'account_email'         => $email,
+			'user_id'               => isset( $data['user_id'] ) ? absint( $data['user_id'] ) : null,
+			'case_id'               => isset( $data['case_id'] ) ? absint( $data['case_id'] ) : null,
 			'account_name'          => isset( $data['account_name'] ) ? sanitize_text_field( $data['account_name'] ) : null,
 			'account_phone'         => isset( $data['account_phone'] ) ? sanitize_text_field( $data['account_phone'] ) : null,
 			'account_address'       => isset( $data['account_address'] ) ? sanitize_textarea_field( $data['account_address'] ) : null,
@@ -124,9 +126,9 @@ class WP_ParaDB_Witness_Handler {
 
 		// Format types for database.
 		$format = array(
-			'%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d',
-			'%s', '%d', '%s', '%s', '%d', '%d', '%d', '%d', '%s', '%s',
-			'%s', '%s',
+			'%s', '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s',
+			'%s', '%d', '%s', '%d', '%s', '%s', '%d', '%d', '%d', '%d',
+			'%s', '%s', '%s', '%s', '%s',
 		);
 
 		// Insert into database.
@@ -322,7 +324,7 @@ class WP_ParaDB_Witness_Handler {
 
 		// Handle other updatable fields.
 		$text_fields = array( 
-			'account_name', 'account_phone', 'incident_location', 
+			'account_name', 'account_email', 'account_phone', 'incident_location', 
 			'incident_date', 'incident_time', 'status' 
 		);
 		$textarea_fields = array( 
@@ -330,7 +332,7 @@ class WP_ParaDB_Witness_Handler {
 			'previous_details', 'admin_notes' 
 		);
 		$bool_fields = array( 'previous_experiences', 'allow_followup' );
-		$int_fields = array( 'witnesses_present', 'user_id' );
+		$int_fields = array( 'witnesses_present', 'user_id', 'case_id' );
 
 		foreach ( $text_fields as $field ) {
 			if ( isset( $data[ $field ] ) ) {
@@ -538,5 +540,29 @@ class WP_ParaDB_Witness_Handler {
 		do_action( 'wp_paradb_witness_account_deleted', $account_id );
 
 		return true;
+	}
+
+	/**
+	 * Review a witness account status
+	 *
+	 * @since    1.0.0
+	 * @param    int       $account_id    Account ID.
+	 * @param    string    $status        New status.
+	 * @return   bool|WP_Error            True on success, WP_Error on failure.
+	 */
+	public static function review_account( $account_id, $status ) {
+		return self::update_witness_account( $account_id, array( 'status' => $status ) );
+	}
+
+	/**
+	 * Link a witness account to a case
+	 *
+	 * @since    1.0.0
+	 * @param    int    $account_id    Account ID.
+	 * @param    int    $case_id       Case ID.
+	 * @return   bool|WP_Error         True on success, WP_Error on failure.
+	 */
+	public static function link_to_case( $account_id, $case_id ) {
+		return self::update_witness_account( $account_id, array( 'case_id' => $case_id ) );
 	}
 }

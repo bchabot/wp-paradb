@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-case-handler.php';
 require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-report-handler.php';
 require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-evidence-handler.php';
+require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-activity-handler.php';
 
 // Get case ID.
 $case_id = isset( $atts['id'] ) ? absint( $atts['id'] ) : ( isset( $_GET['case_id'] ) ? absint( $_GET['case_id'] ) : 0 );
@@ -136,17 +137,24 @@ $wpdb->query( $wpdb->prepare(
 								</div>
 							<?php endif; ?>
 							
-							<?php if ( $report->weather_conditions || $report->temperature || $report->moon_phase ) : ?>
+							<?php
+							$activity = null;
+							if ( $report->activity_id ) {
+								$activity = WP_ParaDB_Activity_Handler::get_activity( $report->activity_id );
+							}
+							?>
+
+							<?php if ( $activity && ( $activity->weather_conditions || $activity->temperature || $activity->moon_phase ) ) : ?>
 								<div class="report-conditions">
-									<h4><?php esc_html_e( 'Environmental Conditions', 'wp-paradb' ); ?></h4>
-									<?php if ( $report->weather_conditions ) : ?>
-										<p><strong><?php esc_html_e( 'Weather:', 'wp-paradb' ); ?></strong> <?php echo esc_html( $report->weather_conditions ); ?></p>
+									<h4><?php esc_html_e( 'Environmental Conditions (from linked activity)', 'wp-paradb' ); ?></h4>
+									<?php if ( $activity->weather_conditions ) : ?>
+										<p><strong><?php esc_html_e( 'Weather:', 'wp-paradb' ); ?></strong> <?php echo esc_html( $activity->weather_conditions ); ?></p>
 									<?php endif; ?>
-									<?php if ( $report->temperature ) : ?>
-										<p><strong><?php esc_html_e( 'Temperature:', 'wp-paradb' ); ?></strong> <?php echo esc_html( $report->temperature ); ?></p>
+									<?php if ( $activity->temperature ) : ?>
+										<p><strong><?php esc_html_e( 'Temperature:', 'wp-paradb' ); ?></strong> <?php echo esc_html( $activity->temperature ); ?></p>
 									<?php endif; ?>
-									<?php if ( $report->moon_phase ) : ?>
-										<p><strong><?php esc_html_e( 'Moon Phase:', 'wp-paradb' ); ?></strong> <?php echo esc_html( ucwords( str_replace( '_', ' ', $report->moon_phase ) ) ); ?></p>
+									<?php if ( $activity->moon_phase ) : ?>
+										<p><strong><?php esc_html_e( 'Moon Phase:', 'wp-paradb' ); ?></strong> <?php echo esc_html( ucwords( str_replace( '_', ' ', $activity->moon_phase ) ) ); ?></p>
 									<?php endif; ?>
 								</div>
 							<?php endif; ?>

@@ -167,16 +167,16 @@ class WP_ParaDB_Public {
 		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-witness-handler.php';
 
 		$data = array(
-			'witness_name'         => isset( $_POST['witness_name'] ) ? sanitize_text_field( wp_unslash( $_POST['witness_name'] ) ) : '',
-			'witness_email'        => isset( $_POST['witness_email'] ) ? sanitize_email( wp_unslash( $_POST['witness_email'] ) ) : '',
-			'witness_phone'        => isset( $_POST['witness_phone'] ) ? sanitize_text_field( wp_unslash( $_POST['witness_phone'] ) ) : '',
+			'account_name'          => isset( $_POST['account_name'] ) ? sanitize_text_field( wp_unslash( $_POST['account_name'] ) ) : '',
+			'account_email'         => isset( $_POST['account_email'] ) ? sanitize_email( wp_unslash( $_POST['account_email'] ) ) : '',
+			'account_phone'         => isset( $_POST['account_phone'] ) ? sanitize_text_field( wp_unslash( $_POST['account_phone'] ) ) : '',
 			'incident_date'        => isset( $_POST['incident_date'] ) ? sanitize_text_field( wp_unslash( $_POST['incident_date'] ) ) : '',
 			'incident_location'    => isset( $_POST['incident_location'] ) ? sanitize_text_field( wp_unslash( $_POST['incident_location'] ) ) : '',
 			'incident_description' => isset( $_POST['incident_description'] ) ? wp_kses_post( wp_unslash( $_POST['incident_description'] ) ) : '',
-			'phenomena_type'       => isset( $_POST['phenomena_type'] ) ? sanitize_text_field( wp_unslash( $_POST['phenomena_type'] ) ) : '',
+			'phenomena_types'       => isset( $_POST['phenomena_types'] ) && is_array( $_POST['phenomena_types'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['phenomena_types'] ) ) : array(),
 		);
 
-		$result = WP_ParaDB_Witness_Handler::submit_account( $data );
+		$result = WP_ParaDB_Witness_Handler::create_witness_account( $data );
 
 		if ( is_wp_error( $result ) ) {
 			set_transient( 'paradb_witness_error', $result->get_error_message(), 30 );

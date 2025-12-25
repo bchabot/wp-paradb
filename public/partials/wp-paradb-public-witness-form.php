@@ -61,20 +61,20 @@ $phenomena_types = isset( $options['phenomena_types'] ) ? $options['phenomena_ty
 			<legend><?php esc_html_e( 'Your Information (Optional)', 'wp-paradb' ); ?></legend>
 			
 			<div class="form-field">
-				<label for="witness_name"><?php esc_html_e( 'Your Name', 'wp-paradb' ); ?></label>
-				<input type="text" name="witness_name" id="witness_name" class="form-control">
+				<label for="account_name"><?php esc_html_e( 'Your Name', 'wp-paradb' ); ?></label>
+				<input type="text" name="account_name" id="account_name" class="form-control">
 				<p class="field-description"><?php esc_html_e( 'Leave blank for anonymous submission', 'wp-paradb' ); ?></p>
 			</div>
 
 			<div class="form-field">
-				<label for="witness_email"><?php esc_html_e( 'Email Address', 'wp-paradb' ); ?></label>
-				<input type="email" name="witness_email" id="witness_email" class="form-control">
+				<label for="account_email"><?php esc_html_e( 'Email Address', 'wp-paradb' ); ?></label>
+				<input type="email" name="account_email" id="account_email" class="form-control">
 				<p class="field-description"><?php esc_html_e( 'We will only use this to contact you about your submission', 'wp-paradb' ); ?></p>
 			</div>
 
 			<div class="form-field">
-				<label for="witness_phone"><?php esc_html_e( 'Phone Number', 'wp-paradb' ); ?></label>
-				<input type="tel" name="witness_phone" id="witness_phone" class="form-control">
+				<label for="account_phone"><?php esc_html_e( 'Phone Number', 'wp-paradb' ); ?></label>
+				<input type="tel" name="account_phone" id="account_phone" class="form-control">
 			</div>
 		</fieldset>
 
@@ -94,8 +94,8 @@ $phenomena_types = isset( $options['phenomena_types'] ) ? $options['phenomena_ty
 
 			<?php if ( ! empty( $phenomena_types ) ) : ?>
 				<div class="form-field">
-					<label for="phenomena_type"><?php esc_html_e( 'Type of Phenomena', 'wp-paradb' ); ?></label>
-					<select name="phenomena_type" id="phenomena_type" class="form-control">
+					<label for="phenomena_types"><?php esc_html_e( 'Type of Phenomena', 'wp-paradb' ); ?></label>
+					<select name="phenomena_types[]" id="phenomena_types" class="form-control">
 						<option value=""><?php esc_html_e( 'Select type...', 'wp-paradb' ); ?></option>
 						<?php foreach ( $phenomena_types as $phenomenon ) : ?>
 							<option value="<?php echo esc_attr( $phenomenon ); ?>"><?php echo esc_html( $phenomenon ); ?></option>

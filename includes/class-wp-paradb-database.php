@@ -156,6 +156,7 @@ class WP_ParaDB_Database {
 			evidence_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			case_id bigint(20) unsigned NOT NULL,
 			report_id bigint(20) unsigned DEFAULT NULL,
+			activity_id bigint(20) unsigned DEFAULT NULL,
 			file_name varchar(255) NOT NULL,
 			file_path varchar(500) NOT NULL,
 			file_type varchar(50) NOT NULL,
@@ -174,6 +175,7 @@ class WP_ParaDB_Database {
 			PRIMARY KEY  (evidence_id),
 			KEY case_id (case_id),
 			KEY report_id (report_id),
+			KEY activity_id (activity_id),
 			KEY evidence_type (evidence_type),
 			KEY uploaded_by (uploaded_by)
 		) $charset_collate;";
@@ -209,9 +211,10 @@ class WP_ParaDB_Database {
 		) $charset_collate;";
 
 		// Witness accounts table - For public submissions
-		$sql_witnesses = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}paradb_witness_accounts (
-			account_id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-			user_id bigint(20) UNSIGNED DEFAULT NULL,
+		$sql_witnesses = "CREATE TABLE {$table_prefix}witness_accounts (
+			account_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			user_id bigint(20) unsigned DEFAULT NULL,
+			case_id bigint(20) unsigned DEFAULT NULL,
 			account_email varchar(255) NOT NULL,
 			account_name varchar(255) DEFAULT NULL,
 			account_phone varchar(50) DEFAULT NULL,
@@ -237,12 +240,13 @@ class WP_ParaDB_Database {
 			date_submitted datetime NOT NULL,
 			date_modified datetime DEFAULT NULL,
 			admin_notes text DEFAULT NULL,
-			PRIMARY KEY (account_id),
+			PRIMARY KEY  (account_id),
 			KEY user_id (user_id),
+			KEY case_id (case_id),
 			KEY status (status),
 			KEY consent_status (consent_status),
 			KEY date_submitted (date_submitted)
-		) {$charset_collate};";
+		) $charset_collate;";
 
 		// Execute table creation
 		dbDelta( $sql_cases );
