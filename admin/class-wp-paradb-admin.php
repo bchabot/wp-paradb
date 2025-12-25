@@ -83,7 +83,7 @@ class WP_ParaDB_Admin {
 			plugin_dir_url( __FILE__ ) . 'js/wp-paradb-admin.js',
 			array( 'jquery' ),
 			$this->version,
-			false
+			true // Load in footer for better performance.
 		);
 	}
 
@@ -104,10 +104,17 @@ class WP_ParaDB_Admin {
 	 * @since    1.0.0
 	 * @param    string    $nonce_action    Nonce action.
 	 * @param    string    $nonce_name      Nonce field name.
+	 * @param    string    $method          Request method ('POST' or 'GET').
 	 * @return   bool                       True if nonce is valid, false otherwise.
 	 */
-	public function verify_nonce( $nonce_action, $nonce_name = '_wpnonce' ) {
-		return isset( $_POST[ $nonce_name ] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST[ $nonce_name ] ) ), $nonce_action );
+	public function verify_nonce( $nonce_action, $nonce_name = '_wpnonce', $method = 'POST' ) {
+		$request_data = 'GET' === strtoupper( $method ) ? $_GET : $_POST;
+
+		if ( ! isset( $request_data[ $nonce_name ] ) ) {
+			return false;
+		}
+
+		return wp_verify_nonce( sanitize_text_field( wp_unslash( $request_data[ $nonce_name ] ) ), $nonce_action );
 	}
 
 	/**

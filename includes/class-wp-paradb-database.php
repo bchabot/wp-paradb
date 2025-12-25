@@ -228,21 +228,25 @@ class WP_ParaDB_Database {
 	 */
 	public static function drop_tables() {
 		global $wpdb;
-		
+
 		$table_prefix = $wpdb->prefix . 'paradb_';
-		
+
+		// Table names are hardcoded and safe - no user input.
 		$tables = array(
-			$table_prefix . 'case_team',
-			$table_prefix . 'case_notes',
-			$table_prefix . 'evidence',
-			$table_prefix . 'witness_accounts',
-			$table_prefix . 'reports',
-			$table_prefix . 'cases',
-			$table_prefix . 'clients',
+			'case_team',
+			'case_notes',
+			'evidence',
+			'witness_accounts',
+			'reports',
+			'cases',
+			'clients',
 		);
 
 		foreach ( $tables as $table ) {
-			$wpdb->query( "DROP TABLE IF EXISTS {$table}" );
+			// Table name is constructed from WordPress prefix and hardcoded values only.
+			$table_name = esc_sql( $table_prefix . $table );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is sanitized with esc_sql and constructed from safe values.
+			$wpdb->query( "DROP TABLE IF EXISTS `{$table_name}`" );
 		}
 
 		delete_option( 'wp_paradb_db_version' );

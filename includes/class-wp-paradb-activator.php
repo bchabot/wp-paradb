@@ -139,6 +139,13 @@ class WP_ParaDB_Activator {
 		if ( ! file_exists( $paradb_dir ) ) {
 			wp_mkdir_p( $paradb_dir );
 
+			// Initialize WordPress filesystem.
+			global $wp_filesystem;
+			if ( empty( $wp_filesystem ) ) {
+				require_once ABSPATH . 'wp-admin/includes/file.php';
+				WP_Filesystem();
+			}
+
 			// Create .htaccess file for additional security.
 			$htaccess_content = "# Protect ParaDB evidence files\n";
 			$htaccess_content .= "<Files *>\n";
@@ -149,10 +156,10 @@ class WP_ParaDB_Activator {
 			$htaccess_content .= "Allow from all\n";
 			$htaccess_content .= "</FilesMatch>\n";
 
-			file_put_contents( $paradb_dir . '/.htaccess', $htaccess_content );
+			$wp_filesystem->put_contents( $paradb_dir . '/.htaccess', $htaccess_content, FS_CHMOD_FILE );
 
 			// Create index.php to prevent directory browsing.
-			file_put_contents( $paradb_dir . '/index.php', '<?php // Silence is golden' );
+			$wp_filesystem->put_contents( $paradb_dir . '/index.php', '<?php // Silence is golden', FS_CHMOD_FILE );
 		}
 
 		// Create subdirectories by year.

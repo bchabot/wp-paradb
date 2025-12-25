@@ -199,13 +199,14 @@ $options = get_option( 'wp_paradb_options', array() );
 						'paradb_case_team',
 						'paradb_witness_accounts',
 					);
-					
+
 					echo '<ul style="margin: 0;">';
 					foreach ( $tables as $table ) {
 						$full_table_name = $wpdb->prefix . $table;
-						$exists = $wpdb->get_var( "SHOW TABLES LIKE '{$full_table_name}'" ) === $full_table_name;
+						// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Checking table existence for admin display.
+						$exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $full_table_name ) ) === $full_table_name;
 						$status_icon = $exists ? '<span style="color: #46b450;">✓</span>' : '<span style="color: #dc3232;">✗</span>';
-						echo '<li>' . $status_icon . ' ' . esc_html( $full_table_name ) . '</li>';
+						echo '<li>' . wp_kses( $status_icon, array( 'span' => array( 'style' => array() ) ) ) . ' ' . esc_html( $full_table_name ) . '</li>';
 					}
 					echo '</ul>';
 					?>

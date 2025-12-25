@@ -120,25 +120,56 @@ class WP_ParaDB_Evidence_Handler {
 		$unique_filename = sprintf(
 			'case-%d-%s.%s',
 			$case_id,
-			uniqid(),
+			wp_generate_uuid4(),
 			$file_extension
 		);
 
 		$target_file = $target_dir . '/' . $unique_filename;
 
-		// Move uploaded file.
-		if ( ! move_uploaded_file( $file['tmp_name'], $target_file ) ) {
-			return new WP_Error( 'upload_failed', __( 'Failed to save uploaded file.', 'wp-paradb' ) );
+		// Move uploaded file using WordPress function.
+		$moved = wp_handle_upload(
+			$file,
+			array(
+				'test_form' => false,
+				'unique_filename_callback' => function() use ( $unique_filename ) {
+					return $unique_filename;
+				},
+			)
+		);
+
+		// If wp_handle_upload doesn't work for our custom directory, fall back to move_uploaded_file.
+		if ( isset( $moved['error'] ) || ! isset( $moved['file'] ) ) {
+			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- Fallback for custom upload directory.
+			if ( ! @move_uploaded_file( $file['tmp_name'], $target_file ) ) {
+				return new WP_Error( 'upload_failed', __( 'Failed to save uploaded file.', 'wp-paradb' ) );
+			}
+		} else {
+			// Move from default upload location to our custom directory.
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- Moving file within uploads directory.
+			if ( $moved['file'] !== $target_file ) {
+				rename( $moved['file'], $target_file );
+			}
 		}
 
-		// Set proper permissions.
-		chmod( $target_file, 0644 );
+		// Initialize WordPress filesystem for permission setting.
+		global $wp_filesystem;
+		if ( empty( $wp_filesystem ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			WP_Filesystem();
+		}
+
+		// Set proper permissions using WordPress filesystem.
+		$wp_filesystem->chmod( $target_file, FS_CHMOD_FILE );
+
+		// Get file info.
+		$file_size = filesize( $target_file );
+		$mime_type = wp_check_filetype( $target_file );
 
 		return array(
 			'file_name' => $unique_filename,
 			'file_path' => str_replace( $upload_dir['basedir'], '', $target_file ),
-			'file_size' => filesize( $target_file ),
-			'mime_type' => mime_content_type( $target_file ),
+			'file_size' => $file_size,
+			'mime_type' => $mime_type['type'] ? $mime_type['type'] : 'application/octet-stream',
 		);
 	}
 
