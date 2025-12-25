@@ -21,6 +21,7 @@ if ( ! current_user_can( 'paradb_view_cases' ) ) {
 // Load required classes.
 require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-report-handler.php';
 require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-case-handler.php';
+require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-activity-handler.php';
 
 // Handle form submission for new/edit report.
 if ( isset( $_POST['save_report'] ) && check_admin_referer( 'save_report', 'report_nonce' ) ) {
@@ -74,6 +75,7 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 	
 	// Get cases for dropdown.
 	$cases = WP_ParaDB_Case_Handler::get_cases( array( 'limit' => 1000 ) );
+	$activities = WP_ParaDB_Activity_Handler::get_activities( array( 'limit' => 1000 ) );
 	?>
 	
 	<div class="wrap">
@@ -99,6 +101,23 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 								</option>
 							<?php endforeach; ?>
 						</select>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row">
+						<label for="activity_id"><?php esc_html_e( 'Activity', 'wp-paradb' ); ?></label>
+					</th>
+					<td>
+						<select name="activity_id" id="activity_id" class="regular-text">
+							<option value=""><?php esc_html_e( 'None', 'wp-paradb' ); ?></option>
+							<?php foreach ( $activities as $activity ) : ?>
+								<option value="<?php echo esc_attr( $activity->activity_id ); ?>" <?php selected( $report ? $report->activity_id : 0, $activity->activity_id ); ?>>
+									<?php echo esc_html( $activity->activity_title ); ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
+						<p class="description"><?php esc_html_e( 'Optionally link this report to a specific investigation activity.', 'wp-paradb' ); ?></p>
 					</td>
 				</tr>
 				
@@ -153,51 +172,6 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 					</td>
 				</tr>
 				
-				<tr>
-					<th scope="row">
-						<label for="weather_conditions"><?php esc_html_e( 'Weather Conditions', 'wp-paradb' ); ?></label>
-					</th>
-					<td>
-						<input type="text" name="weather_conditions" id="weather_conditions" class="regular-text" value="<?php echo $report ? esc_attr( $report->weather_conditions ) : ''; ?>">
-					</td>
-				</tr>
-				
-				<tr>
-					<th scope="row">
-						<label for="temperature"><?php esc_html_e( 'Temperature', 'wp-paradb' ); ?></label>
-					</th>
-					<td>
-						<input type="text" name="temperature" id="temperature" class="regular-text" value="<?php echo $report ? esc_attr( $report->temperature ) : ''; ?>">
-					</td>
-				</tr>
-				
-				<tr>
-					<th scope="row">
-						<label for="moon_phase"><?php esc_html_e( 'Moon Phase', 'wp-paradb' ); ?></label>
-					</th>
-					<td>
-						<select name="moon_phase" id="moon_phase">
-							<option value=""><?php esc_html_e( 'Unknown', 'wp-paradb' ); ?></option>
-							<option value="new" <?php selected( $report ? $report->moon_phase : '', 'new' ); ?>><?php esc_html_e( 'New Moon', 'wp-paradb' ); ?></option>
-							<option value="waxing_crescent" <?php selected( $report ? $report->moon_phase : '', 'waxing_crescent' ); ?>><?php esc_html_e( 'Waxing Crescent', 'wp-paradb' ); ?></option>
-							<option value="first_quarter" <?php selected( $report ? $report->moon_phase : '', 'first_quarter' ); ?>><?php esc_html_e( 'First Quarter', 'wp-paradb' ); ?></option>
-							<option value="waxing_gibbous" <?php selected( $report ? $report->moon_phase : '', 'waxing_gibbous' ); ?>><?php esc_html_e( 'Waxing Gibbous', 'wp-paradb' ); ?></option>
-							<option value="full" <?php selected( $report ? $report->moon_phase : '', 'full' ); ?>><?php esc_html_e( 'Full Moon', 'wp-paradb' ); ?></option>
-							<option value="waning_gibbous" <?php selected( $report ? $report->moon_phase : '', 'waning_gibbous' ); ?>><?php esc_html_e( 'Waning Gibbous', 'wp-paradb' ); ?></option>
-							<option value="last_quarter" <?php selected( $report ? $report->moon_phase : '', 'last_quarter' ); ?>><?php esc_html_e( 'Last Quarter', 'wp-paradb' ); ?></option>
-							<option value="waning_crescent" <?php selected( $report ? $report->moon_phase : '', 'waning_crescent' ); ?>><?php esc_html_e( 'Waning Crescent', 'wp-paradb' ); ?></option>
-						</select>
-					</td>
-				</tr>
-				
-				<tr>
-					<th scope="row">
-						<label for="duration_minutes"><?php esc_html_e( 'Duration (minutes)', 'wp-paradb' ); ?></label>
-					</th>
-					<td>
-						<input type="number" name="duration_minutes" id="duration_minutes" value="<?php echo $report ? esc_attr( $report->duration_minutes ) : ''; ?>">
-					</td>
-				</tr>
 			</table>
 			
 			<p class="submit">

@@ -90,7 +90,7 @@ if ( 'view' === $action && $witness_id > 0 ) {
 			<table class="form-table">
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Submission Date', 'wp-paradb' ); ?></th>
-					<td><?php echo esc_html( gmdate( 'F j, Y g:i a', strtotime( $witness->submission_date ) ) ); ?></td>
+					<td><?php echo esc_html( gmdate( 'F j, Y g:i a', strtotime( $witness->date_submitted ) ) ); ?></td>
 				</tr>
 				
 				<tr>
@@ -111,23 +111,23 @@ if ( 'view' === $action && $witness_id > 0 ) {
 					</td>
 				</tr>
 				
-				<?php if ( ! $witness->is_anonymous ) : ?>
+				<?php if ( ! empty( $witness->account_name ) ) : ?>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Witness Name', 'wp-paradb' ); ?></th>
-						<td><?php echo esc_html( $witness->witness_name ); ?></td>
+						<td><?php echo esc_html( $witness->account_name ); ?></td>
 					</tr>
 					
-					<?php if ( $witness->witness_email ) : ?>
+					<?php if ( $witness->account_email ) : ?>
 						<tr>
 							<th scope="row"><?php esc_html_e( 'Email', 'wp-paradb' ); ?></th>
-							<td><a href="mailto:<?php echo esc_attr( $witness->witness_email ); ?>"><?php echo esc_html( $witness->witness_email ); ?></a></td>
+							<td><a href="mailto:<?php echo esc_attr( $witness->account_email ); ?>"><?php echo esc_html( $witness->account_email ); ?></a></td>
 						</tr>
 					<?php endif; ?>
 					
-					<?php if ( $witness->witness_phone ) : ?>
+					<?php if ( $witness->account_phone ) : ?>
 						<tr>
 							<th scope="row"><?php esc_html_e( 'Phone', 'wp-paradb' ); ?></th>
-							<td><?php echo esc_html( $witness->witness_phone ); ?></td>
+							<td><?php echo esc_html( $witness->account_phone ); ?></td>
 						</tr>
 					<?php endif; ?>
 				<?php else : ?>
@@ -135,6 +135,12 @@ if ( 'view' === $action && $witness_id > 0 ) {
 						<th scope="row"><?php esc_html_e( 'Submission Type', 'wp-paradb' ); ?></th>
 						<td><em><?php esc_html_e( 'Anonymous Submission', 'wp-paradb' ); ?></em></td>
 					</tr>
+					<?php if ( $witness->account_email ) : ?>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Email (Private)', 'wp-paradb' ); ?></th>
+							<td><a href="mailto:<?php echo esc_attr( $witness->account_email ); ?>"><?php echo esc_html( $witness->account_email ); ?></a></td>
+						</tr>
+					<?php endif; ?>
 				<?php endif; ?>
 				
 				<?php if ( $witness->incident_date ) : ?>
@@ -151,10 +157,10 @@ if ( 'view' === $action && $witness_id > 0 ) {
 					</tr>
 				<?php endif; ?>
 				
-				<?php if ( $witness->phenomena_type ) : ?>
+				<?php if ( ! empty( $witness->phenomena_types ) ) : ?>
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Phenomena Type', 'wp-paradb' ); ?></th>
-						<td><?php echo esc_html( $witness->phenomena_type ); ?></td>
+						<th scope="row"><?php esc_html_e( 'Phenomena Types', 'wp-paradb' ); ?></th>
+						<td><?php echo esc_html( is_array( $witness->phenomena_types ) ? implode( ', ', $witness->phenomena_types ) : $witness->phenomena_types ); ?></td>
 					</tr>
 				<?php endif; ?>
 				
@@ -176,7 +182,7 @@ if ( 'view' === $action && $witness_id > 0 ) {
 				
 				<tr>
 					<th scope="row"><?php esc_html_e( 'IP Address', 'wp-paradb' ); ?></th>
-					<td><?php echo esc_html( $witness->witness_ip ); ?></td>
+					<td><?php echo esc_html( $witness->ip_address ); ?></td>
 				</tr>
 			</table>
 		</div>
@@ -244,7 +250,7 @@ if ( 'view' === $action && $witness_id > 0 ) {
 		'status'  => $status_filter,
 		'limit'   => $per_page,
 		'offset'  => ( $paged - 1 ) * $per_page,
-		'orderby' => 'submission_date',
+		'orderby' => 'date_submitted',
 		'order'   => 'DESC',
 	);
 	
@@ -289,19 +295,19 @@ if ( 'view' === $action && $witness_id > 0 ) {
 						<tr>
 							<td class="column-primary" data-colname="<?php esc_attr_e( 'Submitted', 'wp-paradb' ); ?>">
 								<strong>
-									<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-witnesses&action=view&witness_id=' . $witness->witness_id ) ); ?>">
-										<?php echo esc_html( gmdate( 'M j, Y g:i a', strtotime( $witness->submission_date ) ) ); ?>
+									<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-witnesses&action=view&witness_id=' . $witness->account_id ) ); ?>">
+										<?php echo esc_html( gmdate( 'M j, Y g:i a', strtotime( $witness->date_submitted ) ) ); ?>
 									</a>
 								</strong>
 								<div class="row-actions">
 									<span class="view">
-										<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-witnesses&action=view&witness_id=' . $witness->witness_id ) ); ?>">
+										<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-witnesses&action=view&witness_id=' . $witness->account_id ) ); ?>">
 											<?php esc_html_e( 'View', 'wp-paradb' ); ?>
 										</a>
 									</span>
 									|
 									<span class="delete">
-										<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=wp-paradb-witnesses&action=delete&witness_id=' . $witness->witness_id ), 'delete_witness_' . $witness->witness_id ) ); ?>" onclick="return confirm('<?php esc_attr_e( 'Are you sure?', 'wp-paradb' ); ?>');">
+										<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=wp-paradb-witnesses&action=delete&witness_id=' . $witness->account_id ), 'delete_witness_' . $witness->account_id ) ); ?>" onclick="return confirm('<?php esc_attr_e( 'Are you sure?', 'wp-paradb' ); ?>');">
 											<?php esc_html_e( 'Delete', 'wp-paradb' ); ?>
 										</a>
 									</span>
@@ -309,10 +315,10 @@ if ( 'view' === $action && $witness_id > 0 ) {
 							</td>
 							<td data-colname="<?php esc_attr_e( 'Witness', 'wp-paradb' ); ?>">
 								<?php
-								if ( $witness->is_anonymous ) {
+								if ( empty( $witness->account_name ) ) {
 									esc_html_e( 'Anonymous', 'wp-paradb' );
 								} else {
-									echo esc_html( $witness->witness_name );
+									echo esc_html( $witness->account_name );
 								}
 								?>
 							</td>

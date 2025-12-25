@@ -191,6 +191,7 @@ class WP_ParaDB_Evidence_Handler {
 		$evidence_data = array(
 			'case_id'         => absint( $metadata['case_id'] ),
 			'report_id'       => isset( $metadata['report_id'] ) ? absint( $metadata['report_id'] ) : null,
+			'activity_id'     => isset( $metadata['activity_id'] ) ? absint( $metadata['activity_id'] ) : null,
 			'file_name'       => $file_data['file_name'],
 			'file_path'       => $file_data['file_path'],
 			'file_type'       => $extension,
@@ -209,7 +210,7 @@ class WP_ParaDB_Evidence_Handler {
 		);
 
 		$format = array(
-			'%d', '%d', '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%s',
+			'%d', '%d', '%d', '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%s',
 			'%s', '%s', '%s', '%s', '%d', '%d', '%s',
 		);
 
@@ -297,6 +298,7 @@ class WP_ParaDB_Evidence_Handler {
 		$defaults = array(
 			'case_id'       => 0,
 			'report_id'     => 0,
+			'activity_id'   => 0,
 			'evidence_type' => '',
 			'orderby'       => 'date_uploaded',
 			'order'         => 'DESC',
@@ -317,6 +319,11 @@ class WP_ParaDB_Evidence_Handler {
 		if ( $args['report_id'] > 0 ) {
 			$where[] = 'report_id = %d';
 			$where_values[] = $args['report_id'];
+		}
+
+		if ( $args['activity_id'] > 0 ) {
+			$where[] = 'activity_id = %d';
+			$where_values[] = $args['activity_id'];
 		}
 
 		if ( ! empty( $args['evidence_type'] ) ) {

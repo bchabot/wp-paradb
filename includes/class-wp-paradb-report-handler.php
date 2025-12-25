@@ -102,7 +102,7 @@ class WP_ParaDB_Report_Handler {
 		$format = array();
 
 		$allowed_fields = array(
-			'report_title', 'report_type', 'report_date', 'report_content', 'report_summary',
+			'activity_id', 'report_title', 'report_type', 'report_date', 'report_content', 'report_summary',
 		);
 
 		foreach ( $allowed_fields as $field ) {
@@ -110,10 +110,10 @@ class WP_ParaDB_Report_Handler {
 				if ( in_array( $field, array( 'report_content' ), true ) ) {
 					$update_data[ $field ] = wp_kses_post( $data[ $field ] );
 					$format[] = '%s';
-				} elseif ( in_array( $field, array( 'report_summary', 'equipment_used', 'evidence_collected', 'phenomena_observed', 'participants' ), true ) ) {
+				} elseif ( 'report_summary' === $field ) {
 					$update_data[ $field ] = sanitize_textarea_field( $data[ $field ] );
 					$format[] = '%s';
-				} elseif ( 'duration_minutes' === $field ) {
+				} elseif ( 'activity_id' === $field ) {
 					$update_data[ $field ] = absint( $data[ $field ] );
 					$format[] = '%d';
 				} else {

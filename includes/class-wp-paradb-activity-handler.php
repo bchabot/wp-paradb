@@ -270,8 +270,6 @@ class WP_ParaDB_Activity_Handler {
 		}
 
 		// Delete related evidence references.
-		// TODO: Do we need to do anything with reports that reference this activity?
-		/*
 		$wpdb->update(
 			$wpdb->prefix . 'paradb_evidence',
 			array( 'activity_id' => null ),
@@ -279,7 +277,6 @@ class WP_ParaDB_Activity_Handler {
 			array( '%d' ),
 			array( '%d' )
 		);
-		*/
 
 		// Delete activity.
 		$result = $wpdb->delete(
