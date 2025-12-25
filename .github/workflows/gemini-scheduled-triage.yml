@@ -50,7 +50,7 @@ jobs:
             for await (const response of github.paginate.iterator(github.rest.issues.listLabelsForRepo, {
               owner: context.repo.owner,
               repo: context.repo.repo,
-              per_page: 100, # Maximum per page to reduce API calls
+              per_page: 100
             })) {
               labels.push(...response.data);
             }
