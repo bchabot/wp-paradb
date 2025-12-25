@@ -69,9 +69,9 @@ This plugin is created with the organization and leadership of **Brian Chabot** 
 
 ### Contributing
 
-We welcome contributions!
+We welcome contributions from the community!
 
-If you’re interested in writing documentation or creating tutorials, please feel free to contribute at the [project repository](https://github.com/bchabot/wp-paradb).
+Whether you’re interested in writing documentation, creating tutorials, fixing bugs, or adding new features, please feel free to get involved at the [project repository](https://github.com/bchabot/wp-paradb).
 
 ### Project Updates
 
