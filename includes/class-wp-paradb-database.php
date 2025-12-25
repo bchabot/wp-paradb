@@ -185,7 +185,7 @@ class WP_ParaDB_Database {
 		) $charset_collate;";
 
 		// Witness accounts table - For public submissions
-		$sql_witnesses = ""CREATE TABLE IF NOT EXISTS {$wpdb->prefix}paradb_witness_accounts (
+		$sql_witnesses = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}paradb_witness_accounts (
 			account_id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			user_id bigint(20) UNSIGNED DEFAULT NULL,
 			account_email varchar(255) NOT NULL,
