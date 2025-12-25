@@ -50,12 +50,16 @@ class WP_ParaDB_Activator {
 		// Load required classes.
 		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-database.php';
 		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-roles.php';
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-taxonomy-handler.php';
 
 		// Create database tables.
 		WP_ParaDB_Database::create_tables();
 
 		// Create user roles and capabilities.
 		WP_ParaDB_Roles::create_roles();
+
+		// Initialize taxonomies.
+		WP_ParaDB_Taxonomy_Handler::initialize_taxonomies();
 
 		// Set default options.
 		self::set_default_options();
@@ -75,7 +79,7 @@ class WP_ParaDB_Activator {
 	private static function set_default_options() {
 		$default_options = array(
 			'version'                    => WP_PARADB_VERSION,
-			'case_number_format'         => 'CASE-%Y-%ID%',
+			'case_number_format'         => 'CASE-%Y%-%ID%',
 			'require_client_consent'     => true,
 			'allow_public_submissions'   => true,
 			'moderate_submissions'       => true,

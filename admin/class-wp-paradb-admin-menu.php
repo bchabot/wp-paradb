@@ -110,6 +110,16 @@ class WP_ParaDB_Admin_Menu {
 			array( __CLASS__, 'witnesses_page' )
 		);
 
+		// Taxonomies submenu.
+		add_submenu_page(
+			'wp-paradb',
+			__( 'Taxonomies', 'wp-paradb' ),
+			__( 'Taxonomies', 'wp-paradb' ),
+			'paradb_manage_settings',
+			'wp-paradb-taxonomies',
+			array( __CLASS__, 'taxonomies_page' )
+		);
+
 		// Settings submenu.
 		add_submenu_page(
 			'wp-paradb',
@@ -183,6 +193,16 @@ class WP_ParaDB_Admin_Menu {
 	public static function witnesses_page() {
 		require_once WP_PARADB_PLUGIN_DIR . 'admin/partials/wp-paradb-admin-witnesses.php';
 	}
+
+
+	/**
+	 * Taxonomies page
+	 *
+	 * @since    1.0.0
+	 */
+	public static function taxonomies_page() {
+		require_once WP_PARADB_PLUGIN_DIR . 'admin/partials/wp-paradb-admin-taxonomies.php';
+	}	
 
 	/**
 	 * Settings page

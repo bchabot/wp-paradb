@@ -93,6 +93,9 @@ class WP_ParaDB {
 		// Public classes.
 		require_once WP_PARADB_PLUGIN_DIR . 'public/class-wp-paradb-public.php';
 
+		// Taxonomy
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-taxonomy-handler.php';
+
 		$this->loader = new WP_ParaDB_Loader();
 	}
 
