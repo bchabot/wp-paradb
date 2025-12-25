@@ -141,4 +141,13 @@ class WP_ParaDB_Admin {
 		}
 	}
 
+	/**
+	 * Render the relationship management section
+	 *
+	 * @since    1.3.0
+	 */
+	public static function render_relationship_section( $object_id, $object_type ) {
+		require_once WP_PARADB_PLUGIN_DIR . 'admin/partials/wp-paradb-admin-relationships.php';
+	}
+
 }

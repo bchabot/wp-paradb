@@ -135,6 +135,20 @@ class WP_ParaDB_Taxonomy_Handler {
 					'waning_crescent' => __( 'Waning Crescent', 'wp-paradb' ),
 				),
 			),
+			'relationship_types' => array(
+				'label'       => __( 'Relationship Types', 'wp-paradb' ),
+				'description' => __( 'Types of relationships between objects (e.g., Case, Witness, Location)', 'wp-paradb' ),
+				'items'       => array(
+					'associated_with' => __( 'Associated with', 'wp-paradb' ),
+					'located_at'      => __( 'Located at', 'wp-paradb' ),
+					'witnessed_by'    => __( 'Witnessed by', 'wp-paradb' ),
+					'contains'        => __( 'Contains', 'wp-paradb' ),
+					'part_of'         => __( 'Part of', 'wp-paradb' ),
+					'near'            => __( 'Near', 'wp-paradb' ),
+					'caused_by'       => __( 'Caused by', 'wp-paradb' ),
+					'evidence_of'     => __( 'Evidence of', 'wp-paradb' ),
+				),
+			),
 		);
 	}
 

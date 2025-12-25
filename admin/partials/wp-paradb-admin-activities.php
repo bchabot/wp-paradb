@@ -201,6 +201,10 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 					</td>
 				</tr>
 			</table>
+
+			<?php if ( $activity && $activity_id > 0 ) : ?>
+				<?php WP_ParaDB_Admin::render_relationship_section( $activity_id, 'activity' ); ?>
+			<?php endif; ?>
 			
 			<p class="submit">
 				<input type="submit" name="save_activity" class="button button-primary" value="<?php echo 'new' === $action ? esc_attr__( 'Create Activity', 'wp-paradb' ) : esc_attr__( 'Update Activity', 'wp-paradb' ); ?>">

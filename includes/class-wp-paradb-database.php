@@ -210,6 +210,45 @@ class WP_ParaDB_Database {
 			KEY user_id (user_id)
 		) $charset_collate;";
 
+		// Locations table - Address book and shared locations
+		$sql_locations = "CREATE TABLE {$table_prefix}locations (
+			location_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			location_name varchar(200) NOT NULL,
+			address varchar(255) DEFAULT NULL,
+			city varchar(100) DEFAULT NULL,
+			state varchar(50) DEFAULT NULL,
+			zip varchar(20) DEFAULT NULL,
+			country varchar(100) DEFAULT 'United States',
+			latitude decimal(10,8) DEFAULT NULL,
+			longitude decimal(11,8) DEFAULT NULL,
+			location_notes text DEFAULT NULL,
+			is_public tinyint(1) NOT NULL DEFAULT 0,
+			created_by bigint(20) unsigned NOT NULL,
+			date_created datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			date_modified datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY  (location_id),
+			KEY location_name (location_name),
+			KEY created_by (created_by),
+			KEY is_public (is_public)
+		) $charset_collate;";
+
+		// Relationships table - Link any two objects together
+		$sql_relationships = "CREATE TABLE {$table_prefix}relationships (
+			relationship_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			from_id bigint(20) unsigned NOT NULL,
+			from_type varchar(50) NOT NULL,
+			to_id bigint(20) unsigned NOT NULL,
+			to_type varchar(50) NOT NULL,
+			relationship_type varchar(50) NOT NULL,
+			notes text DEFAULT NULL,
+			created_by bigint(20) unsigned NOT NULL,
+			date_created datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY  (relationship_id),
+			KEY from_object (from_type, from_id),
+			KEY to_object (to_type, to_id),
+			KEY relationship_type (relationship_type)
+		) $charset_collate;";
+
 		// Witness accounts table - For public submissions
 		$sql_witnesses = "CREATE TABLE {$table_prefix}witness_accounts (
 			account_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -256,10 +295,12 @@ class WP_ParaDB_Database {
 		dbDelta( $sql_evidence );
 		dbDelta( $sql_notes );
 		dbDelta( $sql_team );
+		dbDelta( $sql_locations );
+		dbDelta( $sql_relationships );
 		dbDelta( $sql_witnesses );
 
 		// Store database version
-		update_option( 'wp_paradb_db_version', '1.0.0' );
+		update_option( 'wp_paradb_db_version', '1.3.0' );
 	}
 
 	/**

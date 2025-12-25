@@ -38,6 +38,7 @@ if ( ! $case || ! $case->is_published ) {
 // Get related data.
 $reports = WP_ParaDB_Report_Handler::get_reports( array( 'case_id' => $case_id, 'limit' => 100 ) );
 $evidence = WP_ParaDB_Evidence_Handler::get_evidence_files( array( 'case_id' => $case_id, 'limit' => 100 ) );
+$relationships = WP_ParaDB_Relationship_Handler::get_relationships( $case_id, 'case' );
 $phenomena = maybe_unserialize( $case->phenomena_types );
 
 // Increment view count.
@@ -106,6 +107,32 @@ $wpdb->query( $wpdb->prepare(
 				<div class="description-content">
 					<?php echo wp_kses_post( wpautop( $case->case_description ) ); ?>
 				</div>
+			</section>
+		<?php endif; ?>
+
+		<?php if ( ! empty( $relationships ) ) : ?>
+			<section class="case-section relationships">
+				<h2><?php esc_html_e( 'Linked Relationships', 'wp-paradb' ); ?></h2>
+				<ul class="relationship-list">
+					<?php 
+					$rel_types = WP_ParaDB_Taxonomy_Handler::get_taxonomy_items( 'relationship_types' );
+					foreach ( $relationships as $rel ) : 
+						$is_from = ( absint( $rel->from_id ) === $case_id && $rel->from_type === 'case' );
+						$target_id = $is_from ? $rel->to_id : $rel->from_id;
+						$target_type = $is_from ? $rel->to_type : $rel->from_type;
+						$label = WP_ParaDB_Relationship_Handler::get_object_label( $target_id, $target_type );
+						$type_label = isset( $rel_types[ $rel->relationship_type ] ) ? $rel_types[ $rel->relationship_type ] : $rel->relationship_type;
+						?>
+						<li>
+							<strong><?php echo esc_html( $type_label ); ?>:</strong> 
+							<?php echo esc_html( $label ); ?> 
+							<small>(<?php echo esc_html( ucfirst( $target_type ) ); ?>)</small>
+							<?php if ( $rel->notes ) : ?>
+								<p class="rel-notes"><em><?php echo esc_html( $rel->notes ); ?></em></p>
+							<?php endif; ?>
+						</li>
+					<?php endforeach; ?>
+				</ul>
 			</section>
 		<?php endif; ?>
 

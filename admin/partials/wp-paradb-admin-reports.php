@@ -170,11 +170,14 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 						);
 						?>
 					</td>
-				</tr>
+								</tr>
+							</table>
 				
-			</table>
-			
-			<p class="submit">
+							<?php if ( $report && $report_id > 0 ) : ?>
+								<?php WP_ParaDB_Admin::render_relationship_section( $report_id, 'report' ); ?>
+							<?php endif; ?>
+							
+							<p class="submit">
 				<input type="submit" name="save_report" class="button button-primary" value="<?php echo 'new' === $action ? esc_attr__( 'Create Report', 'wp-paradb' ) : esc_attr__( 'Update Report', 'wp-paradb' ); ?>">
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-reports' ) ); ?>" class="button">
 					<?php esc_html_e( 'Cancel', 'wp-paradb' ); ?>

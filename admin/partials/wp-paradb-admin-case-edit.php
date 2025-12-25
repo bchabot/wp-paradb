@@ -233,6 +233,11 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 							</table>
 						</div>
 					</div>
+
+					<!-- Case Relationships -->
+					<?php if ( ! $is_new && $case_id > 0 ) : ?>
+						<?php WP_ParaDB_Admin::render_relationship_section( $case_id, 'case' ); ?>
+					<?php endif; ?>
 				</div>
 
 				<!-- Sidebar -->
