@@ -223,4 +223,62 @@ class WP_ParaDB_Taxonomy_Handler {
 	 * @param    mixed     $item_key        Item key or value to remove.
 	 * @return   bool                       Success status.
 	 */
-	public static function remove_taxonomy_item( $taxonomy_key, $item_key )
+	public static function remove_taxonomy_item( $taxonomy_key, $item_key ) {
+		$taxonomy = self::get_taxonomy( $taxonomy_key );
+		
+		if ( ! $taxonomy ) {
+			return false;
+		}
+		
+		if ( isset( $taxonomy['items'][ $item_key ] ) ) {
+			unset( $taxonomy['items'][ $item_key ] );
+		} else {
+			$key = array_search( $item_key, $taxonomy['items'], true );
+			if ( false !== $key ) {
+				unset( $taxonomy['items'][ $key ] );
+			}
+		}
+		
+		return self::update_taxonomy( $taxonomy_key, $taxonomy );
+	}
+
+	/**
+	 * Reset taxonomy to defaults
+	 *
+	 * @since    1.0.0
+	 * @param    string    $taxonomy_key    The taxonomy key.
+	 * @return   bool                       Success status.
+	 */
+	public static function reset_taxonomy( $taxonomy_key ) {
+		$defaults = self::get_default_taxonomies();
+		
+		if ( ! isset( $defaults[ $taxonomy_key ] ) ) {
+			return false;
+		}
+		
+		return self::update_taxonomy( $taxonomy_key, $defaults[ $taxonomy_key ] );
+	}
+
+	/**
+	 * Reset all taxonomies to defaults
+	 *
+	 * @since    1.0.0
+	 * @return   bool    Success status.
+	 */
+	public static function reset_all_taxonomies() {
+		return update_option( 'wp_paradb_taxonomies', self::get_default_taxonomies() );
+	}
+
+	/**
+	 * Initialize taxonomies on first run
+	 *
+	 * @since    1.0.0
+	 */
+	public static function initialize_taxonomies() {
+		$taxonomies = get_option( 'wp_paradb_taxonomies', false );
+		
+		if ( false === $taxonomies ) {
+			update_option( 'wp_paradb_taxonomies', self::get_default_taxonomies() );
+		}
+	}
+}
