@@ -80,6 +80,16 @@ class WP_ParaDB_Admin_Menu {
 			array( __CLASS__, 'reports_page' )
 		);
 
+		// Activities submenu.
+		add_submenu_page(
+			'wp-paradb',
+			__( 'Activities', 'wp-paradb' ),
+			__( 'Activities', 'wp-paradb' ),
+			'paradb_view_cases',
+			'wp-paradb-activities',
+			array( __CLASS__, 'activities_page' )
+		);
+
 		// Clients submenu.
 		add_submenu_page(
 			'wp-paradb',
@@ -165,6 +175,15 @@ class WP_ParaDB_Admin_Menu {
 	 */
 	public static function reports_page() {
 		require_once WP_PARADB_PLUGIN_DIR . 'admin/partials/wp-paradb-admin-reports.php';
+	}
+
+	/**
+	 * Activities page
+	 *
+	 * @since    1.0.0
+	 */
+	public static function activities_page() {
+		require_once WP_PARADB_PLUGIN_DIR . 'admin/partials/wp-paradb-admin-activities.php';
 	}
 
 	/**

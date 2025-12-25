@@ -28,15 +28,12 @@ if ( isset( $_POST['save_report'] ) && check_admin_referer( 'save_report', 'repo
 	
 	$report_data = array(
 		'case_id'            => isset( $_POST['case_id'] ) ? absint( $_POST['case_id'] ) : 0,
+		'activity_id'        => isset( $_POST['activity_id'] ) ? absint( $_POST['activity_id'] ) : 0,
 		'report_title'       => isset( $_POST['report_title'] ) ? sanitize_text_field( wp_unslash( $_POST['report_title'] ) ) : '',
-		'report_type'        => isset( $_POST['report_type'] ) ? sanitize_text_field( wp_unslash( $_POST['report_type'] ) ) : 'investigation',
+		'report_type'        => isset( $_POST['report_type'] ) ? sanitize_text_field( wp_unslash( $_POST['report_type'] ) ) : 'report',
 		'report_date'        => isset( $_POST['report_date'] ) ? sanitize_text_field( wp_unslash( $_POST['report_date'] ) ) : current_time( 'mysql' ),
 		'report_content'     => isset( $_POST['report_content'] ) ? wp_kses_post( wp_unslash( $_POST['report_content'] ) ) : '',
 		'report_summary'     => isset( $_POST['report_summary'] ) ? sanitize_textarea_field( wp_unslash( $_POST['report_summary'] ) ) : '',
-		'weather_conditions' => isset( $_POST['weather_conditions'] ) ? sanitize_text_field( wp_unslash( $_POST['weather_conditions'] ) ) : '',
-		'moon_phase'         => isset( $_POST['moon_phase'] ) ? sanitize_text_field( wp_unslash( $_POST['moon_phase'] ) ) : '',
-		'temperature'        => isset( $_POST['temperature'] ) ? sanitize_text_field( wp_unslash( $_POST['temperature'] ) ) : '',
-		'duration_minutes'   => isset( $_POST['duration_minutes'] ) ? absint( $_POST['duration_minutes'] ) : 0,
 	);
 
 	if ( $report_id > 0 ) {

@@ -77,11 +77,35 @@ class WP_ParaDB_Database {
 		$sql_reports = "CREATE TABLE {$table_prefix}reports (
 			report_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			case_id bigint(20) unsigned NOT NULL,
+			activity_id bigint(20) unsigned DEFAULT NULL,
 			report_title varchar(200) NOT NULL,
-			report_type varchar(50) NOT NULL DEFAULT 'investigation',
+			report_type varchar(50) NOT NULL DEFAULT 'report',
 			report_date datetime NOT NULL,
 			report_content longtext NOT NULL,
 			report_summary text DEFAULT NULL,
+			investigator_id bigint(20) unsigned NOT NULL,
+			is_published tinyint(1) NOT NULL DEFAULT 0,
+			publish_date datetime DEFAULT NULL,
+			date_created datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			date_modified datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY  (report_id),
+			KEY case_id (case_id),
+			KEY activity_id (activity_id),
+			KEY investigator_id (investigator_id),
+			KEY report_type (report_type),
+			KEY report_date (report_date),
+			KEY is_published (is_published)
+		) $charset_collate;";
+
+		// Activities table - Investigation activities and logs
+		$sql_activities = "CREATE TABLE {$table_prefix}activities (
+			activity_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			case_id bigint(20) unsigned NOT NULL,
+			activity_title varchar(200) NOT NULL,
+			activity_type varchar(50) NOT NULL DEFAULT 'investigation',
+			activity_date datetime NOT NULL,
+			activity_content longtext NOT NULL,
+			activity_summary text DEFAULT NULL,
 			investigator_id bigint(20) unsigned NOT NULL,
 			weather_conditions varchar(200) DEFAULT NULL,
 			moon_phase varchar(50) DEFAULT NULL,
@@ -95,11 +119,11 @@ class WP_ParaDB_Database {
 			publish_date datetime DEFAULT NULL,
 			date_created datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			date_modified datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-			PRIMARY KEY  (report_id),
+			PRIMARY KEY  (activity_id),
 			KEY case_id (case_id),
 			KEY investigator_id (investigator_id),
-			KEY report_type (report_type),
-			KEY report_date (report_date),
+			KEY activity_type (activity_type),
+			KEY activity_date (activity_date),
 			KEY is_published (is_published)
 		) $charset_collate;";
 
@@ -223,6 +247,7 @@ class WP_ParaDB_Database {
 		// Execute table creation
 		dbDelta( $sql_cases );
 		dbDelta( $sql_reports );
+		dbDelta( $sql_activities );
 		dbDelta( $sql_clients );
 		dbDelta( $sql_evidence );
 		dbDelta( $sql_notes );
@@ -250,6 +275,7 @@ class WP_ParaDB_Database {
 			'evidence',
 			'witness_accounts',
 			'reports',
+			'activities',
 			'cases',
 			'clients',
 		);

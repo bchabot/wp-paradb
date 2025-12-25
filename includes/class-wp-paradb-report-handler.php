@@ -41,27 +41,19 @@ class WP_ParaDB_Report_Handler {
 		// Prepare report data.
 		$report_data = array(
 			'case_id'            => absint( $data['case_id'] ),
+			'activity_id'        => isset( $data['activity_id'] ) ? absint( $data['activity_id'] ) : null,
 			'report_title'       => sanitize_text_field( $data['report_title'] ),
-			'report_type'        => isset( $data['report_type'] ) ? sanitize_text_field( $data['report_type'] ) : 'investigation',
+			'report_type'        => isset( $data['report_type'] ) ? sanitize_text_field( $data['report_type'] ) : 'report',
 			'report_date'        => isset( $data['report_date'] ) ? sanitize_text_field( $data['report_date'] ) : current_time( 'mysql' ),
 			'report_content'     => wp_kses_post( $data['report_content'] ),
 			'report_summary'     => isset( $data['report_summary'] ) ? sanitize_textarea_field( $data['report_summary'] ) : null,
 			'investigator_id'    => get_current_user_id(),
-			'weather_conditions' => isset( $data['weather_conditions'] ) ? sanitize_text_field( $data['weather_conditions'] ) : null,
-			'moon_phase'         => isset( $data['moon_phase'] ) ? sanitize_text_field( $data['moon_phase'] ) : null,
-			'temperature'        => isset( $data['temperature'] ) ? sanitize_text_field( $data['temperature'] ) : null,
-			'equipment_used'     => isset( $data['equipment_used'] ) ? sanitize_textarea_field( $data['equipment_used'] ) : null,
-			'evidence_collected' => isset( $data['evidence_collected'] ) ? sanitize_textarea_field( $data['evidence_collected'] ) : null,
-			'phenomena_observed' => isset( $data['phenomena_observed'] ) ? sanitize_textarea_field( $data['phenomena_observed'] ) : null,
-			'duration_minutes'   => isset( $data['duration_minutes'] ) ? absint( $data['duration_minutes'] ) : null,
-			'participants'       => isset( $data['participants'] ) ? sanitize_textarea_field( $data['participants'] ) : null,
 			'date_created'       => current_time( 'mysql' ),
 		);
 
 		// Format types for database.
 		$format = array(
-			'%d', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s',
-			'%s', '%s', '%s', '%d', '%s', '%s',
+			'%d', '%d', '%s', '%s', '%s', '%s', '%s', '%d', '%s',
 		);
 
 		// Insert into database.
@@ -111,8 +103,6 @@ class WP_ParaDB_Report_Handler {
 
 		$allowed_fields = array(
 			'report_title', 'report_type', 'report_date', 'report_content', 'report_summary',
-			'weather_conditions', 'moon_phase', 'temperature', 'equipment_used',
-			'evidence_collected', 'phenomena_observed', 'duration_minutes', 'participants',
 		);
 
 		foreach ( $allowed_fields as $field ) {
@@ -188,6 +178,7 @@ class WP_ParaDB_Report_Handler {
 
 		$defaults = array(
 			'case_id'         => 0,
+			'activity_id'     => 0,
 			'investigator_id' => 0,
 			'report_type'     => '',
 			'search'          => '',
@@ -206,6 +197,12 @@ class WP_ParaDB_Report_Handler {
 		if ( $args['case_id'] > 0 ) {
 			$where[] = 'case_id = %d';
 			$where_values[] = $args['case_id'];
+		}
+
+		// Filter by activity.
+		if ( $args['activity_id'] > 0 ) {
+			$where[] = 'activity_id = %d';
+			$where_values[] = $args['activity_id'];
 		}
 
 		// Filter by investigator.
