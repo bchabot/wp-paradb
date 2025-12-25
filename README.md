@@ -55,9 +55,9 @@ A copy of the license is included in the root of the plugin’s directory. The f
 
 When contributing or extending the plugin, please follow the established file structure:
 
-* **[`wp-paradb/includes`](wp-paradb/includes)** - Core functionality shared between admin and public areas
-* **[`wp-paradb/admin`](wp-paradb/admin)** - All admin-specific functionality and interfaces  
-* **[`wp-paradb/public`](wp-paradb/public)** - All public-facing functionality and displays
+* **[`includes/`](includes/)** - Core functionality shared between admin and public areas
+* **[`admin/`](admin/)** - All admin-specific functionality and interfaces  
+* **[`public/`](public/)** - All public-facing functionality and displays
 
 ## 👥 Credits
 
