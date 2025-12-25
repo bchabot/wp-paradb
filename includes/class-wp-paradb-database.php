@@ -185,28 +185,40 @@ class WP_ParaDB_Database {
 		) $charset_collate;";
 
 		// Witness accounts table - For public submissions
-		$sql_witnesses = "CREATE TABLE {$table_prefix}witness_accounts (
-			witness_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-			case_id bigint(20) unsigned DEFAULT NULL,
-			submission_date datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			witness_name varchar(200) DEFAULT NULL,
-			witness_email varchar(100) DEFAULT NULL,
-			witness_phone varchar(30) DEFAULT NULL,
-			incident_date datetime DEFAULT NULL,
-			incident_location varchar(500) DEFAULT NULL,
-			incident_description longtext NOT NULL,
-			phenomena_type varchar(100) DEFAULT NULL,
-			witness_ip varchar(45) DEFAULT NULL,
-			is_anonymous tinyint(1) NOT NULL DEFAULT 0,
-			is_reviewed tinyint(1) NOT NULL DEFAULT 0,
-			reviewed_by bigint(20) unsigned DEFAULT NULL,
-			review_date datetime DEFAULT NULL,
+		$sql_witnesses = ""CREATE TABLE IF NOT EXISTS {$wpdb->prefix}paradb_witness_accounts (
+			account_id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			user_id bigint(20) UNSIGNED DEFAULT NULL,
+			account_email varchar(255) NOT NULL,
+			account_name varchar(255) DEFAULT NULL,
+			account_phone varchar(50) DEFAULT NULL,
+			account_address text DEFAULT NULL,
+			incident_date date NOT NULL,
+			incident_time time DEFAULT NULL,
+			incident_location varchar(255) NOT NULL,
+			incident_description text NOT NULL,
+			phenomena_types text NOT NULL,
+			witnesses_present int(11) DEFAULT NULL,
+			witness_names text DEFAULT NULL,
+			previous_experiences tinyint(1) DEFAULT 0,
+			previous_details text DEFAULT NULL,
+			consent_status varchar(50) NOT NULL DEFAULT 'pending',
+			consent_anonymize tinyint(1) DEFAULT 0,
+			allow_publish tinyint(1) DEFAULT 0,
+			allow_followup tinyint(1) DEFAULT 1,
+			privacy_accepted tinyint(1) DEFAULT 0,
+			privacy_accepted_date datetime DEFAULT NULL,
 			status varchar(50) NOT NULL DEFAULT 'pending',
-			PRIMARY KEY  (witness_id),
-			KEY case_id (case_id),
+			ip_address varchar(100) DEFAULT NULL,
+			user_agent text DEFAULT NULL,
+			date_submitted datetime NOT NULL,
+			date_modified datetime DEFAULT NULL,
+			admin_notes text DEFAULT NULL,
+			PRIMARY KEY (account_id),
+			KEY user_id (user_id),
 			KEY status (status),
-			KEY submission_date (submission_date)
-		) $charset_collate;";
+			KEY consent_status (consent_status),
+			KEY date_submitted (date_submitted)
+		) {$charset_collate};";
 
 		// Execute table creation
 		dbDelta( $sql_cases );

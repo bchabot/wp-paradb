@@ -26,6 +26,19 @@ Alternatively, you can install directly from the WordPress admin:
 - Search for "WordPress Paranormal Database"
 - Click **Install Now** and then **Activate** 
 
+## Usage
+
+### Display the Witness Form
+
+Add this shortcode to any page:
+```
+[paradb_witness_form]
+```
+
+Or with a custom redirect:
+```
+[paradb_witness_form redirect_url="https://yoursite.com/thank-you"]
+
 ## 🛠️ Development Tools
 
 ### Internationalization (i18n)
