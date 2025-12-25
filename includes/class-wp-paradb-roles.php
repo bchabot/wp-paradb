@@ -204,31 +204,35 @@ class WP_ParaDB_Roles {
 			return false;
 		}
 
-		// Administrators and directors can access all cases
+		// Administrators and directors can access all cases.
 		if ( self::user_can( 'paradb_view_all_cases', $user_id ) ) {
 			return true;
 		}
 
 		global $wpdb;
-		$table = $wpdb->prefix . 'paradb_cases';
 
-		// Check if user created the case
-		$created_by = $wpdb->get_var( $wpdb->prepare(
-			"SELECT created_by FROM {$table} WHERE case_id = %d",
-			$case_id
-		) );
+		// Check if user created the case.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Permission check requires direct query.
+		$created_by = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT created_by FROM {$wpdb->prefix}paradb_cases WHERE case_id = %d",
+				$case_id
+			)
+		);
 
 		if ( absint( $created_by ) === absint( $user_id ) ) {
 			return true;
 		}
 
-		// Check if user is assigned to the case
-		$team_table = $wpdb->prefix . 'paradb_case_team';
-		$assigned = $wpdb->get_var( $wpdb->prepare(
-			"SELECT assignment_id FROM {$team_table} WHERE case_id = %d AND user_id = %d",
-			$case_id,
-			$user_id
-		) );
+		// Check if user is assigned to the case.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Permission check requires direct query.
+		$assigned = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT assignment_id FROM {$wpdb->prefix}paradb_case_team WHERE case_id = %d AND user_id = %d",
+				$case_id,
+				$user_id
+			)
+		);
 
 		return ! is_null( $assigned );
 	}

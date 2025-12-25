@@ -87,7 +87,7 @@ class WP_ParaDB_Public {
 			plugin_dir_url( __FILE__ ) . 'js/wp-paradb-public.js',
 			array( 'jquery' ),
 			$this->version,
-			false
+			true // Load in footer for better performance.
 		);
 	}
 

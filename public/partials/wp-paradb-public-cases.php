@@ -17,24 +17,46 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-case-handler.php';
 
 // Get published cases.
-$args = array(
-	'limit'   => isset( $atts['limit'] ) ? absint( $atts['limit'] ) : 10,
-	'orderby' => isset( $atts['orderby'] ) ? sanitize_text_field( $atts['orderby'] ) : 'date_created',
-	'order'   => isset( $atts['order'] ) ? sanitize_text_field( $atts['order'] ) : 'DESC',
-);
+$limit   = isset( $atts['limit'] ) ? absint( $atts['limit'] ) : 10;
+$orderby = isset( $atts['orderby'] ) ? sanitize_key( $atts['orderby'] ) : 'date_created';
+$order   = isset( $atts['order'] ) ? strtoupper( sanitize_key( $atts['order'] ) ) : 'DESC';
 
-// Add published filter.
-global $wpdb;
-$cases_table = $wpdb->prefix . 'paradb_cases';
-$where_clause = 'is_published = 1';
-
-if ( ! empty( $_GET['search'] ) ) {
-	$search_term = '%' . $wpdb->esc_like( sanitize_text_field( wp_unslash( $_GET['search'] ) ) ) . '%';
-	$where_clause .= $wpdb->prepare( ' AND (case_name LIKE %s OR case_description LIKE %s OR location_name LIKE %s)', $search_term, $search_term, $search_term );
+// Validate orderby to prevent SQL injection.
+$allowed_orderby = array( 'case_id', 'case_number', 'case_name', 'date_created', 'date_modified' );
+if ( ! in_array( $orderby, $allowed_orderby, true ) ) {
+	$orderby = 'date_created';
 }
 
-$query = "SELECT * FROM {$cases_table} WHERE {$where_clause} ORDER BY {$args['orderby']} {$args['order']} LIMIT " . absint( $args['limit'] );
-$cases = $wpdb->get_results( $query );
+// Validate order direction.
+if ( ! in_array( $order, array( 'ASC', 'DESC' ), true ) ) {
+	$order = 'DESC';
+}
+
+// Build query with proper preparation.
+global $wpdb;
+$cases_table = $wpdb->prefix . 'paradb_cases';
+
+// Start building the query.
+$query_parts = array();
+$query_parts[] = "SELECT * FROM {$cases_table} WHERE is_published = 1";
+
+// Handle search.
+if ( ! empty( $_GET['search'] ) ) {
+	$search_term = '%' . $wpdb->esc_like( sanitize_text_field( wp_unslash( $_GET['search'] ) ) ) . '%';
+	$query_parts[] = $wpdb->prepare(
+		'AND (case_name LIKE %s OR case_description LIKE %s OR location_name LIKE %s)',
+		$search_term,
+		$search_term,
+		$search_term
+	);
+}
+
+// Add ordering and limit (these are validated above, so safe to interpolate).
+// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $orderby and $order are validated against allowlists.
+$query = implode( ' ', $query_parts ) . " ORDER BY {$orderby} {$order} LIMIT %d";
+
+// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is built with proper escaping above.
+$cases = $wpdb->get_results( $wpdb->prepare( $query, $limit ) );
 ?>
 
 <div class="paradb-cases-listing">

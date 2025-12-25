@@ -48,18 +48,19 @@ if ( file_exists( $paradb_dir ) ) {
 // For multisite installations.
 if ( is_multisite() ) {
 	global $wpdb;
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Required for multisite uninstall.
 	$blog_ids = $wpdb->get_col( "SELECT blog_id FROM {$wpdb->blogs}" );
-	
+
 	foreach ( $blog_ids as $blog_id ) {
-		switch_to_blog( $blog_id );
-		
+		switch_to_blog( (int) $blog_id );
+
 		// Delete options for this site.
 		delete_option( 'wp_paradb_options' );
 		delete_option( 'wp_paradb_db_version' );
-		
+
 		// Drop tables for this site.
 		WP_ParaDB_Database::drop_tables();
-		
+
 		restore_current_blog();
 	}
 }
