@@ -75,7 +75,7 @@ class WP_ParaDB_Activator {
 	private static function set_default_options() {
 		$default_options = array(
 			'version'                    => WP_PARADB_VERSION,
-			'case_number_format'         => 'CASE-%Y-%ID%',
+			'case_number_format'         => 'CASE-%Y%-%ID%',
 			'require_client_consent'     => true,
 			'allow_public_submissions'   => true,
 			'moderate_submissions'       => true,
