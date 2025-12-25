@@ -88,6 +88,29 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 				<input type="hidden" name="activity_id" value="<?php echo esc_attr( $activity->activity_id ); ?>">
 			<?php endif; ?>
 			
+			<?php
+			// Get case location for data fetching if needed
+			$activity_lat = 0;
+			$activity_lng = 0;
+			if ( $activity ) {
+				if ( $activity->location_id ) {
+					$loc = WP_ParaDB_Location_Handler::get_location( $activity->location_id );
+					if ( $loc ) {
+						$activity_lat = $loc->latitude;
+						$activity_lng = $loc->longitude;
+					}
+				} else {
+					$case = WP_ParaDB_Case_Handler::get_case( $activity->case_id );
+					if ( $case ) {
+						$activity_lat = $case->latitude;
+						$activity_lng = $case->longitude;
+					}
+				}
+			}
+			?>
+			<input type="hidden" id="latitude" value="<?php echo esc_attr( $activity_lat ); ?>">
+			<input type="hidden" id="longitude" value="<?php echo esc_attr( $activity_lng ); ?>">
+			
 			<table class="form-table">
 				<tr>
 					<th scope="row">
@@ -161,6 +184,8 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 					</th>
 					<td>
 						<input type="text" name="weather_conditions" id="weather_conditions" class="regular-text" value="<?php echo $activity ? esc_attr( $activity->weather_conditions ) : ''; ?>">
+						<button type="button" id="fetch-environmental-data" class="button"><?php esc_html_e( 'Auto-fetch Environmental Data', 'wp-paradb' ); ?></button>
+						<p class="description"><?php esc_html_e( 'Requires Case/Activity location and date to be set first.', 'wp-paradb' ); ?></p>
 					</td>
 				</tr>
 				
@@ -244,6 +269,18 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 		
 		<hr class="wp-header-end">
 		
+		<script>
+		jQuery(document).ready(function($) {
+			$('#location_id').on('change', function() {
+				var $selected = $(this).find('option:selected');
+				if ($(this).val()) {
+					$('#latitude').val($selected.data('lat') || 0);
+					$('#longitude').val($selected.data('lng') || 0);
+				}
+			});
+		});
+		</script>
+
 		<table class="wp-list-table widefat fixed striped">
 			<thead>
 				<tr>

@@ -55,6 +55,32 @@ class WP_ParaDB_Admin {
 	public function __construct( $plugin_name, $version ) {
 		$this->plugin_name = $plugin_name;
 		$this->version     = $version;
+
+		add_action( 'wp_ajax_paradb_fetch_environmental_data', array( $this, 'ajax_fetch_environmental_data' ) );
+	}
+
+	/**
+	 * AJAX handler for fetching environmental data
+	 */
+	public function ajax_fetch_environmental_data() {
+		check_ajax_referer( 'paradb_admin_nonce', 'nonce' );
+
+		if ( ! current_user_can( 'paradb_view_cases' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wp-paradb' ) ) );
+		}
+
+		$lat = isset( $_POST['lat'] ) ? floatval( $_POST['lat'] ) : 0;
+		$lng = isset( $_POST['lng'] ) ? floatval( $_POST['lng'] ) : 0;
+		$datetime = isset( $_POST['datetime'] ) ? sanitize_text_field( $_POST['datetime'] ) : '';
+
+		if ( ! $lat || ! $lng || ! $datetime ) {
+			wp_send_json_error( array( 'message' => __( 'Missing location or date.', 'wp-paradb' ) ) );
+		}
+
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-environmental-fetcher.php';
+		$data = WP_ParaDB_Environmental_Fetcher::fetch_all( $lat, $lng, $datetime );
+
+		wp_send_json_success( $data );
 	}
 
 	/**
@@ -78,6 +104,23 @@ class WP_ParaDB_Admin {
 	 * @since    1.0.0
 	 */
 	public function enqueue_scripts() {
+		$options = get_option( 'wp_paradb_options', array() );
+		$provider = isset( $options['map_provider'] ) ? $options['map_provider'] : 'google';
+		$api_key = isset( $options['google_maps_api_key'] ) ? $options['google_maps_api_key'] : '';
+
+		if ( 'google' === $provider && ! empty( $api_key ) ) {
+			wp_enqueue_script(
+				'google-maps',
+				'https://maps.googleapis.com/maps/api/js?key=' . esc_attr( $api_key ) . '&libraries=places',
+				array(),
+				null,
+				true
+			);
+		} elseif ( 'osm' === $provider ) {
+			wp_enqueue_style( 'leaflet', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css', array(), '1.9.4' );
+			wp_enqueue_script( 'leaflet', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js', array(), '1.9.4', true );
+		}
+
 		wp_enqueue_script(
 			$this->plugin_name,
 			plugin_dir_url( __FILE__ ) . 'js/wp-paradb-admin.js',
@@ -85,6 +128,17 @@ class WP_ParaDB_Admin {
 			$this->version,
 			true // Load in footer for better performance.
 		);
+
+		wp_localize_script( $this->plugin_name, 'paradb_admin', array(
+			'ajax_url' => admin_url( 'admin-ajax.php' ),
+			'nonce'    => wp_create_nonce( 'paradb_admin_nonce' ),
+		) );
+		
+		// Pass provider settings to JS
+		wp_localize_script( $this->plugin_name, 'paradb_maps', array(
+			'provider' => $provider,
+			'locationiq_key' => isset( $options['locationiq_api_key'] ) ? $options['locationiq_api_key'] : ''
+		) );
 	}
 
 	/**

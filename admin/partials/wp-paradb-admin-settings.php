@@ -38,6 +38,11 @@ if ( isset( $_POST['save_settings'] ) && check_admin_referer( 'save_paradb_setti
 	// Map settings.
 	$options['enable_geolocation'] = isset( $_POST['enable_geolocation'] ) ? 1 : 0;
 	$options['enable_moon_phase'] = isset( $_POST['enable_moon_phase'] ) ? 1 : 0;
+	$options['map_provider'] = isset( $_POST['map_provider'] ) ? sanitize_text_field( wp_unslash( $_POST['map_provider'] ) ) : 'google';
+	$options['google_maps_api_key'] = isset( $_POST['google_maps_api_key'] ) ? sanitize_text_field( wp_unslash( $_POST['google_maps_api_key'] ) ) : '';
+	$options['locationiq_api_key'] = isset( $_POST['locationiq_api_key'] ) ? sanitize_text_field( wp_unslash( $_POST['locationiq_api_key'] ) ) : '';
+	$options['weatherapi_api_key'] = isset( $_POST['weatherapi_api_key'] ) ? sanitize_text_field( wp_unslash( $_POST['weatherapi_api_key'] ) ) : '';
+	$options['freeastroapi_api_key'] = isset( $_POST['freeastroapi_api_key'] ) ? sanitize_text_field( wp_unslash( $_POST['freeastroapi_api_key'] ) ) : '';
 	
 	// Update options.
 	update_option( 'wp_paradb_options', $options );
@@ -171,6 +176,65 @@ $options = get_option( 'wp_paradb_options', array() );
 						<?php esc_html_e( 'Enable moon phase tracking in reports', 'wp-paradb' ); ?>
 					</label>
 					<p class="description"><?php esc_html_e( 'Track lunar phase during investigations', 'wp-paradb' ); ?></p>
+				</td>
+			</tr>
+		</table>
+
+		<h2 class="title"><?php esc_html_e( 'Map & API Settings', 'wp-paradb' ); ?></h2>
+		<table class="form-table">
+			<tr>
+				<th scope="row">
+					<label for="map_provider"><?php esc_html_e( 'Map Provider', 'wp-paradb' ); ?></label>
+				</th>
+				<td>
+					<select name="map_provider" id="map_provider">
+						<option value="google" <?php selected( isset( $options['map_provider'] ) ? $options['map_provider'] : 'google', 'google' ); ?>><?php esc_html_e( 'Google Maps (Requires API Key)', 'wp-paradb' ); ?></option>
+						<option value="osm" <?php selected( isset( $options['map_provider'] ) ? $options['map_provider'] : 'google', 'osm' ); ?>><?php esc_html_e( 'OpenStreetMap / Leaflet (Free)', 'wp-paradb' ); ?></option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row">
+					<label for="google_maps_api_key"><?php esc_html_e( 'Google Maps API Key', 'wp-paradb' ); ?></label>
+				</th>
+				<td>
+					<input type="password" name="google_maps_api_key" id="google_maps_api_key" class="regular-text" value="<?php echo esc_attr( isset( $options['google_maps_api_key'] ) ? $options['google_maps_api_key'] : '' ); ?>">
+					<p class="description">
+						<?php esc_html_e( 'Required if Google Maps is selected.', 'wp-paradb' ); ?>
+					</p>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row">
+					<label for="locationiq_api_key"><?php esc_html_e( 'LocationIQ API Key', 'wp-paradb' ); ?></label>
+				</th>
+				<td>
+					<input type="password" name="locationiq_api_key" id="locationiq_api_key" class="regular-text" value="<?php echo esc_attr( isset( $options['locationiq_api_key'] ) ? $options['locationiq_api_key'] : '' ); ?>">
+					<p class="description">
+						<?php esc_html_e( 'Used for free geocoding if OpenStreetMap is selected. (10,000 free requests/day)', 'wp-paradb' ); ?>
+					</p>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row">
+					<label for="weatherapi_api_key"><?php esc_html_e( 'WeatherAPI.com API Key', 'wp-paradb' ); ?></label>
+				</th>
+				<td>
+					<input type="password" name="weatherapi_api_key" id="weatherapi_api_key" class="regular-text" value="<?php echo esc_attr( isset( $options['weatherapi_api_key'] ) ? $options['weatherapi_api_key'] : '' ); ?>">
+					<p class="description">
+						<?php esc_html_e( 'Used for fetching weather and moon phase data. (Free tier available)', 'wp-paradb' ); ?>
+					</p>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row">
+					<label for="freeastroapi_api_key"><?php esc_html_e( 'FreeAstroAPI Key', 'wp-paradb' ); ?></label>
+				</th>
+				<td>
+					<input type="password" name="freeastroapi_api_key" id="freeastroapi_api_key" class="regular-text" value="<?php echo esc_attr( isset( $options['freeastroapi_api_key'] ) ? $options['freeastroapi_api_key'] : '' ); ?>">
+					<p class="description">
+						<?php esc_html_e( 'Used for fetching astrological transit data. (Optional)', 'wp-paradb' ); ?>
+					</p>
 				</td>
 			</tr>
 		</table>

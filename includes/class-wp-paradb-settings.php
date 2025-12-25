@@ -160,6 +160,11 @@ By submitting a witness report, you acknowledge that you have read and understoo
 			'enable_recaptcha'               => false,
 			'recaptcha_site_key'             => '',
 			'recaptcha_secret_key'           => '',
+			'map_provider'                   => 'google', // google, osm
+			'google_maps_api_key'            => '',
+			'locationiq_api_key'             => '',
+			'weatherapi_api_key'             => '',
+			'freeastroapi_api_key'           => '',
 		);
 	}
 
@@ -277,6 +282,22 @@ By submitting a witness report, you acknowledge that you have read and understoo
 		}
 		if ( isset( $settings['recaptcha_secret_key'] ) ) {
 			$sanitized['recaptcha_secret_key'] = sanitize_text_field( $settings['recaptcha_secret_key'] );
+		}
+
+		if ( isset( $settings['google_maps_api_key'] ) ) {
+			$sanitized['google_maps_api_key'] = sanitize_text_field( $settings['google_maps_api_key'] );
+		}
+		if ( isset( $settings['map_provider'] ) ) {
+			$sanitized['map_provider'] = in_array( $settings['map_provider'], array( 'google', 'osm' ), true ) ? $settings['map_provider'] : 'google';
+		}
+		if ( isset( $settings['locationiq_api_key'] ) ) {
+			$sanitized['locationiq_api_key'] = sanitize_text_field( $settings['locationiq_api_key'] );
+		}
+		if ( isset( $settings['weatherapi_api_key'] ) ) {
+			$sanitized['weatherapi_api_key'] = sanitize_text_field( $settings['weatherapi_api_key'] );
+		}
+		if ( isset( $settings['freeastroapi_api_key'] ) ) {
+			$sanitized['freeastroapi_api_key'] = sanitize_text_field( $settings['freeastroapi_api_key'] );
 		}
 
 		return $sanitized;

@@ -82,9 +82,174 @@
 		});
 
 		// Auto-suggest for location fields
-		if (typeof google !== 'undefined' && google.maps) {
-			$('input[name="location_address"]').each(function() {
+		if (typeof google !== 'undefined' && google.maps && paradb_maps.provider === 'google') {
+			$('input[name="location_address"], input[name="address"]').each(function() {
 				var autocomplete = new google.maps.places.Autocomplete(this);
+			});
+
+			// Location Map handling
+			var mapElement = document.getElementById('location-map');
+			if (mapElement) {
+				initGoogleMap(mapElement);
+			}
+		} else if (typeof L !== 'undefined' && paradb_maps.provider === 'osm') {
+			// Location Map handling for Leaflet
+			var mapElement = document.getElementById('location-map');
+			if (mapElement) {
+				initLeafletMap(mapElement);
+			}
+		}
+
+		// Environmental data fetching
+		$('#fetch-environmental-data').on('click', function() {
+			var $btn = $(this);
+			var lat = $('#latitude').val() || 0;
+			var lng = $('#longitude').val() || 0;
+			var datetime = $('#activity_date').val() || $('#report_date').val() || '';
+
+			if (!lat || !lng || !datetime) {
+				alert('Please ensure location coordinates and date are set first.');
+				return;
+			}
+
+			$btn.prop('disabled', true).text('Fetching...');
+
+			$.ajax({
+				url: paradb_admin.ajax_url,
+				type: 'POST',
+				data: {
+					action: 'paradb_fetch_environmental_data',
+					nonce: paradb_admin.nonce,
+					lat: lat,
+					lng: lng,
+					datetime: datetime
+				},
+				success: function(response) {
+					if (response.success) {
+						var data = response.data;
+						if (data.weather) {
+							if (data.weather.temp) $('#temperature').val(data.weather.temp + '°C');
+							if (data.weather.weather_code !== null) {
+								$('#weather_conditions').val('Code: ' + data.weather.weather_code + (data.weather.humidity ? ', Humidity: ' + data.weather.humidity + '%' : ''));
+							}
+						}
+						if (data.astro && data.astro.moon_phase) {
+							// Try to match moon phase value
+							var phase = data.astro.moon_phase.toLowerCase().replace(/ /g, '_');
+							$('#moon_phase').val(phase);
+						}
+						alert('Data fetched and applied successfully.');
+					} else {
+						alert('Error: ' + response.data.message);
+					}
+				},
+				error: function() {
+					alert('An unexpected error occurred during fetching.');
+				},
+				complete: function() {
+					$btn.prop('disabled', false).text('Auto-fetch Environmental Data');
+				}
+			});
+		});
+
+		function initGoogleMap(element) {
+			var lat = parseFloat($('#latitude').val()) || 0;
+			var lng = parseFloat($('#longitude').val()) || 0;
+			var center = {lat: lat, lng: lng};
+			
+			var map = new google.maps.Map(element, {
+				zoom: (lat !== 0) ? 15 : 2,
+				center: center
+			});
+
+			var marker = new google.maps.Marker({
+				position: center,
+				map: map,
+				draggable: true
+			});
+
+			// Update coordinates when marker is dragged
+			marker.addListener('dragend', function() {
+				var pos = marker.getPosition();
+				$('#latitude').val(pos.lat().toFixed(6));
+				$('#longitude').val(pos.lng().toFixed(6));
+			});
+
+			// Update marker when coordinates change manually
+			$('#latitude, #longitude').on('change', function() {
+				var newPos = {
+					lat: parseFloat($('#latitude').val()) || 0,
+					lng: parseFloat($('#longitude').val()) || 0
+				};
+				marker.setPosition(newPos);
+				map.setCenter(newPos);
+			});
+
+			// Geocode address
+			$('#geocode-address').on('click', function() {
+				var address = $('#address').val() || $('#location_address').val() || '';
+				if (!address) return;
+
+				var geocoder = new google.maps.Geocoder();
+				geocoder.geocode({'address': address}, function(results, status) {
+					if (status === 'OK') {
+						var pos = results[0].geometry.location;
+						map.setCenter(pos);
+						marker.setPosition(pos);
+						$('#latitude').val(pos.lat().toFixed(6));
+						$('#longitude').val(pos.lng().toFixed(6));
+					} else {
+						alert('Geocode was not successful for the following reason: ' + status);
+					}
+				});
+			});
+		}
+
+		function initLeafletMap(element) {
+			var lat = parseFloat($('#latitude').val()) || 0;
+			var lng = parseFloat($('#longitude').val()) || 0;
+			
+			var map = L.map(element).setView([lat, lng], (lat !== 0) ? 15 : 2);
+
+			L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+			}).addTo(map);
+
+			var marker = L.marker([lat, lng], {draggable: true}).addTo(map);
+
+			marker.on('dragend', function(e) {
+				var pos = marker.getLatLng();
+				$('#latitude').val(pos.lat.toFixed(6));
+				$('#longitude').val(pos.lng.toFixed(6));
+			});
+
+			$('#latitude, #longitude').on('change', function() {
+				var newLat = parseFloat($('#latitude').val()) || 0;
+				var newLng = parseFloat($('#longitude').val()) || 0;
+				marker.setLatLng([newLat, newLng]);
+				map.setView([newLat, newLng]);
+			});
+
+			$('#geocode-address').on('click', function() {
+				var address = $('#address').val() || $('#location_address').val() || '';
+				if (!address) return;
+
+				var url = 'https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(address);
+				if (paradb_maps.locationiq_key) {
+					url = 'https://us1.locationiq.com/v1/search.php?key=' + paradb_maps.locationiq_key + '&q=' + encodeURIComponent(address) + '&format=json';
+				}
+
+				$.getJSON(url, function(data) {
+					if (data && data.length > 0) {
+						var pos = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+						map.setView(pos, 15);
+						marker.setLatLng(pos);
+						$('#latitude').val(pos[0].toFixed(6));
+						$('#longitude').val(pos[1].toFixed(6));
+					} else {
+						alert('Location not found.');
+					}
+				});
 			});
 		}
 
