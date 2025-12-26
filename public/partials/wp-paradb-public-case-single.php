@@ -41,18 +41,15 @@ $evidence = WP_ParaDB_Evidence_Handler::get_evidence_files( array( 'case_id' => 
 $relationships = WP_ParaDB_Relationship_Handler::get_relationships( $case_id, 'case' );
 $phenomena = maybe_unserialize( $case->phenomena_types );
 
-// Increment view count.
-global $wpdb;
-$wpdb->query( $wpdb->prepare(
-	"UPDATE {$wpdb->prefix}paradb_cases SET view_count = view_count + 1 WHERE case_id = %d",
-	$case_id
-) );
+// Privacy: Get redaction terms
+require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-privacy.php';
+$redaction_terms = WP_ParaDB_Privacy::get_case_redaction_terms( $case_id );
 ?>
 
 <article class="paradb-single-case">
 	<header class="case-header">
 		<div class="case-number"><?php echo esc_html( $case->case_number ); ?></div>
-		<h1 class="case-title"><?php echo esc_html( $case->case_name ); ?></h1>
+		<h1 class="case-title"><?php echo esc_html( WP_ParaDB_Privacy::redact( $case->case_name, $redaction_terms ) ); ?></h1>
 		
 		<div class="case-meta">
 			<?php if ( $case->location_name || $case->location_city ) : ?>
@@ -60,13 +57,13 @@ $wpdb->query( $wpdb->prepare(
 					<strong><?php esc_html_e( 'Location:', 'wp-paradb' ); ?></strong>
 					<?php
 					if ( $case->location_name ) {
-						echo esc_html( $case->location_name );
+						echo esc_html( WP_ParaDB_Privacy::redact( $case->location_name, $redaction_terms ) );
 						if ( $case->location_city ) {
 							echo ' - ';
 						}
 					}
 					if ( $case->location_city ) {
-						echo esc_html( $case->location_city );
+						echo esc_html( WP_ParaDB_Privacy::redact( $case->location_city, $redaction_terms ) );
 						if ( $case->location_state ) {
 							echo ', ' . esc_html( $case->location_state );
 						}
@@ -95,7 +92,7 @@ $wpdb->query( $wpdb->prepare(
 				<h2><?php esc_html_e( 'Reported Phenomena', 'wp-paradb' ); ?></h2>
 				<ul class="phenomena-list">
 					<?php foreach ( $phenomena as $phenomenon ) : ?>
-						<li><?php echo esc_html( $phenomenon ); ?></li>
+						<li><?php echo esc_html( WP_ParaDB_Privacy::redact( $phenomenon, $redaction_terms ) ); ?></li>
 					<?php endforeach; ?>
 				</ul>
 			</section>
@@ -105,7 +102,7 @@ $wpdb->query( $wpdb->prepare(
 			<section class="case-section description">
 				<h2><?php esc_html_e( 'Case Description', 'wp-paradb' ); ?></h2>
 				<div class="description-content">
-					<?php echo wp_kses_post( wpautop( $case->case_description ) ); ?>
+					<?php echo wp_kses_post( wpautop( WP_ParaDB_Privacy::redact( $case->case_description, $redaction_terms ) ) ); ?>
 				</div>
 			</section>
 		<?php endif; ?>
@@ -121,6 +118,7 @@ $wpdb->query( $wpdb->prepare(
 						$target_id = $is_from ? $rel->to_id : $rel->from_id;
 						$target_type = $is_from ? $rel->to_type : $rel->from_type;
 						$label = WP_ParaDB_Relationship_Handler::get_object_label( $target_id, $target_type );
+						$label = WP_ParaDB_Privacy::redact( $label, $redaction_terms );
 						$type_label = isset( $rel_types[ $rel->relationship_type ] ) ? $rel_types[ $rel->relationship_type ] : $rel->relationship_type;
 						?>
 						<li>
@@ -128,7 +126,7 @@ $wpdb->query( $wpdb->prepare(
 							<?php echo esc_html( $label ); ?> 
 							<small>(<?php echo esc_html( ucfirst( $target_type ) ); ?>)</small>
 							<?php if ( $rel->notes ) : ?>
-								<p class="rel-notes"><em><?php echo esc_html( $rel->notes ); ?></em></p>
+								<p class="rel-notes"><em><?php echo esc_html( WP_ParaDB_Privacy::redact( $rel->notes, $redaction_terms ) ); ?></em></p>
 							<?php endif; ?>
 						</li>
 					<?php endforeach; ?>
@@ -142,7 +140,7 @@ $wpdb->query( $wpdb->prepare(
 				<?php foreach ( $reports as $report ) : ?>
 					<?php if ( $report->is_published ) : ?>
 						<article class="report">
-							<h3 class="report-title"><?php echo esc_html( $report->report_title ); ?></h3>
+							<h3 class="report-title"><?php echo esc_html( WP_ParaDB_Privacy::redact( $report->report_title, $redaction_terms ) ); ?></h3>
 							<div class="report-meta">
 								<span class="report-date">
 									<?php echo esc_html( gmdate( 'F j, Y', strtotime( $report->report_date ) ) ); ?>
@@ -154,13 +152,13 @@ $wpdb->query( $wpdb->prepare(
 							
 							<?php if ( $report->report_summary ) : ?>
 								<div class="report-summary">
-									<?php echo wp_kses_post( wpautop( $report->report_summary ) ); ?>
+									<?php echo wp_kses_post( wpautop( WP_ParaDB_Privacy::redact( $report->report_summary, $redaction_terms ) ) ); ?>
 								</div>
 							<?php endif; ?>
 							
 							<?php if ( $report->report_content ) : ?>
 								<div class="report-content">
-									<?php echo wp_kses_post( wpautop( $report->report_content ) ); ?>
+									<?php echo wp_kses_post( wpautop( WP_ParaDB_Privacy::redact( $report->report_content, $redaction_terms ) ) ); ?>
 								</div>
 							<?php endif; ?>
 							
@@ -175,10 +173,10 @@ $wpdb->query( $wpdb->prepare(
 								<div class="report-conditions">
 									<h4><?php esc_html_e( 'Environmental Conditions (from linked activity)', 'wp-paradb' ); ?></h4>
 									<?php if ( $activity->weather_conditions ) : ?>
-										<p><strong><?php esc_html_e( 'Weather:', 'wp-paradb' ); ?></strong> <?php echo esc_html( $activity->weather_conditions ); ?></p>
+										<p><strong><?php esc_html_e( 'Weather:', 'wp-paradb' ); ?></strong> <?php echo esc_html( WP_ParaDB_Privacy::redact( $activity->weather_conditions, $redaction_terms ) ); ?></p>
 									<?php endif; ?>
 									<?php if ( $activity->temperature ) : ?>
-										<p><strong><?php esc_html_e( 'Temperature:', 'wp-paradb' ); ?></strong> <?php echo esc_html( $activity->temperature ); ?></p>
+										<p><strong><?php esc_html_e( 'Temperature:', 'wp-paradb' ); ?></strong> <?php echo esc_html( WP_ParaDB_Privacy::redact( $activity->temperature, $redaction_terms ) ); ?></p>
 									<?php endif; ?>
 									<?php if ( $activity->moon_phase ) : ?>
 										<p><strong><?php esc_html_e( 'Moon Phase:', 'wp-paradb' ); ?></strong> <?php echo esc_html( ucwords( str_replace( '_', ' ', $activity->moon_phase ) ) ); ?></p>
@@ -203,17 +201,17 @@ $wpdb->query( $wpdb->prepare(
 						<div class="evidence-item">
 							<?php if ( $is_image ) : ?>
 								<a href="<?php echo esc_url( $file_url ); ?>" target="_blank" class="evidence-link">
-									<img src="<?php echo esc_url( $file_url ); ?>" alt="<?php echo esc_attr( $item->title ? $item->title : $item->file_name ); ?>">
+									<img src="<?php echo esc_url( $file_url ); ?>" alt="<?php echo esc_attr( WP_ParaDB_Privacy::redact( $item->title ? $item->title : $item->file_name, $redaction_terms ) ); ?>">
 								</a>
 							<?php else : ?>
 								<a href="<?php echo esc_url( $file_url ); ?>" target="_blank" class="evidence-link file">
 									<span class="file-icon">📄</span>
-									<span class="file-name"><?php echo esc_html( $item->title ? $item->title : $item->file_name ); ?></span>
+									<span class="file-name"><?php echo esc_html( WP_ParaDB_Privacy::redact( $item->title ? $item->title : $item->file_name, $redaction_terms ) ); ?></span>
 								</a>
 							<?php endif; ?>
 							<?php if ( $item->description ) : ?>
 								<div class="evidence-description">
-									<?php echo esc_html( $item->description ); ?>
+									<?php echo esc_html( WP_ParaDB_Privacy::redact( $item->description, $redaction_terms ) ); ?>
 								</div>
 							<?php endif; ?>
 						</div>

@@ -44,6 +44,12 @@ if ( isset( $_POST['save_settings'] ) && check_admin_referer( 'save_paradb_setti
 	$options['weatherapi_api_key'] = isset( $_POST['weatherapi_api_key'] ) ? sanitize_text_field( wp_unslash( $_POST['weatherapi_api_key'] ) ) : '';
 	$options['freeastroapi_api_key'] = isset( $_POST['freeastroapi_api_key'] ) ? sanitize_text_field( wp_unslash( $_POST['freeastroapi_api_key'] ) ) : '';
 	
+	// Privacy & Redaction.
+	$options['redaction_keywords'] = isset( $_POST['redaction_keywords'] ) ? sanitize_textarea_field( wp_unslash( $_POST['redaction_keywords'] ) ) : '';
+	$options['redact_witness_names'] = isset( $_POST['redact_witness_names'] ) ? 1 : 0;
+	$options['redact_investigator_names'] = isset( $_POST['redact_investigator_names'] ) ? 1 : 0;
+	$options['redaction_placeholder'] = isset( $_POST['redaction_placeholder'] ) ? sanitize_text_field( wp_unslash( $_POST['redaction_placeholder'] ) ) : '[REDACTED]';
+
 	// Update options.
 	update_option( 'wp_paradb_options', $options );
 	
@@ -238,7 +244,46 @@ $options = get_option( 'wp_paradb_options', array() );
 				</td>
 			</tr>
 		</table>
-		
+
+		<h2 class="title"><?php esc_html_e( 'Privacy & Redaction Settings', 'wp-paradb' ); ?></h2>
+		<table class="form-table">
+			<tr>
+				<th scope="row">
+					<label for="redaction_keywords"><?php esc_html_e( 'Global Redaction Keywords', 'wp-paradb' ); ?></label>
+				</th>
+				<td>
+					<textarea name="redaction_keywords" id="redaction_keywords" rows="4" class="large-text"><?php echo esc_textarea( isset( $options['redaction_keywords'] ) ? $options['redaction_keywords'] : '' ); ?></textarea>
+					<p class="description">
+						<?php esc_html_e( 'Comma-separated list of terms to automatically redact from all public displays. (e.g., Sensitive locations, private phone numbers, project secrets)', 'wp-paradb' ); ?>
+					</p>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Automatic Name Redaction', 'wp-paradb' ); ?></th>
+				<td>
+					<label style="display: block; margin-bottom: 5px;">
+						<input type="checkbox" name="redact_witness_names" value="1" <?php checked( isset( $options['redact_witness_names'] ) ? $options['redact_witness_names'] : 1, 1 ); ?>>
+						<?php esc_html_e( 'Automatically redact Witness names from case content', 'wp-paradb' ); ?>
+					</label>
+					<label style="display: block;">
+						<input type="checkbox" name="redact_investigator_names" value="1" <?php checked( isset( $options['redact_investigator_names'] ) ? $options['redact_investigator_names'] : 0, 1 ); ?>>
+						<?php esc_html_e( 'Automatically redact Investigator names from case content', 'wp-paradb' ); ?>
+					</label>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row">
+					<label for="redaction_placeholder"><?php esc_html_e( 'Redaction Placeholder', 'wp-paradb' ); ?></label>
+				</th>
+				<td>
+					<input type="text" name="redaction_placeholder" id="redaction_placeholder" class="regular-text" value="<?php echo esc_attr( isset( $options['redaction_placeholder'] ) ? $options['redaction_placeholder'] : '[REDACTED]' ); ?>">
+					<p class="description">
+						<?php esc_html_e( 'The text that will replace redacted terms. (e.g., [REDACTED] or [SENSITIVE])', 'wp-paradb' ); ?>
+					</p>
+				</td>
+			</tr>
+		</table>
+
 		<h2 class="title"><?php esc_html_e( 'Database Information', 'wp-paradb' ); ?></h2>
 		<table class="form-table">
 			<tr>

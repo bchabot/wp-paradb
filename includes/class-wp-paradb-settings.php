@@ -165,6 +165,10 @@ By submitting a witness report, you acknowledge that you have read and understoo
 			'locationiq_api_key'             => '',
 			'weatherapi_api_key'             => '',
 			'freeastroapi_api_key'           => '',
+			'redaction_keywords'             => '', // Comma-separated list
+			'redact_witness_names'           => true,
+			'redact_investigator_names'      => false,
+			'redaction_placeholder'          => '[REDACTED]',
 		);
 	}
 
@@ -235,6 +239,8 @@ By submitting a witness report, you acknowledge that you have read and understoo
 			'require_phone',
 			'require_address',
 			'enable_recaptcha',
+			'redact_witness_names',
+			'redact_investigator_names',
 		);
 
 		foreach ( $bool_keys as $key ) {
@@ -246,6 +252,14 @@ By submitting a witness report, you acknowledge that you have read and understoo
 		// Text settings.
 		if ( isset( $settings['privacy_policy_text'] ) ) {
 			$sanitized['privacy_policy_text'] = wp_kses_post( $settings['privacy_policy_text'] );
+		}
+
+		if ( isset( $settings['redaction_keywords'] ) ) {
+			$sanitized['redaction_keywords'] = sanitize_textarea_field( $settings['redaction_keywords'] );
+		}
+
+		if ( isset( $settings['redaction_placeholder'] ) ) {
+			$sanitized['redaction_placeholder'] = sanitize_text_field( $settings['redaction_placeholder'] );
 		}
 
 		// Email setting.
