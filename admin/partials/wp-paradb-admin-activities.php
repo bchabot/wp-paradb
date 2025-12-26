@@ -36,6 +36,8 @@ if ( isset( $_POST['save_activity'] ) && check_admin_referer( 'save_activity', '
 		'weather_conditions' => isset( $_POST['weather_conditions'] ) ? sanitize_text_field( wp_unslash( $_POST['weather_conditions'] ) ) : '',
 		'moon_phase'         => isset( $_POST['moon_phase'] ) ? sanitize_text_field( wp_unslash( $_POST['moon_phase'] ) ) : '',
 		'temperature'        => isset( $_POST['temperature'] ) ? sanitize_text_field( wp_unslash( $_POST['temperature'] ) ) : '',
+		'astrological_data'  => isset( $_POST['astrological_data'] ) ? sanitize_textarea_field( wp_unslash( $_POST['astrological_data'] ) ) : '',
+		'geomagnetic_data'   => isset( $_POST['geomagnetic_data'] ) ? sanitize_textarea_field( wp_unslash( $_POST['geomagnetic_data'] ) ) : '',
 		'duration_minutes'   => isset( $_POST['duration_minutes'] ) ? absint( $_POST['duration_minutes'] ) : 0,
 	);
 
@@ -195,6 +197,33 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 					</th>
 					<td>
 						<input type="text" name="temperature" id="temperature" class="regular-text" value="<?php echo $activity ? esc_attr( $activity->temperature ) : ''; ?>">
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row">
+						<label for="astrological_data"><?php esc_html_e( 'Astrological Data', 'wp-paradb' ); ?></label>
+					</th>
+					<td>
+						<textarea name="astrological_data" id="astrological_data" rows="3" class="large-text"><?php echo $activity ? esc_textarea( $activity->astrological_data ) : ''; ?></textarea>
+						<p class="description"><?php esc_html_e( 'Planetary positions and transits.', 'wp-paradb' ); ?></p>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row">
+						<label for="geomagnetic_data"><?php esc_html_e( 'Geomagnetic Data', 'wp-paradb' ); ?></label>
+					</th>
+					<td>
+						<textarea name="geomagnetic_data" id="geomagnetic_data" rows="3" class="large-text"><?php echo $activity ? esc_textarea( $activity->geomagnetic_data ) : ''; ?></textarea>
+						<p class="description"><?php esc_html_e( 'Space weather and geomagnetic activity (e.g. Kp-Index).', 'wp-paradb' ); ?></p>
+					</td>
+				</tr>
+
+				<tr id="fetch-results-row" style="display: none;">
+					<th scope="row"><?php esc_html_e( 'Fetch Results', 'wp-paradb' ); ?></th>
+					<td id="fetch-results-container">
+						<!-- JS will populate this -->
 					</td>
 				</tr>
 				
