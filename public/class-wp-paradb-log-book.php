@@ -20,6 +20,29 @@ class WP_ParaDB_Log_Book {
 	public function __construct() {
 		add_shortcode( 'paradb_log_book', array( $this, 'render_log_book' ) );
 		add_action( 'wp_ajax_paradb_submit_field_log', array( $this, 'handle_log_submission' ) );
+		add_action( 'wp_ajax_paradb_get_case_activities', array( $this, 'ajax_get_case_activities' ) );
+	}
+
+	public function ajax_get_case_activities() {
+		check_ajax_referer( 'paradb_log_nonce', 'nonce' );
+		
+		$case_id = isset($_POST['case_id']) ? absint($_POST['case_id']) : 0;
+		if (!$case_id) {
+			wp_send_json_error(array('message' => 'Invalid Case ID'));
+		}
+
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-activity-handler.php';
+		$results = WP_ParaDB_Activity_Handler::get_activities(array('case_id' => $case_id, 'limit' => 500));
+		
+		$activities = array();
+		foreach ($results as $act) {
+			$activities[] = array(
+				'id' => $act->activity_id,
+				'title' => $act->activity_title
+			);
+		}
+
+		wp_send_json_success(array('activities' => $activities));
 	}
 
 	public function render_log_book( $atts ) {
@@ -56,7 +79,14 @@ class WP_ParaDB_Log_Book {
 				</p>
 
 				<p>
-					<button type="button" id="get-location" class="button button-secondary"><?php esc_html_e( '📍 Get Precise Location', 'wp-paradb' ); ?></button>
+					<label for="log_activity_id"><?php esc_html_e( 'Activity (Optional)', 'wp-paradb' ); ?></label><br>
+					<select name="activity_id" id="log_activity_id" class="widefat">
+						<option value=""><?php esc_html_e( '— Select Activity —', 'wp-paradb' ); ?></option>
+					</select>
+				</p>
+
+				<p>
+					<button type="button" id="get-location" class="button button-secondary"><?php esc_html_e( '📍 Update Location', 'wp-paradb' ); ?></button>
 					<span id="location-status"></span>
 					<input type="hidden" name="latitude" id="log_lat">
 					<input type="hidden" name="longitude" id="log_lng">
@@ -82,7 +112,14 @@ class WP_ParaDB_Log_Book {
 
 		<script>
 		(function($) {
+			// Auto-location on load
+			getLocation();
+
 			$('#get-location').on('click', function() {
+				getLocation();
+			});
+
+			function getLocation() {
 				var $status = $('#location-status');
 				if (!navigator.geolocation) {
 					$status.text('Geolocation not supported');
@@ -96,6 +133,35 @@ class WP_ParaDB_Log_Book {
 				}, function(err) {
 					$status.text('Error: ' + err.message);
 				});
+			}
+
+			// Focus content on load
+			$('#log_content').focus();
+
+			// Load activities for selected case
+			$('#log_case_id').on('change', function() {
+				var caseId = $(this).val();
+				var $actSelect = $('#log_activity_id');
+				
+				$actSelect.prop('disabled', true).html('<option value=""><?php esc_html_e( 'Loading...', 'wp-paradb' ); ?></option>');
+
+				if (!caseId) {
+					$actSelect.html('<option value=""><?php esc_html_e( '— Select Activity —', 'wp-paradb' ); ?></option>');
+					return;
+				}
+
+				$.post('<?php echo admin_url('admin-ajax.php'); ?>', {
+					action: 'paradb_get_case_activities',
+					case_id: caseId,
+					nonce: '<?php echo wp_create_nonce("paradb_log_nonce"); ?>'
+				}, function(res) {
+					$actSelect.prop('disabled', false).html('<option value=""><?php esc_html_e( '— Select Activity —', 'wp-paradb' ); ?></option>');
+					if (res.success && res.data.activities) {
+						res.data.activities.forEach(function(act) {
+							$actSelect.append('<option value="' + act.id + '">' + act.title + '</option>');
+						});
+					}
+				});
 			});
 
 			$('#paradb-field-log-form').on('submit', function(e) {
@@ -103,6 +169,9 @@ class WP_ParaDB_Log_Book {
 				var $form = $(this);
 				var formData = new FormData(this);
 				formData.append('action', 'paradb_submit_field_log');
+
+				var $btn = $form.find('button[type="submit"]');
+				$btn.prop('disabled', true).text('<?php esc_html_e( 'Saving...', 'wp-paradb' ); ?>');
 
 				$.ajax({
 					url: '<?php echo admin_url('admin-ajax.php'); ?>',
@@ -112,12 +181,15 @@ class WP_ParaDB_Log_Book {
 					contentType: false,
 					success: function(res) {
 						if (res.success) {
-							alert('Logged successfully!');
-							$('#log_content').val('');
+							alert('<?php esc_html_e( 'Logged successfully!', 'wp-paradb' ); ?>');
+							$('#log_content').val('').focus();
 							$('#log_evidence').val('');
 						} else {
 							alert('Error: ' + res.data.message);
 						}
+					},
+					complete: function() {
+						$btn.prop('disabled', false).text('<?php esc_html_e( 'Log Entry', 'wp-paradb' ); ?>');
 					}
 				});
 			});
@@ -151,6 +223,7 @@ class WP_ParaDB_Log_Book {
 		
 		$log_id = WP_ParaDB_Field_Log_Handler::create_log( array(
 			'case_id'     => $_POST['case_id'],
+			'activity_id' => isset($_POST['activity_id']) ? absint($_POST['activity_id']) : null,
 			'log_content' => $_POST['log_content'],
 			'latitude'    => $_POST['latitude'],
 			'longitude'   => $_POST['longitude']
@@ -165,6 +238,7 @@ class WP_ParaDB_Log_Book {
 			require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-evidence-handler.php';
 			$metadata = array(
 				'case_id'       => $_POST['case_id'],
+				'activity_id'   => isset($_POST['activity_id']) ? absint($_POST['activity_id']) : null,
 				'title'         => 'Field Log Evidence - ' . current_time( 'mysql' ),
 				'description'   => 'Uploaded via Field Log Book entry #' . $log_id,
 				'evidence_type' => 'photo'
