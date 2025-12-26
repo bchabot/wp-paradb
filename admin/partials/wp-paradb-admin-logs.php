@@ -136,7 +136,11 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 <script>
 jQuery(document).ready(function($) {
 	var liveInterval;
-	var lastId = <?php echo $logs ? $logs[0]->log_id : 0; ?>;
+	<?php
+	global $wpdb;
+	$max_id = $wpdb->get_var( "SELECT MAX(log_id) FROM {$wpdb->prefix}paradb_field_logs" );
+	?>
+	var lastId = <?php echo $logs ? intval($logs[0]->log_id) : ($max_id ? intval($max_id) : 0); ?>;
 
 	$('#expanded-view').on('change', function() {
 		if ($(this).is(':checked')) {
@@ -163,6 +167,9 @@ jQuery(document).ready(function($) {
 			data: {
 				action: 'paradb_get_all_logs_live',
 				last_id: lastId,
+				case_id: $('select[name="case_id"]').val(),
+				activity_id: $('select[name="activity_id"]').val(),
+				investigator_id: $('select[name="investigator_id"]').val(),
 				nonce: '<?php echo wp_create_nonce("paradb_log_viewer_nonce"); ?>'
 			},
 			success: function(res) {
@@ -180,7 +187,7 @@ jQuery(document).ready(function($) {
 							html += '<td>' + (log.file_url ? '<a href="' + log.file_url + '" target="_blank">View</a>' : '') + '</td>';
 							html += '</tr>';
 							$('#log-viewer-body').prepend(html);
-							lastId = Math.max(lastId, log.log_id);
+							lastId = Math.max(lastId, parseInt(log.log_id));
 						}
 					});
 				}

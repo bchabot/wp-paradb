@@ -77,18 +77,35 @@ class WP_ParaDB_Admin {
 			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wp-paradb' ) ) );
 		}
 
-		$last_id = absint( $_POST['last_id'] );
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-field-log-handler.php';
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-case-handler.php';
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-activity-handler.php';
+
+		$last_id         = absint( $_POST['last_id'] );
+		$case_id         = isset( $_POST['case_id'] ) ? absint( $_POST['case_id'] ) : 0;
+		$activity_id     = isset( $_POST['activity_id'] ) ? absint( $_POST['activity_id'] ) : 0;
+		$investigator_id = isset( $_POST['investigator_id'] ) ? absint( $_POST['investigator_id'] ) : 0;
 
 		global $wpdb;
 		$table = $wpdb->prefix . 'paradb_field_logs';
 		
-		$query = $wpdb->prepare(
-			"SELECT l.*, u.display_name FROM {$table} l 
+		$where = array( $wpdb->prepare( 'l.log_id > %d', $last_id ) );
+		if ( $case_id ) {
+			$where[] = $wpdb->prepare( 'l.case_id = %d', $case_id );
+		}
+		if ( $activity_id ) {
+			$where[] = $wpdb->prepare( 'l.activity_id = %d', $activity_id );
+		}
+		if ( $investigator_id ) {
+			$where[] = $wpdb->prepare( 'l.investigator_id = %d', $investigator_id );
+		}
+
+		$where_clause = implode( ' AND ', $where );
+
+		$query = "SELECT l.*, u.display_name FROM {$table} l 
 			 JOIN {$wpdb->users} u ON l.investigator_id = u.ID
-			 WHERE l.log_id > %d 
-			 ORDER BY l.date_created ASC LIMIT 50",
-			$last_id
-		);
+			 WHERE {$where_clause} 
+			 ORDER BY l.date_created ASC LIMIT 50";
 
 		$results = $wpdb->get_results( $query );
 		$logs = array();
