@@ -39,6 +39,7 @@ if ( isset( $_POST['save_activity'] ) && check_admin_referer( 'save_activity', '
 		'astrological_data'  => isset( $_POST['astrological_data'] ) ? sanitize_textarea_field( wp_unslash( $_POST['astrological_data'] ) ) : '',
 		'geomagnetic_data'   => isset( $_POST['geomagnetic_data'] ) ? sanitize_textarea_field( wp_unslash( $_POST['geomagnetic_data'] ) ) : '',
 		'duration_minutes'   => isset( $_POST['duration_minutes'] ) ? absint( $_POST['duration_minutes'] ) : 0,
+		'is_published'       => isset( $_POST['is_published'] ) ? 1 : 0,
 	);
 
 	if ( $activity_id > 0 ) {
@@ -53,6 +54,9 @@ if ( isset( $_POST['save_activity'] ) && check_admin_referer( 'save_activity', '
 		echo '<div class="notice notice-success"><p>' . esc_html__( 'Activity saved successfully.', 'wp-paradb' ) . '</p></div>';
 	}
 }
+
+// Get case_id from URL for pre-selection
+$pre_case_id = isset( $_GET['case_id'] ) ? absint( $_GET['case_id'] ) : 0;
 
 // Handle delete action.
 if ( isset( $_GET['action'] ) && 'delete' === $_GET['action'] && isset( $_GET['activity_id'] ) && isset( $_GET['_wpnonce'] ) ) {
@@ -121,8 +125,10 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 					<td>
 						<select name="case_id" id="case_id" required class="regular-text">
 							<option value=""><?php esc_html_e( 'Select Case', 'wp-paradb' ); ?></option>
-							<?php foreach ( $cases as $case ) : ?>
-								<option value="<?php echo esc_attr( $case->case_id ); ?>" <?php selected( $activity ? $activity->case_id : 0, $case->case_id ); ?>>
+							<?php foreach ( $cases as $case ) : 
+								$selected_case_id = $activity ? $activity->case_id : $pre_case_id;
+								?>
+								<option value="<?php echo esc_attr( $case->case_id ); ?>" <?php selected( $selected_case_id, $case->case_id ); ?>>
 									<?php echo esc_html( $case->case_number . ' - ' . $case->case_name ); ?>
 								</option>
 							<?php endforeach; ?>
@@ -161,6 +167,16 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 					</td>
 				</tr>
 				
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Publish Status', 'wp-paradb' ); ?></th>
+					<td>
+						<label>
+							<input type="checkbox" name="is_published" value="1" <?php checked( $activity ? $activity->is_published : 0, 1 ); ?>>
+							<?php esc_html_e( 'Publish this activity on the public case page', 'wp-paradb' ); ?>
+						</label>
+					</td>
+				</tr>
+
 				<tr>
 					<th scope="row">
 						<label for="activity_content"><?php esc_html_e( 'Activity Content', 'wp-paradb' ); ?> *</label>

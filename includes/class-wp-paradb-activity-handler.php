@@ -55,16 +55,16 @@ class WP_ParaDB_Activity_Handler {
 			                        'equipment_used'     => isset( $data['equipment_used'] ) ? sanitize_textarea_field( $data['equipment_used'] ) : null,			'evidence_collected' => isset( $data['evidence_collected'] ) ? sanitize_textarea_field( $data['evidence_collected'] ) : null,
 			'phenomena_observed' => isset( $data['phenomena_observed'] ) ? sanitize_textarea_field( $data['phenomena_observed'] ) : null,
 			'duration_minutes'   => isset( $data['duration_minutes'] ) ? absint( $data['duration_minutes'] ) : null,
-			'participants'       => isset( $data['participants'] ) ? sanitize_textarea_field( $data['participants'] ) : null,
-			'date_created'       => current_time( 'mysql' ),
-		);
-
-		                // Format types for database.
-		                $format = array(
-		                        '%d', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s',
-		                        '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s',
-		                );
-		// Insert into database.
+			                        'participants'       => isset( $data['participants'] ) ? sanitize_textarea_field( $data['participants'] ) : null,
+			                        'is_published'       => isset( $data['is_published'] ) ? absint( $data['is_published'] ) : 0,
+			                        'date_created'       => current_time( 'mysql' ),
+			                );
+			
+			                // Format types for database.
+			                $format = array(
+			                        '%d', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s',
+			                        '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%d', '%s',
+			                );		// Insert into database.
 		$result = $wpdb->insert(
 			$wpdb->prefix . 'paradb_activities',
 			$activity_data,
@@ -112,7 +112,7 @@ class WP_ParaDB_Activity_Handler {
 		$allowed_fields = array(
 			'activity_title', 'activity_type', 'activity_date', 'activity_content', 'activity_summary',
 			'weather_conditions', 'moon_phase', 'temperature', 'astrological_data', 'geomagnetic_data', 
-			'equipment_used', 'evidence_collected', 'phenomena_observed', 'duration_minutes', 'participants',
+			'equipment_used', 'evidence_collected', 'phenomena_observed', 'duration_minutes', 'participants', 'is_published',
 		);
 
 		foreach ( $allowed_fields as $field ) {
@@ -123,7 +123,7 @@ class WP_ParaDB_Activity_Handler {
 				} elseif ( in_array( $field, array( 'activity_summary', 'equipment_used', 'evidence_collected', 'phenomena_observed', 'participants', 'astrological_data', 'geomagnetic_data' ), true ) ) {
 					$update_data[ $field ] = sanitize_textarea_field( $data[ $field ] );
 					$format[] = '%s';
-				} elseif ( 'duration_minutes' === $field ) {
+				} elseif ( in_array( $field, array( 'duration_minutes', 'is_published' ), true ) ) {
 					$update_data[ $field ] = absint( $data[ $field ] );
 					$format[] = '%d';
 				} else {

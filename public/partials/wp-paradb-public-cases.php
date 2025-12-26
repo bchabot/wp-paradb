@@ -90,9 +90,10 @@ $cases = $wpdb->get_results( $wpdb->prepare( $query, $limit ) );
 						</h3>
 						<div class="case-meta">
 							<span class="case-number"><?php echo esc_html( $case->case_number ); ?></span>
-							<?php if ( $case->location_city && $case->location_state ) : ?>
+							<span class="case-status <?php echo esc_attr( $case->case_status ); ?>"><?php echo esc_html( ucfirst( $case->case_status ) ); ?></span>
+							<?php if ( $case->location_city || $case->location_state ) : ?>
 								<span class="case-location">
-									<?php echo esc_html( $case->location_city . ', ' . $case->location_state ); ?>
+									<?php echo esc_html( $case->location_city . ( $case->location_city && $case->location_state ? ', ' : '' ) . $case->location_state ); ?>
 								</span>
 							<?php endif; ?>
 						</div>

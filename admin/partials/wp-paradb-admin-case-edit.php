@@ -236,6 +236,125 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 
 					<!-- Case Relationships -->
 					<?php if ( ! $is_new && $case_id > 0 ) : ?>
+						
+						<!-- Activities -->
+						<div class="postbox">
+							<h2 class="hndle">
+								<span><?php esc_html_e( 'Investigation Activities', 'wp-paradb' ); ?></span>
+								<?php if ( current_user_can( 'paradb_add_activities' ) ) : ?>
+									<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-activities&action=new&case_id=' . $case_id ) ); ?>" class="button button-small" style="float: right; margin-top: -4px;"><?php esc_html_e( 'Add Activity', 'wp-paradb' ); ?></a>
+								<?php endif; ?>
+							</h2>
+							<div class="inside">
+								<?php
+								require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-activity-handler.php';
+								$activities = WP_ParaDB_Activity_Handler::get_activities( array( 'case_id' => $case_id, 'limit' => 100 ) );
+								if ( $activities ) : ?>
+									<table class="wp-list-table widefat fixed striped">
+										<thead>
+											<tr>
+												<th><?php esc_html_e( 'Title', 'wp-paradb' ); ?></th>
+												<th><?php esc_html_e( 'Date', 'wp-paradb' ); ?></th>
+												<th><?php esc_html_e( 'Type', 'wp-paradb' ); ?></th>
+											</tr>
+										</thead>
+										<tbody>
+											<?php foreach ( $activities as $activity ) : ?>
+												<tr>
+													<td>
+														<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-activities&action=edit&activity_id=' . $activity->activity_id ) ); ?>">
+															<?php echo esc_html( $activity->activity_title ); ?>
+														</a>
+													</td>
+													<td><?php echo esc_html( gmdate( 'Y-m-d', strtotime( $activity->activity_date ) ) ); ?></td>
+													<td><?php echo esc_html( ucfirst( $activity->activity_type ) ); ?></td>
+												</tr>
+											<?php endforeach; ?>
+										</tbody>
+									</table>
+								<?php else : ?>
+									<p><?php esc_html_e( 'No activities recorded for this case.', 'wp-paradb' ); ?></p>
+								<?php endif; ?>
+							</div>
+						</div>
+
+						<!-- Reports -->
+						<div class="postbox">
+							<h2 class="hndle">
+								<span><?php esc_html_e( 'Investigation Reports', 'wp-paradb' ); ?></span>
+								<?php if ( current_user_can( 'paradb_add_reports' ) ) : ?>
+									<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-reports&action=new&case_id=' . $case_id ) ); ?>" class="button button-small" style="float: right; margin-top: -4px;"><?php esc_html_e( 'Add Report', 'wp-paradb' ); ?></a>
+								<?php endif; ?>
+							</h2>
+							<div class="inside">
+								<?php
+								require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-report-handler.php';
+								$reports = WP_ParaDB_Report_Handler::get_reports( array( 'case_id' => $case_id, 'limit' => 100 ) );
+								if ( $reports ) : ?>
+									<table class="wp-list-table widefat fixed striped">
+										<thead>
+											<tr>
+												<th><?php esc_html_e( 'Title', 'wp-paradb' ); ?></th>
+												<th><?php esc_html_e( 'Date', 'wp-paradb' ); ?></th>
+												<th><?php esc_html_e( 'Type', 'wp-paradb' ); ?></th>
+											</tr>
+										</thead>
+										<tbody>
+											<?php foreach ( $reports as $report ) : ?>
+												<tr>
+													<td>
+														<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-reports&action=edit&report_id=' . $report->report_id ) ); ?>">
+															<?php echo esc_html( $report->report_title ); ?>
+														</a>
+													</td>
+													<td><?php echo esc_html( gmdate( 'Y-m-d', strtotime( $report->report_date ) ) ); ?></td>
+													<td><?php echo esc_html( ucfirst( $report->report_type ) ); ?></td>
+												</tr>
+											<?php endforeach; ?>
+										</tbody>
+									</table>
+								<?php else : ?>
+									<p><?php esc_html_e( 'No reports recorded for this case.', 'wp-paradb' ); ?></p>
+								<?php endif; ?>
+							</div>
+						</div>
+
+						<!-- Evidence -->
+						<div class="postbox">
+							<h2 class="hndle">
+								<span><?php esc_html_e( 'Evidence Files', 'wp-paradb' ); ?></span>
+								<?php if ( current_user_can( 'paradb_upload_evidence' ) ) : ?>
+									<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-evidence&action=upload&case_id=' . $case_id ) ); ?>" class="button button-small" style="float: right; margin-top: -4px;"><?php esc_html_e( 'Upload Evidence', 'wp-paradb' ); ?></a>
+								<?php endif; ?>
+							</h2>
+							<div class="inside">
+								<?php
+								require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-evidence-handler.php';
+								$evidence_files = WP_ParaDB_Evidence_Handler::get_evidence_files( array( 'case_id' => $case_id, 'limit' => 100 ) );
+								if ( $evidence_files ) : ?>
+									<div class="evidence-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px;">
+										<?php foreach ( $evidence_files as $evidence ) : 
+											$file_url = WP_ParaDB_Evidence_Handler::get_evidence_url( $evidence );
+											$is_image = in_array( $evidence->file_type, array( 'jpg', 'jpeg', 'png', 'gif' ), true );
+											?>
+											<div class="evidence-thumb" style="text-align: center; border: 1px solid #ddd; padding: 5px;">
+												<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-evidence&case_id=' . $case_id ) ); ?>" title="<?php echo esc_attr( $evidence->title ); ?>">
+													<?php if ( $is_image ) : ?>
+														<img src="<?php echo esc_url( $file_url ); ?>" style="max-width: 100%; height: auto; max-height: 80px; display: block; margin: 0 auto 5px;">
+													<?php else : ?>
+														<div style="font-size: 32px; margin-bottom: 5px;">📄</div>
+													<?php endif; ?>
+													<small style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?php echo esc_html( $evidence->title ? $evidence->title : $evidence->file_name ); ?></small>
+												</a>
+											</div>
+										<?php endforeach; ?>
+									</div>
+								<?php else : ?>
+									<p><?php esc_html_e( 'No evidence files linked to this case.', 'wp-paradb' ); ?></p>
+								<?php endif; ?>
+							</div>
+						</div>
+
 						<?php WP_ParaDB_Admin::render_relationship_section( $case_id, 'case' ); ?>
 
 						<!-- Field Logs -->

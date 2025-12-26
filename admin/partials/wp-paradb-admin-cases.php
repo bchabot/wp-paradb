@@ -37,18 +37,20 @@ if ( isset( $_GET['action'] ) && 'delete' === $_GET['action'] && isset( $_GET['c
 
 // Get filter parameters.
 $status = isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : '';
+$assigned_to = isset( $_GET['assigned_to'] ) ? absint( $_GET['assigned_to'] ) : 0;
 $search = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '';
 $paged = isset( $_GET['paged'] ) ? absint( $_GET['paged'] ) : 1;
 $per_page = 20;
 
 // Get cases.
 $args = array(
-	'status'  => $status,
-	'search'  => $search,
-	'limit'   => $per_page,
-	'offset'  => ( $paged - 1 ) * $per_page,
-	'orderby' => 'date_created',
-	'order'   => 'DESC',
+	'status'      => $status,
+	'assigned_to' => $assigned_to,
+	'search'      => $search,
+	'limit'       => $per_page,
+	'offset'      => ( $paged - 1 ) * $per_page,
+	'orderby'     => 'date_created',
+	'order'       => 'DESC',
 );
 
 $cases = WP_ParaDB_Case_Handler::get_cases( $args );
@@ -58,6 +60,9 @@ global $wpdb;
 $where_clause = '1=1';
 if ( ! empty( $status ) ) {
 	$where_clause .= $wpdb->prepare( ' AND case_status = %s', $status );
+}
+if ( $assigned_to > 0 ) {
+	$where_clause .= $wpdb->prepare( ' AND assigned_to = %d', $assigned_to );
 }
 if ( ! empty( $search ) ) {
 	$search_term = '%' . $wpdb->esc_like( $search ) . '%';
@@ -69,6 +74,10 @@ $total_pages = ceil( $total_cases / $per_page );
 // Get status options.
 $options = get_option( 'wp_paradb_options', array() );
 $case_statuses = isset( $options['case_statuses'] ) ? $options['case_statuses'] : array();
+
+// Get investigators for filter.
+require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-roles.php';
+$investigators = WP_ParaDB_Roles::get_all_paradb_users();
 ?>
 
 <div class="wrap">
@@ -93,6 +102,15 @@ $case_statuses = isset( $options['case_statuses'] ) ? $options['case_statuses'] 
 					<?php foreach ( $case_statuses as $status_key => $status_label ) : ?>
 						<option value="<?php echo esc_attr( $status_key ); ?>" <?php selected( $status, $status_key ); ?>>
 							<?php echo esc_html( $status_label ); ?>
+						</option>
+					<?php endforeach; ?>
+				</select>
+
+				<select name="assigned_to" id="filter-by-assignee">
+					<option value=""><?php esc_html_e( 'All Assignees', 'wp-paradb' ); ?></option>
+					<?php foreach ( $investigators as $investigator ) : ?>
+						<option value="<?php echo esc_attr( $investigator->ID ); ?>" <?php selected( $assigned_to, $investigator->ID ); ?>>
+							<?php echo esc_html( $investigator->display_name ); ?>
 						</option>
 					<?php endforeach; ?>
 				</select>
@@ -131,14 +149,25 @@ $case_statuses = isset( $options['case_statuses'] ) ? $options['case_statuses'] 
 			<tr>
 				<th scope="col" class="manage-column column-primary"><?php esc_html_e( 'Case Number', 'wp-paradb' ); ?></th>
 				<th scope="col" class="manage-column"><?php esc_html_e( 'Name', 'wp-paradb' ); ?></th>
-				<th scope="col" class="manage-column"><?php esc_html_e( 'Location', 'wp-paradb' ); ?></th>
+				<th scope="col" class="manage-column"><?php esc_html_e( 'Assignee', 'wp-paradb' ); ?></th>
+				<th scope="col" class="manage-column"><?php esc_html_e( 'Stats', 'wp-paradb' ); ?></th>
 				<th scope="col" class="manage-column"><?php esc_html_e( 'Status', 'wp-paradb' ); ?></th>
 				<th scope="col" class="manage-column"><?php esc_html_e( 'Created', 'wp-paradb' ); ?></th>
 			</tr>
 		</thead>
 		<tbody>
 			<?php if ( ! empty( $cases ) ) : ?>
-				<?php foreach ( $cases as $case ) : ?>
+				<?php foreach ( $cases as $case ) : 
+					$assignee = $case->assigned_to ? get_userdata( $case->assigned_to ) : null;
+					
+					require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-report-handler.php';
+					require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-activity-handler.php';
+					require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-evidence-handler.php';
+					
+					$report_count = WP_ParaDB_Report_Handler::get_case_report_count( $case->case_id );
+					$activity_count = WP_ParaDB_Activity_Handler::get_case_activity_count( $case->case_id );
+					$evidence_count = WP_ParaDB_Evidence_Handler::get_case_evidence_count( $case->case_id );
+					?>
 					<tr>
 						<td class="column-primary" data-colname="<?php esc_attr_e( 'Case Number', 'wp-paradb' ); ?>">
 							<strong>
@@ -163,10 +192,16 @@ $case_statuses = isset( $options['case_statuses'] ) ? $options['case_statuses'] 
 							</div>
 						</td>
 						<td data-colname="<?php esc_attr_e( 'Name', 'wp-paradb' ); ?>">
-							<?php echo esc_html( $case->case_name ); ?>
+							<?php echo esc_html( $case->case_name ); ?><br>
+							<small><?php echo esc_html( $case->location_name ? $case->location_name : $case->location_city ); ?></small>
 						</td>
-						<td data-colname="<?php esc_attr_e( 'Location', 'wp-paradb' ); ?>">
-							<?php echo esc_html( $case->location_name ? $case->location_name : $case->location_city ); ?>
+						<td data-colname="<?php esc_attr_e( 'Assignee', 'wp-paradb' ); ?>">
+							<?php echo $assignee ? esc_html( $assignee->display_name ) : '—'; ?>
+						</td>
+						<td data-colname="<?php esc_attr_e( 'Stats', 'wp-paradb' ); ?>">
+							<span class="dashicons dashicons-clipboard" title="<?php esc_attr_e( 'Reports', 'wp-paradb' ); ?>"></span> <?php echo esc_html( $report_count ); ?>&nbsp;
+							<span class="dashicons dashicons-performance" title="<?php esc_attr_e( 'Activities', 'wp-paradb' ); ?>"></span> <?php echo esc_html( $activity_count ); ?>&nbsp;
+							<span class="dashicons dashicons-format-image" title="<?php esc_attr_e( 'Evidence', 'wp-paradb' ); ?>"></span> <?php echo esc_html( $evidence_count ); ?>
 						</td>
 						<td data-colname="<?php esc_attr_e( 'Status', 'wp-paradb' ); ?>">
 							<?php
@@ -181,7 +216,7 @@ $case_statuses = isset( $options['case_statuses'] ) ? $options['case_statuses'] 
 				<?php endforeach; ?>
 			<?php else : ?>
 				<tr>
-					<td colspan="5" style="text-align: center; padding: 20px;">
+					<td colspan="6" style="text-align: center; padding: 20px;">
 						<?php esc_html_e( 'No cases found.', 'wp-paradb' ); ?>
 					</td>
 				</tr>
