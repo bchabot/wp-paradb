@@ -22,6 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<a href="#shortcodes" class="nav-tab"><?php esc_html_e( 'Shortcodes', 'wp-paradb' ); ?></a>
 		<a href="#user-roles" class="nav-tab"><?php esc_html_e( 'User Roles', 'wp-paradb' ); ?></a>
 		<a href="#environmental-data" class="nav-tab"><?php esc_html_e( 'Environmental Data', 'wp-paradb' ); ?></a>
+		<a href="#api-setup" class="nav-tab"><?php esc_html_e( 'API Setup', 'wp-paradb' ); ?></a>
 	</div>
 
 	<div id="getting-started" class="tab-content" style="display: block; background: #fff; padding: 20px; border: 1px solid #ccc; border-top: none;">
@@ -61,10 +62,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</td>
 				</tr>
 				<tr>
-					<td><code>[paradb_single_case]</code></td>
+					<td><code>[paradb_single_case id="123"]</code></td>
 					<td><?php esc_html_e( 'Displays full details for a specific case.', 'wp-paradb' ); ?></td>
 					<td>
-						<code>id="123"</code> - <?php esc_html_e( 'The Case ID to display. If omitted, it will try to get the ID from the URL.', 'wp-paradb' ); ?>
+						<code>id="123"</code> - (<strong><?php esc_html_e( 'Required', 'wp-paradb' ); ?></strong>) <?php esc_html_e( 'The Case ID to display.', 'wp-paradb' ); ?>
 					</td>
 				</tr>
 				<tr>
@@ -109,6 +110,43 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<li><strong><?php esc_html_e( 'Geomagnetic:', 'wp-paradb' ); ?></strong> <?php esc_html_e( 'Solar activity and Kp-Index (Planetary K-index).', 'wp-paradb' ); ?></li>
 		</ul>
 		<p class="description"><?php esc_html_e( 'Note: Some data requires API keys to be configured in the ParaDB Settings page.', 'wp-paradb' ); ?></p>
+	</div>
+
+	<div id="api-setup" class="tab-content" style="display: none; background: #fff; padding: 20px; border: 1px solid #ccc; border-top: none;">
+		<h2><?php esc_html_e( 'API Configuration', 'wp-paradb' ); ?></h2>
+		<p><?php esc_html_e( 'To enable full functionality like maps and environmental data, you need to configure API keys from various providers.', 'wp-paradb' ); ?></p>
+		
+		<table class="widefat striped">
+			<thead>
+				<tr>
+					<th><?php esc_html_e( 'Service', 'wp-paradb' ); ?></th>
+					<th><?php esc_html_e( 'Purpose', 'wp-paradb' ); ?></th>
+					<th><?php esc_html_e( 'How to Get a Key', 'wp-paradb' ); ?></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td><strong><?php esc_html_e( 'Google Maps', 'wp-paradb' ); ?></strong></td>
+					<td><?php esc_html_e( 'Interactive maps and address auto-suggest.', 'wp-paradb' ); ?></td>
+					<td><?php esc_html_e( 'Create a project in the Google Cloud Console, enable "Maps JavaScript API" and "Places API", then create an API key.', 'wp-paradb' ); ?> <a href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank"><?php esc_html_e( 'Link', 'wp-paradb' ); ?></a></td>
+				</tr>
+				<tr>
+					<td><strong><?php esc_html_e( 'LocationIQ', 'wp-paradb' ); ?></strong></td>
+					<td><?php esc_html_e( 'Geocoding (converting addresses to coordinates) for OpenStreetMap.', 'wp-paradb' ); ?></td>
+					<td><?php esc_html_e( 'Sign up for a free account at LocationIQ.com. They offer 10,000 free requests per day.', 'wp-paradb' ); ?> <a href="https://locationiq.com/" target="_blank"><?php esc_html_e( 'Link', 'wp-paradb' ); ?></a></td>
+				</tr>
+				<tr>
+					<td><strong><?php esc_html_e( 'WeatherAPI', 'wp-paradb' ); ?></strong></td>
+					<td><?php esc_html_e( 'Astronomical data (moon phase) and weather fetching.', 'wp-paradb' ); ?></td>
+					<td><?php esc_html_e( 'Sign up for a free account at WeatherAPI.com.', 'wp-paradb' ); ?> <a href="https://www.weatherapi.com/signup.aspx" target="_blank"><?php esc_html_e( 'Link', 'wp-paradb' ); ?></a></td>
+				</tr>
+				<tr>
+					<td><strong><?php esc_html_e( 'FreeAstroAPI', 'wp-paradb' ); ?></strong></td>
+					<td><?php esc_html_e( 'Detailed planetary transit and astrological data.', 'wp-paradb' ); ?></td>
+					<td><?php esc_html_e( 'Sign up for an API key at FreeAstroAPI.com.', 'wp-paradb' ); ?> <a href="https://freeastroapi.com/" target="_blank"><?php esc_html_e( 'Link', 'wp-paradb' ); ?></a></td>
+				</tr>
+			</tbody>
+		</table>
 	</div>
 </div>
 

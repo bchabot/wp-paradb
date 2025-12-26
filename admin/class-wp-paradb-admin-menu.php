@@ -90,6 +90,16 @@ class WP_ParaDB_Admin_Menu {
 			array( __CLASS__, 'activities_page' )
 		);
 
+		// Field Logs submenu.
+		add_submenu_page(
+			'wp-paradb',
+			__( 'Field Logs', 'wp-paradb' ),
+			__( 'Field Logs', 'wp-paradb' ),
+			'paradb_view_cases',
+			'wp-paradb-logs',
+			array( __CLASS__, 'logs_page' )
+		);
+
 		// Clients submenu.
 		add_submenu_page(
 			'wp-paradb',
@@ -149,6 +159,25 @@ class WP_ParaDB_Admin_Menu {
 			'wp-paradb-docs',
 			array( __CLASS__, 'docs_page' )
 		);
+
+		// Hidden Log Chat page.
+		add_submenu_page(
+			null, // Hidden from menu
+			__( 'Log Action', 'wp-paradb' ),
+			__( 'Log Action', 'wp-paradb' ),
+			'paradb_view_cases',
+			'wp-paradb-log-chat',
+			array( __CLASS__, 'log_chat_page' )
+		);
+	}
+
+	/**
+	 * Log chat page
+	 *
+	 * @since    1.6.0
+	 */
+	public static function log_chat_page() {
+		require_once WP_PARADB_PLUGIN_DIR . 'admin/partials/wp-paradb-admin-log-chat.php';
 	}
 
 	/**
@@ -203,6 +232,15 @@ class WP_ParaDB_Admin_Menu {
 	 */
 	public static function activities_page() {
 		require_once WP_PARADB_PLUGIN_DIR . 'admin/partials/wp-paradb-admin-activities.php';
+	}
+
+	/**
+	 * Field Logs page
+	 *
+	 * @since    1.6.0
+	 */
+	public static function logs_page() {
+		require_once WP_PARADB_PLUGIN_DIR . 'admin/partials/wp-paradb-admin-logs.php';
 	}
 
 	/**

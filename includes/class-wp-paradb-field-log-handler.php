@@ -38,13 +38,14 @@ class WP_ParaDB_Field_Log_Handler {
 			'log_content'     => wp_kses_post( $data['log_content'] ),
 			'latitude'        => isset( $data['latitude'] ) ? floatval( $data['latitude'] ) : null,
 			'longitude'       => isset( $data['longitude'] ) ? floatval( $data['longitude'] ) : null,
+			'file_url'        => isset( $data['file_url'] ) ? esc_url_raw( $data['file_url'] ) : null,
 			'date_created'    => current_time( 'mysql' ),
 		);
 
 		$result = $wpdb->insert(
 			$wpdb->prefix . 'paradb_field_logs',
 			$log_data,
-			array( '%d', '%d', '%d', '%s', '%f', '%f', '%s' )
+			array( '%d', '%d', '%d', '%s', '%f', '%f', '%s', '%s' )
 		);
 
 		if ( false === $result ) {

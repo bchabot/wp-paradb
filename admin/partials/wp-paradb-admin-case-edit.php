@@ -61,15 +61,16 @@ if ( isset( $_POST['save_case'] ) && check_admin_referer( 'save_case_' . $case_i
 		'assigned_to'        => isset( $_POST['assigned_to'] ) ? absint( $_POST['assigned_to'] ) : null,
 	);
 
-	if ( $is_new ) {
-		$result = WP_ParaDB_Case_Handler::create_case( $case_data );
-		if ( is_wp_error( $result ) ) {
-			echo '<div class="notice notice-error"><p>' . esc_html( $result->get_error_message() ) . '</p></div>';
+		if ( $is_new ) {
+			$result = WP_ParaDB_Case_Handler::create_case( $case_data );
+			if ( is_wp_error( $result ) ) {
+				echo '<div class="notice notice-error"><p>' . esc_html( $result->get_error_message() ) . '</p></div>';
+			} else {
+				$redirect_url = admin_url( 'admin.php?page=wp-paradb-case-edit&case_id=' . $result . '&message=created' );
+				echo '<script>window.location.href="' . esc_url_raw( $redirect_url ) . '";</script>';
+				exit;
+			}
 		} else {
-			wp_redirect( admin_url( 'admin.php?page=wp-paradb-case-edit&case_id=' . $result . '&message=created' ) );
-			exit;
-		}
-	} else {
 		$result = WP_ParaDB_Case_Handler::update_case( $case_id, $case_data );
 		if ( is_wp_error( $result ) ) {
 			echo '<div class="notice notice-error"><p>' . esc_html( $result->get_error_message() ) . '</p></div>';
@@ -485,6 +486,11 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 								<p>
 									<strong><?php esc_html_e( 'Case Number:', 'wp-paradb' ); ?></strong><br>
 									<?php echo esc_html( $case->case_number ); ?>
+								</p>
+								<p>
+									<strong><?php esc_html_e( 'Shortcode:', 'wp-paradb' ); ?></strong><br>
+									<code style="display: block; padding: 5px; background: #f0f0f0; border: 1px solid #ccc; cursor: copy;" onclick="var s = this.innerText; navigator.clipboard.writeText(s); alert('Copied: ' + s);">[paradb_single_case id="<?php echo esc_attr( $case->case_id ); ?>"]</code>
+									<small class="description"><?php esc_html_e( 'Click to copy shortcode.', 'wp-paradb' ); ?></small>
 								</p>
 								<p>
 									<strong><?php esc_html_e( 'Created:', 'wp-paradb' ); ?></strong><br>

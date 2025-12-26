@@ -269,10 +269,10 @@ class WP_ParaDB_Database {
 			activity_id bigint(20) unsigned DEFAULT NULL,
 			investigator_id bigint(20) unsigned NOT NULL,
 			log_content text NOT NULL,
-			latitude decimal(10,8) DEFAULT NULL,
-			longitude decimal(11,8) DEFAULT NULL,
-			date_created datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			PRIMARY KEY  (log_id),
+			                        latitude decimal(10,8) DEFAULT NULL,
+			                        longitude decimal(11,8) DEFAULT NULL,
+			                        file_url varchar(500) DEFAULT NULL,
+			                        date_created datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,			PRIMARY KEY  (log_id),
 			KEY case_id (case_id),
 			KEY activity_id (activity_id),
 			KEY investigator_id (investigator_id),
@@ -333,8 +333,9 @@ class WP_ParaDB_Database {
 		dbDelta( $sql_field_logs );
 		dbDelta( $sql_witnesses );
 
-		                // Store database version
-		                update_option( 'wp_paradb_db_version', '1.5.0' );	}
+		                                // Store database version
+
+		                                update_option( 'wp_paradb_db_version', '1.6.0' );	}
 
 	/**
 	 * Drop all plugin tables

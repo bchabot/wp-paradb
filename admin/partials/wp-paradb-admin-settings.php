@@ -77,9 +77,8 @@ $options = get_option( 'wp_paradb_options', array() );
 				<td>
 					<input type="text" name="case_number_format" id="case_number_format" class="regular-text" value="<?php echo esc_attr( isset( $options['case_number_format'] ) ? $options['case_number_format'] : 'CASE-%Y-%ID%' ); ?>">
 					<p class="description">
-						<?php esc_html_e( 'Use placeholders: %Y% (year), %M% (month), %D% (day), %ID% (case ID)', 'wp-paradb' ); ?><br>
-						<?php esc_html_e( 'Example: CASE-%Y-%ID% produces CASE-2024-0001', 'wp-paradb' ); ?>
-					</p>
+																<?php esc_html_e( 'Use placeholders: %Y% (year), %M% (month), %D% (day), %ID% (case ID)', 'wp-paradb' ); ?><br>
+																<?php esc_html_e( 'Example: CASE-%Y%-%ID% produces CASE-2024-0001', 'wp-paradb' ); ?>					</p>
 				</td>
 			</tr>
 			
@@ -208,7 +207,8 @@ $options = get_option( 'wp_paradb_options', array() );
 				<td>
 					<input type="password" name="google_maps_api_key" id="google_maps_api_key" class="regular-text" value="<?php echo esc_attr( isset( $options['google_maps_api_key'] ) ? $options['google_maps_api_key'] : '' ); ?>" title="<?php esc_attr_e( 'Enter your Google Maps JavaScript API key for map display and address auto-suggest.', 'wp-paradb' ); ?>">
 					<p class="description">
-						<?php esc_html_e( 'Required if Google Maps is selected. Get one from the Google Cloud Console.', 'wp-paradb' ); ?>
+						<?php esc_html_e( 'Required if Google Maps is selected.', 'wp-paradb' ); ?>
+						<a href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank"><?php esc_html_e( 'Get Google Maps Key', 'wp-paradb' ); ?></a>
 					</p>
 				</td>
 			</tr>
@@ -219,7 +219,8 @@ $options = get_option( 'wp_paradb_options', array() );
 				<td>
 					<input type="password" name="locationiq_api_key" id="locationiq_api_key" class="regular-text" value="<?php echo esc_attr( isset( $options['locationiq_api_key'] ) ? $options['locationiq_api_key'] : '' ); ?>" title="<?php esc_attr_e( 'Enter your LocationIQ API key for geocoding services with OpenStreetMap.', 'wp-paradb' ); ?>">
 					<p class="description">
-						<?php esc_html_e( 'Used for free geocoding if OpenStreetMap is selected. (10,000 free requests/day)', 'wp-paradb' ); ?>
+						<?php esc_html_e( 'Used for free geocoding if OpenStreetMap is selected.', 'wp-paradb' ); ?>
+						<a href="https://locationiq.com/" target="_blank"><?php esc_html_e( 'Get LocationIQ Key', 'wp-paradb' ); ?></a>
 					</p>
 				</td>
 			</tr>
@@ -230,7 +231,8 @@ $options = get_option( 'wp_paradb_options', array() );
 				<td>
 					<input type="password" name="weatherapi_api_key" id="weatherapi_api_key" class="regular-text" value="<?php echo esc_attr( isset( $options['weatherapi_api_key'] ) ? $options['weatherapi_api_key'] : '' ); ?>" title="<?php esc_attr_e( 'Enter your WeatherAPI.com key for moon phase and astronomical data.', 'wp-paradb' ); ?>">
 					<p class="description">
-						<?php esc_html_e( 'Used for fetching weather and moon phase data. (Free tier available)', 'wp-paradb' ); ?>
+						<?php esc_html_e( 'Used for fetching weather and moon phase data.', 'wp-paradb' ); ?>
+						<a href="https://www.weatherapi.com/signup.aspx" target="_blank"><?php esc_html_e( 'Get WeatherAPI Key', 'wp-paradb' ); ?></a>
 					</p>
 				</td>
 			</tr>
@@ -241,7 +243,8 @@ $options = get_option( 'wp_paradb_options', array() );
 				<td>
 					<input type="password" name="freeastroapi_api_key" id="freeastroapi_api_key" class="regular-text" value="<?php echo esc_attr( isset( $options['freeastroapi_api_key'] ) ? $options['freeastroapi_api_key'] : '' ); ?>" title="<?php esc_attr_e( 'Enter your FreeAstroAPI.com key for planetary transit data.', 'wp-paradb' ); ?>">
 					<p class="description">
-						<?php esc_html_e( 'Used for fetching astrological transit data. (Optional)', 'wp-paradb' ); ?>
+						<?php esc_html_e( 'Used for fetching astrological transit data.', 'wp-paradb' ); ?>
+						<a href="https://freeastroapi.com/" target="_blank"><?php esc_html_e( 'Get FreeAstroAPI Key', 'wp-paradb' ); ?></a>
 					</p>
 				</td>
 			</tr>
