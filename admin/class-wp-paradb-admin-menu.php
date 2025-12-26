@@ -139,6 +139,16 @@ class WP_ParaDB_Admin_Menu {
 			'wp-paradb-settings',
 			array( __CLASS__, 'settings_page' )
 		);
+
+		// Documentation submenu.
+		add_submenu_page(
+			'wp-paradb',
+			__( 'Documentation', 'wp-paradb' ),
+			__( 'Documentation', 'wp-paradb' ),
+			'paradb_view_cases',
+			'wp-paradb-docs',
+			array( __CLASS__, 'docs_page' )
+		);
 	}
 
 	/**
@@ -148,6 +158,15 @@ class WP_ParaDB_Admin_Menu {
 	 */
 	public static function dashboard_page() {
 		require_once WP_PARADB_PLUGIN_DIR . 'admin/partials/wp-paradb-admin-dashboard.php';
+	}
+
+	/**
+	 * Documentation page
+	 *
+	 * @since    1.0.0
+	 */
+	public static function docs_page() {
+		require_once WP_PARADB_PLUGIN_DIR . 'admin/partials/wp-paradb-admin-docs.php';
 	}
 
 	/**

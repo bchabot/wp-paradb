@@ -35,6 +35,7 @@ if ( isset( $_POST['save_report'] ) && check_admin_referer( 'save_report', 'repo
 		'report_date'        => isset( $_POST['report_date'] ) ? sanitize_text_field( wp_unslash( $_POST['report_date'] ) ) : current_time( 'mysql' ),
 		'report_content'     => isset( $_POST['report_content'] ) ? wp_kses_post( wp_unslash( $_POST['report_content'] ) ) : '',
 		'report_summary'     => isset( $_POST['report_summary'] ) ? sanitize_textarea_field( wp_unslash( $_POST['report_summary'] ) ) : '',
+		'is_published'       => isset( $_POST['is_published'] ) ? 1 : 0,
 	);
 
 	if ( $report_id > 0 ) {
@@ -49,6 +50,9 @@ if ( isset( $_POST['save_report'] ) && check_admin_referer( 'save_report', 'repo
 		echo '<div class="notice notice-success"><p>' . esc_html__( 'Report saved successfully.', 'wp-paradb' ) . '</p></div>';
 	}
 }
+
+// Get case_id from URL for pre-selection
+$pre_case_id = isset( $_GET['case_id'] ) ? absint( $_GET['case_id'] ) : 0;
 
 // Handle delete action.
 if ( isset( $_GET['action'] ) && 'delete' === $_GET['action'] && isset( $_GET['report_id'] ) && isset( $_GET['_wpnonce'] ) ) {
@@ -95,8 +99,10 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 					<td>
 						<select name="case_id" id="case_id" required class="regular-text">
 							<option value=""><?php esc_html_e( 'Select Case', 'wp-paradb' ); ?></option>
-							<?php foreach ( $cases as $case ) : ?>
-								<option value="<?php echo esc_attr( $case->case_id ); ?>" <?php selected( $report ? $report->case_id : 0, $case->case_id ); ?>>
+							<?php foreach ( $cases as $case ) : 
+								$selected_case_id = $report ? $report->case_id : $pre_case_id;
+								?>
+								<option value="<?php echo esc_attr( $case->case_id ); ?>" <?php selected( $selected_case_id, $case->case_id ); ?>>
 									<?php echo esc_html( $case->case_number . ' - ' . $case->case_name ); ?>
 								</option>
 							<?php endforeach; ?>
@@ -154,6 +160,16 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 				</tr>
 				
 				<tr>
+					<th scope="row"><?php esc_html_e( 'Publish Status', 'wp-paradb' ); ?></th>
+					<td>
+						<label>
+							<input type="checkbox" name="is_published" value="1" <?php checked( $report ? $report->is_published : 0, 1 ); ?>>
+							<?php esc_html_e( 'Publish this report on the public case page', 'wp-paradb' ); ?>
+						</label>
+					</td>
+				</tr>
+				
+				<tr>
 					<th scope="row">
 						<label for="report_content"><?php esc_html_e( 'Report Content', 'wp-paradb' ); ?> *</label>
 					</th>
@@ -189,19 +205,25 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 	<?php
 } else {
 	// Show list.
+	$case_filter = isset( $_GET['case_id'] ) ? absint( $_GET['case_id'] ) : 0;
+	$activity_filter = isset( $_GET['activity_id'] ) ? absint( $_GET['activity_id'] ) : 0;
 	$search = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '';
 	$paged = isset( $_GET['paged'] ) ? absint( $_GET['paged'] ) : 1;
 	$per_page = 20;
 	
 	$args = array(
-		'search'  => $search,
-		'limit'   => $per_page,
-		'offset'  => ( $paged - 1 ) * $per_page,
-		'orderby' => 'report_date',
-		'order'   => 'DESC',
+		'case_id'     => $case_filter,
+		'activity_id' => $activity_filter,
+		'search'      => $search,
+		'limit'       => $per_page,
+		'offset'      => ( $paged - 1 ) * $per_page,
+		'orderby'     => 'report_date',
+		'order'       => 'DESC',
 	);
 	
 	$reports = WP_ParaDB_Report_Handler::get_reports( $args );
+	$cases = WP_ParaDB_Case_Handler::get_cases( array( 'limit' => 1000 ) );
+	$activities = WP_ParaDB_Activity_Handler::get_activities( array( 'limit' => 1000 ) );
 	?>
 	
 	<div class="wrap">
@@ -214,15 +236,43 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 		<?php endif; ?>
 		
 		<hr class="wp-header-end">
+
+		<div class="tablenav top">
+			<div class="alignleft actions">
+				<form method="get" action="">
+					<input type="hidden" name="page" value="wp-paradb-reports">
+					
+					<select name="case_id" id="filter-by-case">
+						<option value=""><?php esc_html_e( 'All Cases', 'wp-paradb' ); ?></option>
+						<?php foreach ( $cases as $case ) : ?>
+							<option value="<?php echo esc_attr( $case->case_id ); ?>" <?php selected( $case_filter, $case->case_id ); ?>>
+								<?php echo esc_html( $case->case_number ); ?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+
+					<select name="activity_id" id="filter-by-activity">
+						<option value=""><?php esc_html_e( 'All Activities', 'wp-paradb' ); ?></option>
+						<?php foreach ( $activities as $activity ) : ?>
+							<option value="<?php echo esc_attr( $activity->activity_id ); ?>" <?php selected( $activity_filter, $activity->activity_id ); ?>>
+								<?php echo esc_html( $activity->activity_title ); ?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+					
+					<input type="submit" class="button" value="<?php esc_attr_e( 'Filter', 'wp-paradb' ); ?>">
+				</form>
+			</div>
+		</div>
 		
 		<table class="wp-list-table widefat fixed striped">
 			<thead>
 				<tr>
 					<th><?php esc_html_e( 'Title', 'wp-paradb' ); ?></th>
 					<th><?php esc_html_e( 'Case', 'wp-paradb' ); ?></th>
+					<th><?php esc_html_e( 'Activity', 'wp-paradb' ); ?></th>
 					<th><?php esc_html_e( 'Type', 'wp-paradb' ); ?></th>
 					<th><?php esc_html_e( 'Date', 'wp-paradb' ); ?></th>
-					<th><?php esc_html_e( 'Investigator', 'wp-paradb' ); ?></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -230,7 +280,7 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 					<?php foreach ( $reports as $report ) : ?>
 						<?php
 						$case = WP_ParaDB_Case_Handler::get_case( $report->case_id );
-						$investigator = get_userdata( $report->investigator_id );
+						$activity = $report->activity_id ? WP_ParaDB_Activity_Handler::get_activity( $report->activity_id ) : null;
 						?>
 						<tr>
 							<td>
@@ -262,9 +312,17 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 									</a>
 								<?php endif; ?>
 							</td>
+							<td>
+								<?php if ( $activity ) : ?>
+									<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-activities&action=edit&activity_id=' . $activity->activity_id ) ); ?>">
+										<?php echo esc_html( $activity->activity_title ); ?>
+									</a>
+								<?php else : ?>
+									—
+								<?php endif; ?>
+							</td>
 							<td><?php echo esc_html( ucfirst( $report->report_type ) ); ?></td>
 							<td><?php echo esc_html( gmdate( 'M j, Y', strtotime( $report->report_date ) ) ); ?></td>
-							<td><?php echo $investigator ? esc_html( $investigator->display_name ) : esc_html__( 'Unknown', 'wp-paradb' ); ?></td>
 						</tr>
 					<?php endforeach; ?>
 				<?php else : ?>

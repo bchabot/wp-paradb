@@ -45,17 +45,17 @@ class WP_ParaDB_Report_Handler {
 			'report_title'       => sanitize_text_field( $data['report_title'] ),
 			'report_type'        => isset( $data['report_type'] ) ? sanitize_text_field( $data['report_type'] ) : 'report',
 			'report_date'        => isset( $data['report_date'] ) ? sanitize_text_field( $data['report_date'] ) : current_time( 'mysql' ),
-			'report_content'     => wp_kses_post( $data['report_content'] ),
-			'report_summary'     => isset( $data['report_summary'] ) ? sanitize_textarea_field( $data['report_summary'] ) : null,
-			'investigator_id'    => get_current_user_id(),
-			'date_created'       => current_time( 'mysql' ),
-		);
-
-		// Format types for database.
-		$format = array(
-			'%d', '%d', '%s', '%s', '%s', '%s', '%s', '%d', '%s',
-		);
-
+			                        'report_content'     => wp_kses_post( $data['report_content'] ),
+			                        'report_summary'     => isset( $data['report_summary'] ) ? sanitize_textarea_field( $data['report_summary'] ) : null,
+			                        'is_published'       => isset( $data['is_published'] ) ? absint( $data['is_published'] ) : 0,
+			                        'investigator_id'    => get_current_user_id(),
+			                        'date_created'       => current_time( 'mysql' ),
+			                );
+			
+			                // Format types for database.
+			                $format = array(
+			                        '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s',
+			                );
 		// Insert into database.
 		$result = $wpdb->insert(
 			$wpdb->prefix . 'paradb_reports',
@@ -101,28 +101,27 @@ class WP_ParaDB_Report_Handler {
 		$update_data = array();
 		$format = array();
 
-		$allowed_fields = array(
-			'activity_id', 'report_title', 'report_type', 'report_date', 'report_content', 'report_summary',
-		);
-
-		foreach ( $allowed_fields as $field ) {
-			if ( isset( $data[ $field ] ) ) {
-				if ( in_array( $field, array( 'report_content' ), true ) ) {
-					$update_data[ $field ] = wp_kses_post( $data[ $field ] );
-					$format[] = '%s';
-				} elseif ( 'report_summary' === $field ) {
-					$update_data[ $field ] = sanitize_textarea_field( $data[ $field ] );
-					$format[] = '%s';
-				} elseif ( 'activity_id' === $field ) {
-					$update_data[ $field ] = absint( $data[ $field ] );
-					$format[] = '%d';
-				} else {
-					$update_data[ $field ] = sanitize_text_field( $data[ $field ] );
-					$format[] = '%s';
-				}
-			}
-		}
-
+		                $allowed_fields = array(
+		                        'activity_id', 'report_title', 'report_type', 'report_date', 'report_content', 'report_summary', 'is_published',
+		                );
+		
+		                foreach ( $allowed_fields as $field ) {
+		                        if ( isset( $data[ $field ] ) ) {
+		                                if ( in_array( $field, array( 'report_content' ), true ) ) {
+		                                        $update_data[ $field ] = wp_kses_post( $data[ $field ] );
+		                                        $format[] = '%s';
+		                                } elseif ( 'report_summary' === $field ) {
+		                                        $update_data[ $field ] = sanitize_textarea_field( $data[ $field ] );
+		                                        $format[] = '%s';
+		                                } elseif ( in_array( $field, array( 'activity_id', 'is_published' ), true ) ) {
+		                                        $update_data[ $field ] = absint( $data[ $field ] );
+		                                        $format[] = '%d';
+		                                } else {
+		                                        $update_data[ $field ] = sanitize_text_field( $data[ $field ] );
+		                                        $format[] = '%s';
+		                                }
+		                        }
+		                }
 		$update_data['date_modified'] = current_time( 'mysql' );
 		$format[] = '%s';
 

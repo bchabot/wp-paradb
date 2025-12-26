@@ -406,4 +406,81 @@ class WP_ParaDB_Evidence_Handler {
 		$upload_dir = wp_upload_dir();
 		return $upload_dir['baseurl'] . $evidence->file_path;
 	}
+
+	/**
+	 * Get evidence files with filters
+	 *
+	 * @since    1.0.0
+	 * @param    array    $args    Query arguments.
+	 * @return   array             Array of evidence objects.
+	 */
+	public static function get_evidence_files( $args = array() ) {
+		global $wpdb;
+
+		$defaults = array(
+			'case_id'       => 0,
+			'report_id'     => 0,
+			'activity_id'   => 0,
+			'evidence_type' => '',
+			'limit'         => 30,
+			'offset'        => 0,
+			'orderby'       => 'date_uploaded',
+			'order'         => 'DESC',
+		);
+
+		$args = wp_parse_args( $args, $defaults );
+
+		$where = array( '1=1' );
+		$where_values = array();
+
+		if ( $args['case_id'] > 0 ) {
+			$where[] = 'case_id = %d';
+			$where_values[] = $args['case_id'];
+		}
+
+		if ( $args['report_id'] > 0 ) {
+			$where[] = 'report_id = %d';
+			$where_values[] = $args['report_id'];
+		}
+
+		if ( $args['activity_id'] > 0 ) {
+			$where[] = 'activity_id = %d';
+			$where_values[] = $args['activity_id'];
+		}
+
+		if ( ! empty( $args['evidence_type'] ) ) {
+			$where[] = 'evidence_type = %s';
+			$where_values[] = $args['evidence_type'];
+		}
+
+		$where_clause = implode( ' AND ', $where );
+		$query = "SELECT * FROM {$wpdb->prefix}paradb_evidence WHERE {$where_clause}";
+
+		$allowed_orderby = array( 'evidence_id', 'title', 'date_uploaded', 'file_size', 'evidence_type' );
+		$orderby = in_array( $args['orderby'], $allowed_orderby, true ) ? $args['orderby'] : 'date_uploaded';
+		$order = 'ASC' === strtoupper( $args['order'] ) ? 'ASC' : 'DESC';
+		$query .= " ORDER BY {$orderby} {$order}";
+
+		$query .= " LIMIT %d OFFSET %d";
+		$where_values[] = absint( $args['limit'] );
+		$where_values[] = absint( $args['offset'] );
+
+		return $wpdb->get_results( $wpdb->prepare( $query, $where_values ) );
+	}
+
+	/**
+	 * Get evidence count for a case
+	 *
+	 * @since    1.0.0
+	 * @param    int    $case_id    Case ID.
+	 * @return   int                Evidence count.
+	 */
+	public static function get_case_evidence_count( $case_id ) {
+		global $wpdb;
+
+		return absint( $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*) FROM {$wpdb->prefix}paradb_evidence WHERE case_id = %d",
+			absint( $case_id )
+		) ) );
+	}
 }

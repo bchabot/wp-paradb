@@ -42,12 +42,23 @@ if ( isset( $_POST['upload_evidence'] ) && check_admin_referer( 'upload_evidence
 
 		$result = WP_ParaDB_Evidence_Handler::upload_evidence( $_FILES['evidence_file'], $metadata );
 		
-		if ( is_wp_error( $result ) ) {
-			echo '<div class="notice notice-error"><p>' . esc_html( $result->get_error_message() ) . '</p></div>';
-		} else {
-			echo '<div class="notice notice-success"><p>' . esc_html__( 'Evidence uploaded successfully.', 'wp-paradb' ) . '</p></div>';
+			if ( is_wp_error( $result ) ) {
+		
+				echo '<div class="notice notice-error"><p>' . esc_html( $result->get_error_message() ) . '</p></div>';
+		
+			} else {
+		
+				echo '<div class="notice notice-success"><p>' . esc_html__( 'Evidence uploaded successfully.', 'wp-paradb' ) . '</p></div>';
+		
+			}
+		
 		}
-	} else {
+		
+		
+		
+		// Get case_id from URL for pre-selection
+		
+		$pre_case_id = isset( $_GET['case_id'] ) ? absint( $_GET['case_id'] ) : 0; else {
 		echo '<div class="notice notice-error"><p>' . esc_html__( 'Please select a file to upload.', 'wp-paradb' ) . '</p></div>';
 	}
 }
@@ -87,17 +98,16 @@ if ( 'upload' === $action ) {
 					<th scope="row">
 						<label for="case_id"><?php esc_html_e( 'Case', 'wp-paradb' ); ?> *</label>
 					</th>
-					<td>
-						<select name="case_id" id="case_id" class="regular-text" required>
-							<option value=""><?php esc_html_e( 'Select Case', 'wp-paradb' ); ?></option>
-							<?php foreach ( $cases as $case ) : ?>
-								<option value="<?php echo esc_attr( $case->case_id ); ?>">
-									<?php echo esc_html( $case->case_number . ' - ' . $case->case_name ); ?>
-								</option>
-							<?php endforeach; ?>
-						</select>
-					</td>
-				</tr>
+					                                        <td>
+					                                                <select name="case_id" id="case_id" class="regular-text" required>
+					                                                        <option value=""><?php esc_html_e( 'Select Case', 'wp-paradb' ); ?></option>
+					                                                        <?php foreach ( $cases as $case ) : ?>
+					                                                                <option value="<?php echo esc_attr( $case->case_id ); ?>" <?php selected( $pre_case_id, $case->case_id ); ?>>
+					                                                                        <?php echo esc_html( $case->case_number . ' - ' . $case->case_name ); ?>
+					                                                                </option>
+					                                                        <?php endforeach; ?>
+					                                                </select>
+					                                        </td>				</tr>
 
 				<tr>
 					<th scope="row">

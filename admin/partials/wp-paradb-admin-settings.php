@@ -206,9 +206,9 @@ $options = get_option( 'wp_paradb_options', array() );
 					<label for="google_maps_api_key"><?php esc_html_e( 'Google Maps API Key', 'wp-paradb' ); ?></label>
 				</th>
 				<td>
-					<input type="password" name="google_maps_api_key" id="google_maps_api_key" class="regular-text" value="<?php echo esc_attr( isset( $options['google_maps_api_key'] ) ? $options['google_maps_api_key'] : '' ); ?>">
+					<input type="password" name="google_maps_api_key" id="google_maps_api_key" class="regular-text" value="<?php echo esc_attr( isset( $options['google_maps_api_key'] ) ? $options['google_maps_api_key'] : '' ); ?>" title="<?php esc_attr_e( 'Enter your Google Maps JavaScript API key for map display and address auto-suggest.', 'wp-paradb' ); ?>">
 					<p class="description">
-						<?php esc_html_e( 'Required if Google Maps is selected.', 'wp-paradb' ); ?>
+						<?php esc_html_e( 'Required if Google Maps is selected. Get one from the Google Cloud Console.', 'wp-paradb' ); ?>
 					</p>
 				</td>
 			</tr>
@@ -217,7 +217,7 @@ $options = get_option( 'wp_paradb_options', array() );
 					<label for="locationiq_api_key"><?php esc_html_e( 'LocationIQ API Key', 'wp-paradb' ); ?></label>
 				</th>
 				<td>
-					<input type="password" name="locationiq_api_key" id="locationiq_api_key" class="regular-text" value="<?php echo esc_attr( isset( $options['locationiq_api_key'] ) ? $options['locationiq_api_key'] : '' ); ?>">
+					<input type="password" name="locationiq_api_key" id="locationiq_api_key" class="regular-text" value="<?php echo esc_attr( isset( $options['locationiq_api_key'] ) ? $options['locationiq_api_key'] : '' ); ?>" title="<?php esc_attr_e( 'Enter your LocationIQ API key for geocoding services with OpenStreetMap.', 'wp-paradb' ); ?>">
 					<p class="description">
 						<?php esc_html_e( 'Used for free geocoding if OpenStreetMap is selected. (10,000 free requests/day)', 'wp-paradb' ); ?>
 					</p>
@@ -228,7 +228,7 @@ $options = get_option( 'wp_paradb_options', array() );
 					<label for="weatherapi_api_key"><?php esc_html_e( 'WeatherAPI.com API Key', 'wp-paradb' ); ?></label>
 				</th>
 				<td>
-					<input type="password" name="weatherapi_api_key" id="weatherapi_api_key" class="regular-text" value="<?php echo esc_attr( isset( $options['weatherapi_api_key'] ) ? $options['weatherapi_api_key'] : '' ); ?>">
+					<input type="password" name="weatherapi_api_key" id="weatherapi_api_key" class="regular-text" value="<?php echo esc_attr( isset( $options['weatherapi_api_key'] ) ? $options['weatherapi_api_key'] : '' ); ?>" title="<?php esc_attr_e( 'Enter your WeatherAPI.com key for moon phase and astronomical data.', 'wp-paradb' ); ?>">
 					<p class="description">
 						<?php esc_html_e( 'Used for fetching weather and moon phase data. (Free tier available)', 'wp-paradb' ); ?>
 					</p>
@@ -239,7 +239,7 @@ $options = get_option( 'wp_paradb_options', array() );
 					<label for="freeastroapi_api_key"><?php esc_html_e( 'FreeAstroAPI Key', 'wp-paradb' ); ?></label>
 				</th>
 				<td>
-					<input type="password" name="freeastroapi_api_key" id="freeastroapi_api_key" class="regular-text" value="<?php echo esc_attr( isset( $options['freeastroapi_api_key'] ) ? $options['freeastroapi_api_key'] : '' ); ?>">
+					<input type="password" name="freeastroapi_api_key" id="freeastroapi_api_key" class="regular-text" value="<?php echo esc_attr( isset( $options['freeastroapi_api_key'] ) ? $options['freeastroapi_api_key'] : '' ); ?>" title="<?php esc_attr_e( 'Enter your FreeAstroAPI.com key for planetary transit data.', 'wp-paradb' ); ?>">
 					<p class="description">
 						<?php esc_html_e( 'Used for fetching astrological transit data. (Optional)', 'wp-paradb' ); ?>
 					</p>
@@ -288,7 +288,7 @@ $options = get_option( 'wp_paradb_options', array() );
 				<th scope="row"><?php esc_html_e( 'Data Removal', 'wp-paradb' ); ?></th>
 				<td>
 					<label>
-						<input type="checkbox" name="delete_data_on_uninstall" value="1" <?php checked( isset( $options['delete_data_on_uninstall'] ) ? $options['delete_data_on_uninstall'] : 0, 1 ); ?>>
+						<input type="checkbox" name="delete_data_on_uninstall" value="1" <?php checked( isset( $options['delete_data_on_uninstall'] ) ? $options['delete_data_on_uninstall'] : 0, 1 ); ?> title="<?php esc_attr_e( 'If checked, all plugin data and tables will be permanently deleted when the plugin is uninstalled.', 'wp-paradb' ); ?>">
 						<span style="color: #dc3232; font-weight: bold;"><?php esc_html_e( 'Permanently delete ALL data and tables when this plugin is uninstalled', 'wp-paradb' ); ?></span>
 					</label>
 					<p class="description"><?php esc_html_e( 'Warning: This cannot be undone. Keep this unchecked if you want to preserve your data between installations.', 'wp-paradb' ); ?></p>

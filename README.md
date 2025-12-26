@@ -1,95 +1,45 @@
-# WordPress Paranormal Database
+# WordPress Paranormal Database (WP-ParaDB)
 
-Welcome to WP-ParaDB! This plugin provides a standardized, easy-to-use way of recording, archiving, and sharing paranormal witness reports, recorded anomalies, experiments, and investigations. Based loosely on the original ParaDB project, it offers researchers a comprehensive platform for paranormal data management within WordPress.
+WP-ParaDB is a comprehensive, professional-grade WordPress plugin designed for paranormal researchers, parapsychologists, and investigation teams. It provides a standardized and secure platform for recording, archiving, and sharing paranormal witness reports, field observations, experiments, and detailed investigation cases.
 
-## ✨ Planned Features
+## 🌟 Key Features
 
-* **Universal Compatibility** - Works with any standard, up-to-date WordPress installation and theme
-* **Investigation Logging** - Comprehensive paranormal investigation logging and reporting tools
-* **Experiment Recording** - Detailed recording of parapsychological experiments
-* **Advanced Search** - Database searchable by all fields with free search and advanced boolean search capabilities
-* **Multi-language Support** - Full internationalization support for global research communities
-* **Peer Review Process** - Built-in peer review workflow for research validation
-* **Federated Architecture** - Connect and share data across multiple research installations
+*   **Case Management:** Organize investigations into comprehensive cases with linked activities, reports, and evidence.
+*   **Activity Logging:** Detailed tracking of site visits, interviews, and experiments.
+*   **Environmental Data Integration:** Automatically fetch weather, astronomical (moon phase), astrological (planetary transits), and geomagnetic (Kp-Index) data based on location and time.
+*   **Evidence Handling:** Securely upload and link photos, audio, and video files to cases and activities.
+*   **Public Witness Submissions:** A customizable public form for witnesses to submit their experiences directly to your database.
+*   **Privacy & Redaction:** Built-in tools to automatically or manually redact sensitive information from public-facing reports.
+*   **Role-Based Access:** Specialized user roles (Director, Team Leader, Investigator) to manage team permissions.
+*   **Data Maintenance:** Integrated tools for data backup (JSON), restoration, and complete scrubbing on uninstall.
 
 ## 🚀 Installation
 
-Installing WP-ParaDB is straightforward and follows standard WordPress plugin installation procedures:
+1.  Download the latest release from the [releases page](https://github.com/bchabot/wp-paradb/releases).
+2.  Upload the `wp-paradb` folder to your `/wp-content/plugins/` directory.
+3.  Activate the plugin through the 'Plugins' menu in WordPress.
+4.  Navigate to **ParaDB > Settings** to configure your API keys and default options.
 
-1. **Download** the plugin files from the [releases page](https://github.com/bchabot/wp-paradb/releases)
-2. **Upload** the plugin files to your WordPress installation's `/wp-content/plugins/` directory
-3. **Activate** the plugin through the 'Plugins' menu in your WordPress admin dashboard
-4. **Configure** the plugin settings to match your research requirements
+## 📖 Usage & Shortcodes
 
-Alternatively, you can install directly from the WordPress admin:
-- Navigate to **Plugins > Add New**
-- Search for "WordPress Paranormal Database"
-- Click **Install Now** and then **Activate** 
+Full documentation is available directly within the WordPress admin under **ParaDB > Documentation**.
 
-## Usage
+### Main Shortcodes:
+*   `[paradb_cases]` - Displays a searchable grid of all published cases.
+*   `[paradb_single_case id="123"]` - Displays full details for a specific case.
+*   `[paradb_witness_form]` - Displays the public witness submission form.
+*   `[paradb_log_book]` - Displays a chronological log of all published activities and reports.
 
-### Display the Witness Form
+## 👥 Credits & Acknowledgments
 
-Add this shortcode to any page:
-```
-[paradb_witness_form]
-```
+WP-ParaDB is based on the original concepts and workflow of the **[ParaDB](https://github.com/szarkos/paradb)** project.
 
-Or with a custom redirect:
-```
-[paradb_witness_form redirect_url="https://yoursite.com/thank-you"]
-
-## 🛠️ Development Tools
-
-### Internationalization (i18n)
-* **[Poedit](http://www.poedit.net/)** - Professional translation editor for creating and managing .po files
-* **[makepot](http://i18n.svn.wordpress.org/tools/trunk/)** - Official WordPress translation tools for generating .pot files
-* **[i18n](https://github.com/grappler/i18n)** - WordPress internationalization command-line tools
-
-### Development Resources
-* **[WordPress Plugin Boilerplate](http://wppb.io/)** - Standardized plugin development framework
-* **[ParaDB](http://paradb.sourceforge.net/)** - Original paranormal database project that inspired this plugin
+We would like to extend our sincere thanks to **Stephen Zarkos** ([szarkos](https://github.com/szarkos)) for the original idea and the significant work he put into the original ParaDB software. His contribution provided the inspiration and foundation for this WordPress implementation.
 
 ## 📄 License
 
-This WordPress plugin is licensed under the **GPL v3 or later**.
-
-> This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License, version 3, as published by the Free Software Foundation.
-
-> This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-> You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-
-A copy of the license is included in the root of the plugin’s directory. The file is named [`LICENSE`](LICENSE).
-
-## 📁 Plugin Structure
-
-### File Organization
-
-When contributing or extending the plugin, please follow the established file structure:
-
-* **[`includes/`](includes/)** - Core functionality shared between admin and public areas
-* **[`admin/`](admin/)** - All admin-specific functionality and interfaces  
-* **[`public/`](public/)** - All public-facing functionality and displays
-
-## 👥 Credits
-
-WP-ParaDB is loosely based on concepts found in **[ParaDB](http://paradb.sourceforge.net/)** ([SourceForge](https://sourceforge.net/projects/paradb/) | [GitHub](https://github.com/szarkos/paradb)). Copyright (C) 2007 Stephen A. Zarkos <Obsid@Sentry.net> and distributed under GPL2.
-
-This plugin is created with the organization and leadership of **Brian Chabot** <bchabot@gmail.com> and released under GPL3.
-
-## 📚 Documentation & Support
-
-### Contributing
-
-We welcome contributions from the community!
-
-Whether you’re interested in writing documentation, creating tutorials, fixing bugs, or adding new features, please feel free to get involved at the [project repository](https://github.com/bchabot/wp-paradb).
-
-### Project Updates
-
-For project updates and version history, see the [CHANGELOG](CHANGELOG.md).
+This plugin is licensed under the [GPL v3 or later](LICENSE).
 
 ---
 
-**Ready to start your paranormal research journey?** Install WP-ParaDB today and join the community of researchers documenting the unexplained! 🔍👻
+Developed and maintained by **Brian Chabot** ([brianchabot.org](https://brianchabot.org/)) 🔍👻
