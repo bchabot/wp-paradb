@@ -47,24 +47,25 @@ class WP_ParaDB_Activity_Handler {
 			'activity_content'     => wp_kses_post( $data['activity_content'] ),
 			'activity_summary'     => isset( $data['activity_summary'] ) ? sanitize_textarea_field( $data['activity_summary'] ) : null,
 			'investigator_id'    => get_current_user_id(),
-			                        'weather_conditions' => isset( $data['weather_conditions'] ) ? sanitize_text_field( $data['weather_conditions'] ) : null,
-			                        'moon_phase'         => isset( $data['moon_phase'] ) ? sanitize_text_field( $data['moon_phase'] ) : null,
-			                        'temperature'        => isset( $data['temperature'] ) ? sanitize_text_field( $data['temperature'] ) : null,
-			                        'astrological_data'  => isset( $data['astrological_data'] ) ? sanitize_textarea_field( $data['astrological_data'] ) : null,
-			                        'geomagnetic_data'   => isset( $data['geomagnetic_data'] ) ? sanitize_textarea_field( $data['geomagnetic_data'] ) : null,
-			                        'equipment_used'     => isset( $data['equipment_used'] ) ? sanitize_textarea_field( $data['equipment_used'] ) : null,			'evidence_collected' => isset( $data['evidence_collected'] ) ? sanitize_textarea_field( $data['evidence_collected'] ) : null,
+			'weather_conditions' => isset( $data['weather_conditions'] ) ? sanitize_text_field( $data['weather_conditions'] ) : null,
+			'moon_phase'         => isset( $data['moon_phase'] ) ? sanitize_text_field( $data['moon_phase'] ) : null,
+			'temperature'        => isset( $data['temperature'] ) ? sanitize_text_field( $data['temperature'] ) : null,
+			'astrological_data'  => isset( $data['astrological_data'] ) ? sanitize_textarea_field( $data['astrological_data'] ) : null,
+			'geomagnetic_data'   => isset( $data['geomagnetic_data'] ) ? sanitize_textarea_field( $data['geomagnetic_data'] ) : null,
+			'equipment_used'     => isset( $data['equipment_used'] ) ? sanitize_textarea_field( $data['equipment_used'] ) : null,
+			'evidence_collected' => isset( $data['evidence_collected'] ) ? sanitize_textarea_field( $data['evidence_collected'] ) : null,
 			'phenomena_observed' => isset( $data['phenomena_observed'] ) ? sanitize_textarea_field( $data['phenomena_observed'] ) : null,
 			'duration_minutes'   => isset( $data['duration_minutes'] ) ? absint( $data['duration_minutes'] ) : null,
-			                        'participants'       => isset( $data['participants'] ) ? sanitize_textarea_field( $data['participants'] ) : null,
-			                        'is_published'       => isset( $data['is_published'] ) ? absint( $data['is_published'] ) : 0,
-			                        'date_created'       => current_time( 'mysql' ),
-			                );
-			
-			                // Format types for database.
-			                $format = array(
-			                        '%d', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s',
-			                        '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%d', '%s',
-			                );		// Insert into database.
+			'participants'       => isset( $data['participants'] ) ? sanitize_textarea_field( $data['participants'] ) : null,
+			'is_published'       => isset( $data['is_published'] ) ? absint( $data['is_published'] ) : 0,
+			'date_created'       => current_time( 'mysql' ),
+		);
+
+		// Format types for database.
+		$format = array(
+			'%d', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s',
+			'%s', '%s', '%s', '%s', '%s', '%d', '%s', '%d', '%s',
+		);		// Insert into database.
 		$result = $wpdb->insert(
 			$wpdb->prefix . 'paradb_activities',
 			$activity_data,
