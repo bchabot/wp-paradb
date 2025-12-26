@@ -160,15 +160,16 @@ class WP_ParaDB_Admin_Menu {
 			array( __CLASS__, 'docs_page' )
 		);
 
-		// Hidden Log Chat page.
+		// Hidden Log Chat page (registered then removed to hide).
 		add_submenu_page(
-			null, // Hidden from menu
+			'wp-paradb',
 			__( 'Log Action', 'wp-paradb' ),
 			__( 'Log Action', 'wp-paradb' ),
 			'paradb_view_cases',
 			'wp-paradb-log-chat',
 			array( __CLASS__, 'log_chat_page' )
 		);
+		remove_submenu_page( 'wp-paradb', 'wp-paradb-log-chat' );
 	}
 
 	/**

@@ -37,13 +37,13 @@ class WP_ParaDB_Activator {
 	public static function activate() {
 		// Check WordPress version compatibility.
 		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
-			deactivate_plugins( plugin_basename( __FILE__ ) );
+			deactivate_plugins( WP_PARADB_PLUGIN_BASENAME );
 			wp_die( esc_html__( 'WordPress Paranormal Database requires WordPress 5.0 or higher.', 'wp-paradb' ) );
 		}
 
 		// Check PHP version compatibility.
 		if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
-			deactivate_plugins( plugin_basename( __FILE__ ) );
+			deactivate_plugins( WP_PARADB_PLUGIN_BASENAME );
 			wp_die( esc_html__( 'WordPress Paranormal Database requires PHP 7.4 or higher.', 'wp-paradb' ) );
 		}
 
