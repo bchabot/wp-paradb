@@ -32,7 +32,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<h3><?php esc_html_e( 'Workflow Overview', 'wp-paradb' ); ?></h3>
 		<ol>
 			<li><strong><?php esc_html_e( 'Create a Case:', 'wp-paradb' ); ?></strong> <?php esc_html_e( 'Start by creating a new case. This is the top-level container for all your research at a specific location.', 'wp-paradb' ); ?></li>
-			<li><strong><?php esc_html_e( 'Log Activities:', 'wp-paradb' ); ?></strong> <?php esc_html_e( 'Record individual site visits, experiments, or interviews as Activities. This is where you can auto-fetch environmental data.', 'wp-paradb' ); ?></li>
+			<li><strong><?php esc_html_e( 'Assign a Team:', 'wp-paradb' ); ?></strong> <?php esc_html_e( 'Assign a Case Manager and multiple team members with specific roles (Lead, Researcher, Tech Specialist) to collaborate on the investigation.', 'wp-paradb' ); ?></li>
+			<li><strong><?php esc_html_e( 'Log Activities & Field Notes:', 'wp-paradb' ); ?></strong> <?php esc_html_e( 'Record site visits as Activities. Use the "Log My Actions" button on mobile for real-time field notes with GPS coordinates and photos.', 'wp-paradb' ); ?></li>
 			<li><strong><?php esc_html_e( 'Write Reports:', 'wp-paradb' ); ?></strong> <?php esc_html_e( 'Summarize your findings in formal Reports. Reports can be linked to specific Activities.', 'wp-paradb' ); ?></li>
 			<li><strong><?php esc_html_e( 'Upload Evidence:', 'wp-paradb' ); ?></strong> <?php esc_html_e( 'Attach photos, audio, or video files to your cases, activities, or reports.', 'wp-paradb' ); ?></li>
 			<li><strong><?php esc_html_e( 'Publish:', 'wp-paradb' ); ?></strong> <?php esc_html_e( 'When ready, mark your cases and specific activities/reports as published to share them on your website.', 'wp-paradb' ); ?></li>

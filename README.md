@@ -5,6 +5,8 @@ WP-ParaDB is a comprehensive, professional-grade WordPress plugin designed for p
 ## 🌟 Key Features
 
 *   **Case Management:** Organize investigations into comprehensive cases with linked activities, reports, and evidence.
+*   **Team Assignments:** Assign multiple team members to a case with customizable roles (Lead, Tech, Researcher, etc.).
+*   **Mobile-Friendly Logging:** "Log My Actions" feature designed for rapid field entry with auto-geolocation and attachment support.
 *   **Activity Logging:** Detailed tracking of site visits, interviews, and experiments.
 *   **Environmental Data Integration:** Automatically fetch weather, astronomical (moon phase), astrological (planetary transits), and geomagnetic (Kp-Index) data based on location and time.
 *   **Evidence Handling:** Securely upload and link photos, audio, and video files to cases and activities.
