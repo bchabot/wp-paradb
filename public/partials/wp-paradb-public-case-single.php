@@ -37,6 +37,7 @@ if ( ! $case || ! $case->is_published ) {
 
 // Get related data.
 $reports = WP_ParaDB_Report_Handler::get_reports( array( 'case_id' => $case_id, 'limit' => 100 ) );
+$activities = WP_ParaDB_Activity_Handler::get_activities( array( 'case_id' => $case_id, 'limit' => 100 ) );
 $evidence = WP_ParaDB_Evidence_Handler::get_evidence_files( array( 'case_id' => $case_id, 'limit' => 100 ) );
 $relationships = WP_ParaDB_Relationship_Handler::get_relationships( $case_id, 'case' );
 $phenomena = maybe_unserialize( $case->phenomena_types );
@@ -180,6 +181,58 @@ $redaction_terms = WP_ParaDB_Privacy::get_case_redaction_terms( $case_id );
 									<?php endif; ?>
 									<?php if ( $activity->moon_phase ) : ?>
 										<p><strong><?php esc_html_e( 'Moon Phase:', 'wp-paradb' ); ?></strong> <?php echo esc_html( ucwords( str_replace( '_', ' ', $activity->moon_phase ) ) ); ?></p>
+									<?php endif; ?>
+									<?php if ( $activity->astrological_data ) : ?>
+										<p><strong><?php esc_html_e( 'Astrological:', 'wp-paradb' ); ?></strong> <?php echo esc_html( WP_ParaDB_Privacy::redact( $activity->astrological_data, $redaction_terms ) ); ?></p>
+									<?php endif; ?>
+									<?php if ( $activity->geomagnetic_data ) : ?>
+										<p><strong><?php esc_html_e( 'Geomagnetic:', 'wp-paradb' ); ?></strong> <?php echo esc_html( WP_ParaDB_Privacy::redact( $activity->geomagnetic_data, $redaction_terms ) ); ?></p>
+									<?php endif; ?>
+								</div>
+							<?php endif; ?>
+						</article>
+					<?php endif; ?>
+				<?php endforeach; ?>
+			</section>
+		<?php endif; ?>
+
+		<?php if ( ! empty( $activities ) ) : ?>
+			<section class="case-section activities">
+				<h2><?php esc_html_e( 'Investigation Activities', 'wp-paradb' ); ?></h2>
+				<?php foreach ( $activities as $activity ) : ?>
+					<?php if ( $activity->is_published ) : ?>
+						<article class="activity">
+							<h3 class="activity-title"><?php echo esc_html( WP_ParaDB_Privacy::redact( $activity->activity_title, $redaction_terms ) ); ?></h3>
+							<div class="activity-meta">
+								<span class="activity-date">
+									<?php echo esc_html( gmdate( 'F j, Y', strtotime( $activity->activity_date ) ) ); ?>
+								</span>
+								<span class="activity-type">
+									<?php echo esc_html( ucfirst( $activity->activity_type ) ); ?>
+								</span>
+							</div>
+
+							<div class="activity-content">
+								<?php echo wp_kses_post( wpautop( WP_ParaDB_Privacy::redact( $activity->activity_content, $redaction_terms ) ) ); ?>
+							</div>
+
+							<?php if ( $activity->weather_conditions || $activity->temperature || $activity->moon_phase || $activity->astrological_data || $activity->geomagnetic_data ) : ?>
+								<div class="activity-conditions">
+									<h4><?php esc_html_e( 'Environmental Conditions', 'wp-paradb' ); ?></h4>
+									<?php if ( $activity->weather_conditions ) : ?>
+										<p><strong><?php esc_html_e( 'Weather:', 'wp-paradb' ); ?></strong> <?php echo esc_html( WP_ParaDB_Privacy::redact( $activity->weather_conditions, $redaction_terms ) ); ?></p>
+									<?php endif; ?>
+									<?php if ( $activity->temperature ) : ?>
+										<p><strong><?php esc_html_e( 'Temperature:', 'wp-paradb' ); ?></strong> <?php echo esc_html( WP_ParaDB_Privacy::redact( $activity->temperature, $redaction_terms ) ); ?></p>
+									<?php endif; ?>
+									<?php if ( $activity->moon_phase ) : ?>
+										<p><strong><?php esc_html_e( 'Moon Phase:', 'wp-paradb' ); ?></strong> <?php echo esc_html( ucwords( str_replace( '_', ' ', $activity->moon_phase ) ) ); ?></p>
+									<?php endif; ?>
+									<?php if ( $activity->astrological_data ) : ?>
+										<p><strong><?php esc_html_e( 'Astrological:', 'wp-paradb' ); ?></strong> <?php echo esc_html( WP_ParaDB_Privacy::redact( $activity->astrological_data, $redaction_terms ) ); ?></p>
+									<?php endif; ?>
+									<?php if ( $activity->geomagnetic_data ) : ?>
+										<p><strong><?php esc_html_e( 'Geomagnetic:', 'wp-paradb' ); ?></strong> <?php echo esc_html( WP_ParaDB_Privacy::redact( $activity->geomagnetic_data, $redaction_terms ) ); ?></p>
 									<?php endif; ?>
 								</div>
 							<?php endif; ?>

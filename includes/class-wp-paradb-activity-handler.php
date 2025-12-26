@@ -47,23 +47,23 @@ class WP_ParaDB_Activity_Handler {
 			'activity_content'     => wp_kses_post( $data['activity_content'] ),
 			'activity_summary'     => isset( $data['activity_summary'] ) ? sanitize_textarea_field( $data['activity_summary'] ) : null,
 			'investigator_id'    => get_current_user_id(),
-			'weather_conditions' => isset( $data['weather_conditions'] ) ? sanitize_text_field( $data['weather_conditions'] ) : null,
-			'moon_phase'         => isset( $data['moon_phase'] ) ? sanitize_text_field( $data['moon_phase'] ) : null,
-			'temperature'        => isset( $data['temperature'] ) ? sanitize_text_field( $data['temperature'] ) : null,
-			'equipment_used'     => isset( $data['equipment_used'] ) ? sanitize_textarea_field( $data['equipment_used'] ) : null,
-			'evidence_collected' => isset( $data['evidence_collected'] ) ? sanitize_textarea_field( $data['evidence_collected'] ) : null,
+			                        'weather_conditions' => isset( $data['weather_conditions'] ) ? sanitize_text_field( $data['weather_conditions'] ) : null,
+			                        'moon_phase'         => isset( $data['moon_phase'] ) ? sanitize_text_field( $data['moon_phase'] ) : null,
+			                        'temperature'        => isset( $data['temperature'] ) ? sanitize_text_field( $data['temperature'] ) : null,
+			                        'astrological_data'  => isset( $data['astrological_data'] ) ? sanitize_textarea_field( $data['astrological_data'] ) : null,
+			                        'geomagnetic_data'   => isset( $data['geomagnetic_data'] ) ? sanitize_textarea_field( $data['geomagnetic_data'] ) : null,
+			                        'equipment_used'     => isset( $data['equipment_used'] ) ? sanitize_textarea_field( $data['equipment_used'] ) : null,			'evidence_collected' => isset( $data['evidence_collected'] ) ? sanitize_textarea_field( $data['evidence_collected'] ) : null,
 			'phenomena_observed' => isset( $data['phenomena_observed'] ) ? sanitize_textarea_field( $data['phenomena_observed'] ) : null,
 			'duration_minutes'   => isset( $data['duration_minutes'] ) ? absint( $data['duration_minutes'] ) : null,
 			'participants'       => isset( $data['participants'] ) ? sanitize_textarea_field( $data['participants'] ) : null,
 			'date_created'       => current_time( 'mysql' ),
 		);
 
-		// Format types for database.
-		$format = array(
-			'%d', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s',
-			'%s', '%s', '%s', '%d', '%s', '%s',
-		);
-
+		                // Format types for database.
+		                $format = array(
+		                        '%d', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s',
+		                        '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s',
+		                );
 		// Insert into database.
 		$result = $wpdb->insert(
 			$wpdb->prefix . 'paradb_activities',
@@ -111,8 +111,8 @@ class WP_ParaDB_Activity_Handler {
 
 		$allowed_fields = array(
 			'activity_title', 'activity_type', 'activity_date', 'activity_content', 'activity_summary',
-			'weather_conditions', 'moon_phase', 'temperature', 'equipment_used',
-			'evidence_collected', 'phenomena_observed', 'duration_minutes', 'participants',
+			'weather_conditions', 'moon_phase', 'temperature', 'astrological_data', 'geomagnetic_data', 
+			'equipment_used', 'evidence_collected', 'phenomena_observed', 'duration_minutes', 'participants',
 		);
 
 		foreach ( $allowed_fields as $field ) {
@@ -120,7 +120,7 @@ class WP_ParaDB_Activity_Handler {
 				if ( in_array( $field, array( 'activity_content' ), true ) ) {
 					$update_data[ $field ] = wp_kses_post( $data[ $field ] );
 					$format[] = '%s';
-				} elseif ( in_array( $field, array( 'activity_summary', 'equipment_used', 'evidence_collected', 'phenomena_observed', 'participants' ), true ) ) {
+				} elseif ( in_array( $field, array( 'activity_summary', 'equipment_used', 'evidence_collected', 'phenomena_observed', 'participants', 'astrological_data', 'geomagnetic_data' ), true ) ) {
 					$update_data[ $field ] = sanitize_textarea_field( $data[ $field ] );
 					$format[] = '%s';
 				} elseif ( 'duration_minutes' === $field ) {

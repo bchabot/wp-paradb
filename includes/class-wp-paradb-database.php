@@ -112,11 +112,12 @@ class WP_ParaDB_Database {
 			activity_content longtext NOT NULL,
 			activity_summary text DEFAULT NULL,
 			investigator_id bigint(20) unsigned NOT NULL,
-			weather_conditions varchar(200) DEFAULT NULL,
-			moon_phase varchar(50) DEFAULT NULL,
-			temperature varchar(50) DEFAULT NULL,
-			equipment_used text DEFAULT NULL,
-			evidence_collected text DEFAULT NULL,
+			                        weather_conditions varchar(200) DEFAULT NULL,
+			                        moon_phase varchar(50) DEFAULT NULL,
+			                        temperature varchar(50) DEFAULT NULL,
+			                        astrological_data text DEFAULT NULL,
+			                        geomagnetic_data text DEFAULT NULL,
+			                        equipment_used text DEFAULT NULL,			evidence_collected text DEFAULT NULL,
 			phenomena_observed text DEFAULT NULL,
 			duration_minutes int(11) DEFAULT NULL,
 			participants text DEFAULT NULL,
@@ -332,9 +333,8 @@ class WP_ParaDB_Database {
 		dbDelta( $sql_field_logs );
 		dbDelta( $sql_witnesses );
 
-		// Store database version
-		update_option( 'wp_paradb_db_version', '1.4.0' );
-	}
+		                // Store database version
+		                update_option( 'wp_paradb_db_version', '1.5.0' );	}
 
 	/**
 	 * Drop all plugin tables

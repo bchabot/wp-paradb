@@ -124,26 +124,49 @@
 					lng: lng,
 					datetime: datetime
 				},
-				success: function(response) {
-					if (response.success) {
-						var data = response.data;
-						if (data.weather) {
-							if (data.weather.temp) $('#temperature').val(data.weather.temp + '°C');
-							if (data.weather.weather_code !== null) {
-								$('#weather_conditions').val('Code: ' + data.weather.weather_code + (data.weather.humidity ? ', Humidity: ' + data.weather.humidity + '%' : ''));
-							}
-						}
-						if (data.astro && data.astro.moon_phase) {
-							// Try to match moon phase value
-							var phase = data.astro.moon_phase.toLowerCase().replace(/ /g, '_');
-							$('#moon_phase').val(phase);
-						}
-						alert('Data fetched and applied successfully.');
-					} else {
-						alert('Error: ' + response.data.message);
-					}
-				},
-				error: function() {
+				                                success: function(response) {
+				                                        if (response.success) {
+				                                                var data = response.data;
+				                                                var resultsHtml = '<div class="fetch-results-list" style="background: #f9f9f9; padding: 10px; border: 1px solid #ddd; margin-top: 10px;">';
+				                                                
+				                                                                                                if (data.weather) {
+				                                                                                                        resultsHtml += '<p><label><input type="checkbox" class="apply-env-data" data-target="#temperature" data-value="' + (data.weather.temp ? data.weather.temp + '°C' : '') + '"> <strong>Temperature:</strong> ' + (data.weather.temp ? data.weather.temp + '°C' : 'N/A') + '</label></p>';
+				                                                                                                        var cond = 'Code: ' + data.weather.weather_code + (data.weather.humidity ? ', Humidity: ' + data.weather.humidity + '%' : '');
+				                                                                                                        resultsHtml += '<p><label><input type="checkbox" class="apply-env-data" data-target="#weather_conditions" data-value="' + cond + '"> <strong>Weather Conditions:</strong> ' + cond + '</label></p>';
+				                                                                                                }				                                                
+				                                                if (data.astro && data.astro.moon_phase) {
+				                                                        resultsHtml += '<p><label><input type="checkbox" class="apply-env-data" data-target="#moon_phase" data-value="' + data.astro.moon_phase.toLowerCase().replace(/ /g, '_') + '"> <strong>Moon Phase:</strong> ' + data.astro.moon_phase + '</label></p>';
+				                                                }
+				
+				                                                if (data.astrology) {
+				                                                        var astroText = '';
+				                                                        for (var planet in data.astrology) {
+				                                                                astroText += planet + ': ' + data.astrology[planet].sign + ' (' + data.astrology[planet].full_degree.toFixed(2) + '°); ';
+				                                                        }
+				                                                        resultsHtml += '<p><label><input type="checkbox" class="apply-env-data" data-target="#astrological_data" data-value="' + astroText + '"> <strong>Astrological:</strong> ' + astroText.substring(0, 100) + '...</label></p>';
+				                                                }
+				
+				                                                if (data.geomagnetic) {
+				                                                        var geoText = 'Kp-Index: ' + data.geomagnetic.kp_index + ' (' + data.geomagnetic.source + ')';
+				                                                        resultsHtml += '<p><label><input type="checkbox" class="apply-env-data" data-target="#geomagnetic_data" data-value="' + geoText + '"> <strong>Geomagnetic:</strong> ' + geoText + '</label></p>';
+				                                                }
+				
+				                                                resultsHtml += '<button type="button" id="apply-selected-env-data" class="button button-small">Apply Selected</button>';
+				                                                resultsHtml += '</div>';
+				
+				                                                $('#fetch-results-container').html(resultsHtml);
+				                                                $('#fetch-results-row').show();
+				
+				                                                $('#apply-selected-env-data').on('click', function() {
+				                                                        $('.apply-env-data:checked').each(function() {
+				                                                                $($(this).data('target')).val($(this).data('value'));
+				                                                        });
+				                                                        alert('Selected data applied.');
+				                                                });
+				                                        } else {
+				                                                alert('Error: ' + response.data.message);
+				                                        }
+				                                },				error: function() {
 					alert('An unexpected error occurred during fetching.');
 				},
 				complete: function() {
