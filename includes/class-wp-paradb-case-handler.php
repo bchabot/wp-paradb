@@ -306,6 +306,7 @@ class WP_ParaDB_Case_Handler {
 		$wpdb->delete( $wpdb->prefix . 'paradb_case_team', array( 'case_id' => $case_id ), array( '%d' ) );
 		$wpdb->delete( $wpdb->prefix . 'paradb_case_notes', array( 'case_id' => $case_id ), array( '%d' ) );
 		$wpdb->delete( $wpdb->prefix . 'paradb_reports', array( 'case_id' => $case_id ), array( '%d' ) );
+		$wpdb->delete( $wpdb->prefix . 'paradb_activities', array( 'case_id' => $case_id ), array( '%d' ) );
 		$wpdb->delete( $wpdb->prefix . 'paradb_evidence', array( 'case_id' => $case_id ), array( '%d' ) );
 
 		// Delete case.

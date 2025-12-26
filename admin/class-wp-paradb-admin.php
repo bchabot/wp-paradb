@@ -57,6 +57,51 @@ class WP_ParaDB_Admin {
 		$this->version     = $version;
 
 		add_action( 'wp_ajax_paradb_fetch_environmental_data', array( $this, 'ajax_fetch_environmental_data' ) );
+		add_action( 'admin_init', array( $this, 'handle_maintenance_actions' ) );
+	}
+
+	/**
+	 * Handle Maintenance form actions (Backup/Restore/Reset)
+	 */
+	public function handle_maintenance_actions() {
+		if ( ! isset( $_POST['paradb_maintenance_action'] ) ) return;
+		
+		check_admin_referer( 'paradb_maintenance_nonce', 'maintenance_nonce' );
+
+		if ( ! current_user_can( 'paradb_manage_settings' ) ) {
+			wp_die( __( 'Unauthorized.', 'wp-paradb' ) );
+		}
+
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-maintenance-handler.php';
+
+		$action = sanitize_text_field( $_POST['paradb_maintenance_action'] );
+
+		switch ( $action ) {
+			case 'backup':
+				$data = WP_ParaDB_Maintenance_Handler::export_data();
+				$filename = 'paradb-backup-' . date( 'Y-m-d-His' ) . '.json';
+				header( 'Content-Type: application/json' );
+				header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+				echo $data;
+				exit;
+
+			case 'restore':
+				if ( ! empty( $_FILES['restore_file']['tmp_name'] ) ) {
+					$json = file_get_contents( $_FILES['restore_file']['tmp_name'] );
+					$result = WP_ParaDB_Maintenance_Handler::import_data( $json );
+					if ( is_wp_error( $result ) ) {
+						add_settings_error( 'paradb_messages', 'restore_error', $result->get_error_message(), 'error' );
+					} else {
+						add_settings_error( 'paradb_messages', 'restore_success', __( 'Data restored successfully.', 'wp-paradb' ), 'updated' );
+					}
+				}
+				break;
+
+			case 'reset':
+				WP_ParaDB_Maintenance_Handler::reset_all();
+				add_settings_error( 'paradb_messages', 'reset_success', __( 'All data and settings have been reset.', 'wp-paradb' ), 'updated' );
+				break;
+		}
 	}
 
 	/**

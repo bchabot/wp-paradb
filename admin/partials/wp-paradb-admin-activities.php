@@ -55,7 +55,7 @@ if ( isset( $_POST['save_activity'] ) && check_admin_referer( 'save_activity', '
 // Handle delete action.
 if ( isset( $_GET['action'] ) && 'delete' === $_GET['action'] && isset( $_GET['activity_id'] ) && isset( $_GET['_wpnonce'] ) ) {
 	if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'delete_activity_' . absint( $_GET['activity_id'] ) ) ) {
-		if ( current_user_can( 'paradb_delete_reports' ) ) {
+		if ( current_user_can( 'paradb_delete_activities' ) ) {
 			$result = WP_ParaDB_Activity_Handler::delete_activity( absint( $_GET['activity_id'] ) );
 			if ( ! is_wp_error( $result ) ) {
 				echo '<div class="notice notice-success"><p>' . esc_html__( 'Activity deleted successfully.', 'wp-paradb' ) . '</p></div>';
@@ -261,7 +261,7 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 	<div class="wrap">
 		<h1 class="wp-heading-inline"><?php esc_html_e( 'Activities', 'wp-paradb' ); ?></h1>
 		
-		<?php if ( current_user_can( 'paradb_add_reports' ) ) : ?>
+		<?php if ( current_user_can( 'paradb_add_activities' ) ) : ?>
 			<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-activities&action=new' ) ); ?>" class="page-title-action">
 				<?php esc_html_e( 'Add New', 'wp-paradb' ); ?>
 			</a>
@@ -311,7 +311,7 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 											<?php esc_html_e( 'Edit', 'wp-paradb' ); ?>
 										</a>
 									</span>
-									<?php if ( current_user_can( 'paradb_delete_reports' ) ) : ?>
+									<?php if ( current_user_can( 'paradb_delete_activities' ) ) : ?>
 										|
 										<span class="delete">
 											<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=wp-paradb-activities&action=delete&activity_id=' . $activity->activity_id ), 'delete_activity_' . $activity->activity_id ) ); ?>" onclick="return confirm('<?php esc_attr_e( 'Are you sure?', 'wp-paradb' ); ?>');">

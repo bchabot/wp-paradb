@@ -352,10 +352,13 @@ class WP_ParaDB_Database {
 			'case_notes',
 			'evidence',
 			'witness_accounts',
+			'field_logs',
+			'relationships',
 			'reports',
 			'activities',
 			'cases',
 			'clients',
+			'locations',
 		);
 
 		foreach ( $tables as $table ) {

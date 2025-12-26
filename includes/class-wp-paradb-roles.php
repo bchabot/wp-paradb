@@ -37,53 +37,58 @@ class WP_ParaDB_Roles {
 			'read' => true,
 		);
 
-		// Investigator capabilities - Can view and work on assigned cases
-		$investigator_caps = array_merge(
-			$read_caps,
-			array(
-				'paradb_view_cases'        => true,
-				'paradb_view_own_cases'    => true,
-				'paradb_edit_own_cases'    => true,
-				'paradb_add_reports'       => true,
-				'paradb_edit_own_reports'  => true,
-				'paradb_view_clients'      => true,
-				'paradb_upload_evidence'   => true,
-				'paradb_add_notes'         => true,
-			)
-		);
+				// Investigator capabilities - Can view and work on assigned cases
+				$investigator_caps = array_merge(
+						$read_caps,
+						array(
+								'paradb_view_cases'        => true,
+								'paradb_view_own_cases'    => true,
+								'paradb_edit_own_cases'    => true,
+								'paradb_add_reports'       => true,
+								'paradb_edit_own_reports'  => true,
+								'paradb_add_activities'      => true,
+								'paradb_edit_own_activities' => true,
+								'paradb_view_clients'      => true,
+								'paradb_upload_evidence'   => true,
+								'paradb_add_notes'         => true,
+						)
+				);
 
-		// Team Leader capabilities - Can manage cases and team members
-		$team_leader_caps = array_merge(
-			$investigator_caps,
-			array(
-				'paradb_create_cases'      => true,
-				'paradb_edit_cases'        => true,
-				'paradb_delete_own_cases'  => true,
-				'paradb_assign_cases'      => true,
-				'paradb_manage_team'       => true,
-				'paradb_edit_reports'      => true,
-				'paradb_delete_own_reports' => true,
-				'paradb_add_clients'       => true,
-				'paradb_edit_clients'      => true,
-				'paradb_manage_evidence'   => true,
-				'paradb_publish_cases'     => true,
-			)
-		);
+				// Team Leader capabilities - Can manage cases and team members
+				$team_leader_caps = array_merge(
+						$investigator_caps,
+						array(
+								'paradb_create_cases'      => true,
+								'paradb_edit_cases'        => true,
+								'paradb_delete_own_cases'  => true,
+								'paradb_assign_cases'      => true,
+								'paradb_manage_team'       => true,
+								'paradb_edit_reports'      => true,
+								'paradb_delete_own_reports' => true,
+								'paradb_edit_activities'     => true,
+								'paradb_delete_own_activities' => true,
+								'paradb_add_clients'       => true,
+								'paradb_edit_clients'      => true,
+								'paradb_manage_evidence'   => true,
+								'paradb_publish_cases'     => true,
+						)
+				);
 
-		// Director capabilities - Full administrative control
-		$director_caps = array_merge(
-			$team_leader_caps,
-			array(
-				'paradb_delete_cases'      => true,
-				'paradb_delete_reports'    => true,
-				'paradb_delete_clients'    => true,
-				'paradb_delete_evidence'   => true,
-				'paradb_manage_settings'   => true,
-				'paradb_view_all_cases'    => true,
-				'paradb_export_data'       => true,
-				'paradb_manage_witnesses'  => true,
-			)
-		);
+				// Director capabilities - Full administrative control
+				$director_caps = array_merge(
+						$team_leader_caps,
+						array(
+								'paradb_delete_cases'      => true,
+								'paradb_delete_reports'    => true,
+								'paradb_delete_activities'   => true,
+								'paradb_delete_clients'    => true,
+								'paradb_delete_evidence'   => true,
+								'paradb_manage_settings'   => true,
+								'paradb_view_all_cases'    => true,
+								'paradb_export_data'       => true,
+								'paradb_manage_witnesses'  => true,
+						)
+				);
 
 		// Create roles
 		add_role(
@@ -136,12 +141,17 @@ class WP_ParaDB_Roles {
 				'paradb_delete_cases',
 				'paradb_assign_cases',
 				'paradb_view_all_cases',
-				'paradb_add_reports',
-				'paradb_edit_own_reports',
-				'paradb_edit_reports',
-				'paradb_delete_own_reports',
-				'paradb_delete_reports',
-				'paradb_view_clients',
+								'paradb_add_reports',
+								'paradb_edit_own_reports',
+								'paradb_edit_reports',
+								'paradb_delete_own_reports',
+								'paradb_delete_reports',
+								'paradb_add_activities',
+								'paradb_edit_own_activities',
+								'paradb_edit_activities',
+								'paradb_delete_own_activities',
+								'paradb_delete_activities',
+								'paradb_view_clients',
 				'paradb_add_clients',
 				'paradb_edit_clients',
 				'paradb_delete_clients',
