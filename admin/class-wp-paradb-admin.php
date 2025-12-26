@@ -59,6 +59,8 @@ class WP_ParaDB_Admin {
 		add_action( 'wp_ajax_paradb_fetch_environmental_data', array( $this, 'ajax_fetch_environmental_data' ) );
 		add_action( 'wp_ajax_paradb_submit_log_chat', array( $this, 'ajax_submit_log_chat' ) );
 		add_action( 'wp_ajax_paradb_get_log_chat', array( $this, 'ajax_get_log_chat' ) );
+		add_action( 'wp_ajax_paradb_assign_team_member', array( $this, 'ajax_assign_team_member' ) );
+		add_action( 'wp_ajax_paradb_remove_team_member', array( $this, 'ajax_remove_team_member' ) );
 		add_action( 'wp_ajax_paradb_get_all_logs_live', array( $this, 'ajax_get_all_logs_live' ) );
 		add_action( 'wp_ajax_paradb_get_linkable_objects', array( $this, 'ajax_get_linkable_objects' ) );
 		add_action( 'wp_ajax_paradb_search_locations', array( $this, 'ajax_search_locations' ) );
@@ -198,6 +200,55 @@ class WP_ParaDB_Admin {
 		}
 
 		wp_send_json_success( array( 'logs' => $logs ) );
+	}
+
+	/**
+	 * AJAX handler for assigning team member to case
+	 */
+	public function ajax_assign_team_member() {
+		check_ajax_referer( 'paradb_team_nonce', 'nonce' );
+
+		if ( ! current_user_can( 'paradb_assign_cases' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wp-paradb' ) ) );
+		}
+
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-case-handler.php';
+
+		$case_id = absint( $_POST['case_id'] );
+		$user_id = absint( $_POST['user_id'] );
+		$role = sanitize_text_field( $_POST['role'] );
+
+		$result = WP_ParaDB_Case_Handler::assign_team_member( $case_id, $user_id, $role );
+
+		if ( is_wp_error( $result ) ) {
+			wp_send_json_error( array( 'message' => $result->get_error_message() ) );
+		}
+
+		wp_send_json_success();
+	}
+
+	/**
+	 * AJAX handler for removing team member from case
+	 */
+	public function ajax_remove_team_member() {
+		check_ajax_referer( 'paradb_team_nonce', 'nonce' );
+
+		if ( ! current_user_can( 'paradb_assign_cases' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wp-paradb' ) ) );
+		}
+
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-case-handler.php';
+
+		$case_id = absint( $_POST['case_id'] );
+		$user_id = absint( $_POST['user_id'] );
+
+		$result = WP_ParaDB_Case_Handler::remove_team_member( $case_id, $user_id );
+
+		if ( is_wp_error( $result ) ) {
+			wp_send_json_error( array( 'message' => $result->get_error_message() ) );
+		}
+
+		wp_send_json_success();
 	}
 
 	/**

@@ -161,6 +161,18 @@ class WP_ParaDB_Taxonomy_Handler {
 					'evidence_of'     => __( 'Evidence of', 'wp-paradb' ),
 				),
 			),
+			'team_roles' => array(
+				'label'       => __( 'Team Roles', 'wp-paradb' ),
+				'description' => __( 'Roles for team members assigned to cases', 'wp-paradb' ),
+				'items'       => array(
+					'lead'         => __( 'Lead Investigator', 'wp-paradb' ),
+					'investigator' => __( 'Investigator', 'wp-paradb' ),
+					'researcher'   => __( 'Researcher', 'wp-paradb' ),
+					'tech'         => __( 'Tech Specialist', 'wp-paradb' ),
+					'trainee'      => __( 'Trainee', 'wp-paradb' ),
+					'other'        => __( 'Other', 'wp-paradb' ),
+				),
+			),
 		);
 	}
 

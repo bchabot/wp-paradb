@@ -386,6 +386,35 @@ class WP_ParaDB_Case_Handler {
 	}
 
 	/**
+	 * Remove team member from case
+	 *
+	 * @since    1.6.0
+	 * @param    int    $case_id    Case ID.
+	 * @param    int    $user_id    User ID.
+	 * @return   bool|WP_Error      True on success, WP_Error on failure.
+	 */
+	public static function remove_team_member( $case_id, $user_id ) {
+		global $wpdb;
+
+		$result = $wpdb->delete(
+			$wpdb->prefix . 'paradb_case_team',
+			array(
+				'case_id' => absint( $case_id ),
+				'user_id' => absint( $user_id ),
+			),
+			array( '%d', '%d' )
+		);
+
+		if ( false === $result ) {
+			return new WP_Error( 'db_delete_error', __( 'Failed to remove team member.', 'wp-paradb' ) );
+		}
+
+		do_action( 'wp_paradb_team_member_removed', $case_id, $user_id );
+
+		return true;
+	}
+
+	/**
 	 * Get team members for a case
 	 *
 	 * @since    1.0.0

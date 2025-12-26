@@ -155,6 +155,7 @@ jQuery(document).ready(function($) {
 		formData.append('action', 'paradb_submit_log_chat');
 
 		var $btn = $(this).find('button[type="submit"]');
+		var $content = $('#log_content');
 		$btn.prop('disabled', true).text('Sending...');
 
 		$.ajax({
@@ -165,10 +166,15 @@ jQuery(document).ready(function($) {
 			contentType: false,
 			success: function(res) {
 				if (res.success) {
-					$('#log_content').val('');
+					$content.val('').focus();
 					$('#log_file').val('');
 					$('#file-preview').text('');
 					loadLogs();
+					// Scroll to bottom
+					setTimeout(function() {
+						var $chat = $('#log-chat-messages');
+						$chat.scrollTop(0);
+					}, 500);
 				} else {
 					alert('Error: ' + res.data.message);
 				}
@@ -178,6 +184,9 @@ jQuery(document).ready(function($) {
 			}
 		});
 	});
+
+	// Focus input on load
+	$('#log_content').focus();
 
 	function loadLogs() {
 		$.ajax({

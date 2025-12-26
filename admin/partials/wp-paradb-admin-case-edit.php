@@ -465,7 +465,7 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 							</p>
 
 							<p>
-								<label for="assigned_to"><strong><?php esc_html_e( 'Assigned To', 'wp-paradb' ); ?></strong></label><br>
+								<label for="assigned_to"><strong><?php esc_html_e( 'Case Manager', 'wp-paradb' ); ?></strong></label><br>
 								<select name="assigned_to" id="assigned_to" class="widefat">
 									<option value=""><?php esc_html_e( 'Unassigned', 'wp-paradb' ); ?></option>
 									<?php foreach ( $investigators as $investigator ) : ?>
@@ -477,6 +477,135 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 							</p>
 						</div>
 					</div>
+
+					<!-- Team Assignments -->
+					<?php if ( ! $is_new && $case_id > 0 ) : ?>
+						<div class="postbox">
+							<h2 class="hndle"><?php esc_html_e( 'Team Assignments', 'wp-paradb' ); ?></h2>
+							<div class="inside">
+								<?php
+								$team_members = WP_ParaDB_Case_Handler::get_case_team( $case_id );
+								$team_roles = WP_ParaDB_Taxonomy_Handler::get_taxonomy_items( 'team_roles' );
+								?>
+								<table class="wp-list-table widefat fixed striped">
+									<thead>
+										<tr>
+											<th><?php esc_html_e( 'Member', 'wp-paradb' ); ?></th>
+											<th><?php esc_html_e( 'Role', 'wp-paradb' ); ?></th>
+											<th style="width: 100px;"><?php esc_html_e( 'Actions', 'wp-paradb' ); ?></th>
+										</tr>
+									</thead>
+									<tbody id="case-team-list">
+										<?php if ( $team_members ) : ?>
+											<?php foreach ( $team_members as $member ) : 
+												$user = get_userdata( $member->user_id );
+												if ( ! $user ) continue;
+												?>
+												<tr>
+													<td><?php echo esc_html( $user->display_name ); ?></td>
+													<td>
+														<select class="change-team-role" data-user-id="<?php echo esc_attr( $member->user_id ); ?>">
+															<?php foreach ( $team_roles as $role_key => $role_label ) : ?>
+																<option value="<?php echo esc_attr( $role_key ); ?>" <?php selected( $member->role, $role_key ); ?>>
+																	<?php echo esc_html( $role_label ); ?>
+																</option>
+															<?php endforeach; ?>
+														</select>
+													</td>
+													<td>
+														<button type="button" class="button button-link-delete remove-team-member" data-user-id="<?php echo esc_attr( $member->user_id ); ?>">
+															<?php esc_html_e( 'Remove', 'wp-paradb' ); ?>
+														</button>
+													</td>
+												</tr>
+											<?php endforeach; ?>
+										<?php else : ?>
+											<tr class="no-items"><td colspan="3"><?php esc_html_e( 'No team members assigned.', 'wp-paradb' ); ?></td></tr>
+										<?php endif; ?>
+									</tbody>
+								</table>
+
+								<div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+									<h4><?php esc_html_e( 'Add Team Member', 'wp-paradb' ); ?></h4>
+									<div style="display: flex; gap: 10px; align-items: center;">
+										<select id="new-team-member" style="flex: 1;">
+											<option value=""><?php esc_html_e( 'Select User', 'wp-paradb' ); ?></option>
+											<?php foreach ( $investigators as $inv ) : ?>
+												<option value="<?php echo esc_attr( $inv->ID ); ?>"><?php echo esc_html( $inv->display_name ); ?></option>
+											<?php endforeach; ?>
+										</select>
+										<select id="new-team-role">
+											<?php foreach ( $team_roles as $role_key => $role_label ) : ?>
+												<option value="<?php echo esc_attr( $role_key ); ?>"><?php echo esc_html( $role_label ); ?></option>
+											<?php endforeach; ?>
+										</select>
+										<button type="button" id="add-team-member" class="button"><?php esc_html_e( 'Add to Team', 'wp-paradb' ); ?></button>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<script>
+						jQuery(document).ready(function($) {
+							var caseId = <?php echo $case_id; ?>;
+
+							$('#add-team-member').on('click', function() {
+								var userId = $('#new-team-member').val();
+								var role = $('#new-team-role').val();
+								if (!userId) return;
+
+								$.post(ajaxurl, {
+									action: 'paradb_assign_team_member',
+									case_id: caseId,
+									user_id: userId,
+									role: role,
+									nonce: '<?php echo wp_create_nonce("paradb_team_nonce"); ?>'
+								}, function(res) {
+									if (res.success) {
+										location.reload();
+									} else {
+										alert(res.data.message);
+									}
+								});
+							});
+
+							$(document).on('click', '.remove-team-member', function() {
+								if (!confirm('<?php echo esc_js(__("Are you sure you want to remove this team member?", "wp-paradb")); ?>')) return;
+								var userId = $(this).data('user-id');
+								
+								$.post(ajaxurl, {
+									action: 'paradb_remove_team_member',
+									case_id: caseId,
+									user_id: userId,
+									nonce: '<?php echo wp_create_nonce("paradb_team_nonce"); ?>'
+								}, function(res) {
+									if (res.success) {
+										location.reload();
+									} else {
+										alert(res.data.message);
+									}
+								});
+							});
+
+							$(document).on('change', '.change-team-role', function() {
+								var userId = $(this).data('user-id');
+								var role = $(this).val();
+
+								$.post(ajaxurl, {
+									action: 'paradb_assign_team_member',
+									case_id: caseId,
+									user_id: userId,
+									role: role,
+									nonce: '<?php echo wp_create_nonce("paradb_team_nonce"); ?>'
+								}, function(res) {
+									if (!res.success) {
+										alert(res.data.message);
+									}
+								});
+							});
+						});
+						</script>
+					<?php endif; ?>
 
 					<?php if ( ! $is_new && $case ) : ?>
 						<!-- Case Meta -->

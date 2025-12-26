@@ -169,7 +169,7 @@ class WP_ParaDB_Admin_Menu {
 			'wp-paradb-log-chat',
 			array( __CLASS__, 'log_chat_page' )
 		);
-		remove_submenu_page( 'wp-paradb', 'wp-paradb-log-chat' );
+		// remove_submenu_page( 'wp-paradb', 'wp-paradb-log-chat' );
 	}
 
 	/**
