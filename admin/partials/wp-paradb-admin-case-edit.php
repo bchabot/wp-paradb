@@ -382,7 +382,22 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 												<tr>
 													<td><?php echo esc_html( gmdate( 'Y-m-d H:i', strtotime( $log->date_created ) ) ); ?></td>
 													<td><?php echo $investigator ? esc_html( $investigator->display_name ) : '—'; ?></td>
-													<td><?php echo wp_kses_post( $log->log_content ); ?></td>
+													<td>
+														<?php echo wp_kses_post( $log->log_content ); ?>
+														<?php if ( $log->file_url ) : ?>
+															<div style="margin-top: 5px;">
+																<?php 
+																$is_img = preg_match( '/\.(jpg|jpeg|png|gif)$/i', $log->file_url );
+																if ( $is_img ) : ?>
+																	<a href="<?php echo esc_url( $log->file_url ); ?>" target="_blank">
+																		<img src="<?php echo esc_url( $log->file_url ); ?>" style="max-width: 60px; max-height: 60px; border-radius: 2px; border: 1px solid #ddd;">
+																	</a>
+																<?php else : ?>
+																	<a href="<?php echo esc_url( $log->file_url ); ?>" target="_blank" style="font-size: 11px;"><?php esc_html_e( 'View Attachment', 'wp-paradb' ); ?></a>
+																<?php endif; ?>
+															</div>
+														<?php endif; ?>
+													</td>
 													<td><?php echo $log->latitude ? esc_html( $log->latitude . ', ' . $log->longitude ) : '—'; ?></td>
 												</tr>
 											<?php endforeach; ?>

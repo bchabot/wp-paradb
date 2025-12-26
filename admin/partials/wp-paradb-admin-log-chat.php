@@ -210,7 +210,7 @@ jQuery(document).ready(function($) {
 								var isImg = log.file_url.match(/\.(jpg|jpeg|png|gif)$/i);
 								html += '<div class="paradb-log-file">';
 								if (isImg) {
-									html += '<a href="' + log.file_url + '" target="_blank"><img src="' + log.file_url + '" style="max-width: 100%; border-radius: 4px;"></a>';
+									html += '<a href="' + log.file_url + '" target="_blank" title="View full size"><img src="' + log.file_url + '" style="max-width: 80px; max-height: 80px; border-radius: 4px; border: 1px solid #ddd; padding: 2px; background: #fff;"></a>';
 								} else {
 									html += '<a href="' + log.file_url + '" target="_blank" class="button button-small">View Attachment</a>';
 								}

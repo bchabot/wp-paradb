@@ -311,7 +311,15 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 												<?php echo wp_kses_post( $log->log_content ); ?>
 												<?php if ( $log->file_url ) : ?>
 													<div style="margin-top: 5px;">
-														<a href="<?php echo esc_url( $log->file_url ); ?>" target="_blank" class="button button-small"><?php esc_html_e( 'View Attachment', 'wp-paradb' ); ?></a>
+														<?php 
+														$is_img = preg_match( '/\.(jpg|jpeg|png|gif)$/i', $log->file_url );
+														if ( $is_img ) : ?>
+															<a href="<?php echo esc_url( $log->file_url ); ?>" target="_blank">
+																<img src="<?php echo esc_url( $log->file_url ); ?>" style="max-width: 60px; max-height: 60px; border-radius: 2px; border: 1px solid #ddd;">
+															</a>
+														<?php else : ?>
+															<a href="<?php echo esc_url( $log->file_url ); ?>" target="_blank" class="button button-small"><?php esc_html_e( 'View Attachment', 'wp-paradb' ); ?></a>
+														<?php endif; ?>
 													</div>
 												<?php endif; ?>
 											</td>
