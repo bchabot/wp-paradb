@@ -89,7 +89,8 @@ class WP_ParaDB {
 		        		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-relationship-handler.php';
 		        		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-environmental-fetcher.php';
 		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-field-log-handler.php';
-		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-privacy.php';		// Admin classes.
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-privacy.php';
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-maintenance-handler.php';		// Admin classes.
 		require_once WP_PARADB_PLUGIN_DIR . 'admin/class-wp-paradb-admin.php';
 		require_once WP_PARADB_PLUGIN_DIR . 'admin/class-wp-paradb-admin-menu.php';
 

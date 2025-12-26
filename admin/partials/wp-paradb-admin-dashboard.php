@@ -25,6 +25,7 @@ require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-case-handler.php';
 global $wpdb;
 $cases_table = $wpdb->prefix . 'paradb_cases';
 $reports_table = $wpdb->prefix . 'paradb_reports';
+$activities_table = $wpdb->prefix . 'paradb_activities';
 $clients_table = $wpdb->prefix . 'paradb_clients';
 $evidence_table = $wpdb->prefix . 'paradb_evidence';
 
@@ -32,6 +33,7 @@ $total_cases = $wpdb->get_var( "SELECT COUNT(*) FROM {$cases_table}" );
 $open_cases = $wpdb->get_var( "SELECT COUNT(*) FROM {$cases_table} WHERE case_status = 'open' OR case_status = 'active'" );
 $closed_cases = $wpdb->get_var( "SELECT COUNT(*) FROM {$cases_table} WHERE case_status = 'closed'" );
 $total_reports = $wpdb->get_var( "SELECT COUNT(*) FROM {$reports_table}" );
+$total_activities = $wpdb->get_var( "SELECT COUNT(*) FROM {$activities_table}" );
 $total_clients = $wpdb->get_var( "SELECT COUNT(*) FROM {$clients_table}" );
 $total_evidence = $wpdb->get_var( "SELECT COUNT(*) FROM {$evidence_table}" );
 
@@ -72,11 +74,15 @@ $my_cases = WP_ParaDB_Case_Handler::get_cases( array(
 				<p style="margin: 0; color: #666;"><?php esc_html_e( 'Closed Cases', 'wp-paradb' ); ?></p>
 			</div>
 
-			<div class="paradb-stat-card" style="background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 4px;">
-				<h3 style="margin: 0 0 10px 0; color: #826eb4;"><?php echo esc_html( number_format( $total_reports ) ); ?></h3>
-				<p style="margin: 0; color: #666;"><?php esc_html_e( 'Total Reports', 'wp-paradb' ); ?></p>
-			</div>
-
+			                        <div class="paradb-stat-card" style="background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 4px;">
+			                                <h3 style="margin: 0 0 10px 0; color: #826eb4;"><?php echo esc_html( number_format( $total_reports ) ); ?></h3>
+			                                <p style="margin: 0; color: #666;"><?php esc_html_e( 'Total Reports', 'wp-paradb' ); ?></p>
+			                        </div>
+			
+			                        <div class="paradb-stat-card" style="background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 4px;">
+			                                <h3 style="margin: 0 0 10px 0; color: #32c1dc;"><?php echo esc_html( number_format( $total_activities ) ); ?></h3>
+			                                <p style="margin: 0; color: #666;"><?php esc_html_e( 'Total Activities', 'wp-paradb' ); ?></p>
+			                        </div>
 			<div class="paradb-stat-card" style="background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 4px;">
 				<h3 style="margin: 0 0 10px 0; color: #f56e28;"><?php echo esc_html( number_format( $total_clients ) ); ?></h3>
 				<p style="margin: 0; color: #666;"><?php esc_html_e( 'Clients', 'wp-paradb' ); ?></p>
@@ -98,12 +104,17 @@ $my_cases = WP_ParaDB_Case_Handler::get_cases( array(
 					</a>
 				<?php endif; ?>
 				
-				<?php if ( current_user_can( 'paradb_add_reports' ) ) : ?>
-					<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-reports&action=new' ) ); ?>" class="button">
-						<?php esc_html_e( 'Add Report', 'wp-paradb' ); ?>
-					</a>
-				<?php endif; ?>
+				                                <?php if ( current_user_can( 'paradb_add_reports' ) ) : ?>
+				                                        <a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-reports&action=new' ) ); ?>" class="button">
+				                                                <?php esc_html_e( 'Add Report', 'wp-paradb' ); ?>
+				                                        </a>
+				                                <?php endif; ?>
 				
+				                                <?php if ( current_user_can( 'paradb_add_activities' ) ) : ?>
+				                                        <a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-activities&action=new' ) ); ?>" class="button">
+				                                                <?php esc_html_e( 'Add Activity', 'wp-paradb' ); ?>
+				                                        </a>
+				                                <?php endif; ?>				
 				<?php if ( current_user_can( 'paradb_add_clients' ) ) : ?>
 					<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-clients&action=new' ) ); ?>" class="button">
 						<?php esc_html_e( 'Add Client', 'wp-paradb' ); ?>

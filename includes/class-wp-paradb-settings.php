@@ -169,6 +169,7 @@ By submitting a witness report, you acknowledge that you have read and understoo
 			'redact_witness_names'           => true,
 			'redact_investigator_names'      => false,
 			'redaction_placeholder'          => '[REDACTED]',
+			'delete_data_on_uninstall'       => false,
 		);
 	}
 
@@ -241,6 +242,7 @@ By submitting a witness report, you acknowledge that you have read and understoo
 			'enable_recaptcha',
 			'redact_witness_names',
 			'redact_investigator_names',
+			'delete_data_on_uninstall',
 		);
 
 		foreach ( $bool_keys as $key ) {

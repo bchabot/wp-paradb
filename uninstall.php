@@ -15,10 +15,23 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 // Load database class.
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-wp-paradb-database.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-wp-paradb-roles.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-wp-paradb-settings.php';
+
+// Check if we should delete all data.
+$delete_all = WP_ParaDB_Settings::get_setting( 'delete_data_on_uninstall', false );
+
+if ( ! $delete_all ) {
+	// Only delete core options, but keep data tables.
+	delete_option( 'wp_paradb_options' );
+	delete_option( 'wp_paradb_db_version' );
+	return;
+}
 
 // Delete plugin options.
 delete_option( 'wp_paradb_options' );
 delete_option( 'wp_paradb_db_version' );
+delete_option( 'wp_paradb_settings' );
+delete_option( 'wp_paradb_taxonomies' );
 
 // Remove custom user roles.
 WP_ParaDB_Roles::remove_roles();

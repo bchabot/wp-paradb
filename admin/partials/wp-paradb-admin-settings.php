@@ -49,6 +49,7 @@ if ( isset( $_POST['save_settings'] ) && check_admin_referer( 'save_paradb_setti
 	$options['redact_witness_names'] = isset( $_POST['redact_witness_names'] ) ? 1 : 0;
 	$options['redact_investigator_names'] = isset( $_POST['redact_investigator_names'] ) ? 1 : 0;
 	$options['redaction_placeholder'] = isset( $_POST['redaction_placeholder'] ) ? sanitize_text_field( wp_unslash( $_POST['redaction_placeholder'] ) ) : '[REDACTED]';
+	$options['delete_data_on_uninstall'] = isset( $_POST['delete_data_on_uninstall'] ) ? 1 : 0;
 
 	// Update options.
 	update_option( 'wp_paradb_options', $options );
@@ -63,8 +64,9 @@ $options = get_option( 'wp_paradb_options', array() );
 <div class="wrap">
 	<h1><?php esc_html_e( 'ParaDB Settings', 'wp-paradb' ); ?></h1>
 	
-	<form method="post" action="">
+	<form method="post" action="" enctype="multipart/form-data">
 		<?php wp_nonce_field( 'save_paradb_settings', 'settings_nonce' ); ?>
+		<?php settings_errors( 'paradb_messages' ); ?>
 		
 		<h2 class="title"><?php esc_html_e( 'General Settings', 'wp-paradb' ); ?></h2>
 		<table class="form-table">
@@ -282,6 +284,16 @@ $options = get_option( 'wp_paradb_options', array() );
 					</p>
 				</td>
 			</tr>
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Data Removal', 'wp-paradb' ); ?></th>
+				<td>
+					<label>
+						<input type="checkbox" name="delete_data_on_uninstall" value="1" <?php checked( isset( $options['delete_data_on_uninstall'] ) ? $options['delete_data_on_uninstall'] : 0, 1 ); ?>>
+						<span style="color: #dc3232; font-weight: bold;"><?php esc_html_e( 'Permanently delete ALL data and tables when this plugin is uninstalled', 'wp-paradb' ); ?></span>
+					</label>
+					<p class="description"><?php esc_html_e( 'Warning: This cannot be undone. Keep this unchecked if you want to preserve your data between installations.', 'wp-paradb' ); ?></p>
+				</td>
+			</tr>
 		</table>
 
 		<h2 class="title"><?php esc_html_e( 'Database Information', 'wp-paradb' ); ?></h2>
@@ -335,12 +347,36 @@ $options = get_option( 'wp_paradb_options', array() );
 	
 	<table class="form-table">
 		<tr>
+			<th scope="row"><?php esc_html_e( 'Backup Data', 'wp-paradb' ); ?></th>
+			<td>
+				<form method="post" action="">
+					<?php wp_nonce_field( 'paradb_maintenance_nonce', 'maintenance_nonce' ); ?>
+					<input type="hidden" name="paradb_maintenance_action" value="backup">
+					<input type="submit" class="button" value="<?php esc_attr_e( 'Download Backup (JSON)', 'wp-paradb' ); ?>">
+					<p class="description"><?php esc_html_e( 'Export all cases, logs, locations, and settings to a JSON file.', 'wp-paradb' ); ?></p>
+				</form>
+			</td>
+		</tr>
+		<tr>
+			<th scope="row"><?php esc_html_e( 'Restore Data', 'wp-paradb' ); ?></th>
+			<td>
+				<form method="post" action="" enctype="multipart/form-data">
+					<?php wp_nonce_field( 'paradb_maintenance_nonce', 'maintenance_nonce' ); ?>
+					<input type="hidden" name="paradb_maintenance_action" value="restore">
+					<input type="file" name="restore_file" accept=".json" required>
+					<input type="submit" class="button" value="<?php esc_attr_e( 'Restore from Backup', 'wp-paradb' ); ?>" onclick="return confirm('<?php esc_attr_e( 'Warning: This will overwrite all current data. Continue?', 'wp-paradb' ); ?>');">
+				</form>
+			</td>
+		</tr>
+		<tr>
 			<th scope="row"><?php esc_html_e( 'Reset Plugin', 'wp-paradb' ); ?></th>
 			<td>
-				<p class="description" style="margin-bottom: 10px;">
-					<?php esc_html_e( 'This will remove all plugin data including cases, reports, clients, and evidence files. User roles will be preserved.', 'wp-paradb' ); ?>
-				</p>
-				<button type="button" class="button" onclick="if(confirm('<?php esc_attr_e( 'Are you absolutely sure? This will delete ALL ParaDB data and cannot be undone!', 'wp-paradb' ); ?>')) { alert('<?php esc_attr_e( 'Please deactivate and reactivate the plugin to reset data.', 'wp-paradb' ); ?>'); }"><?php esc_html_e( 'Reset All Data', 'wp-paradb' ); ?></button>
+				<form method="post" action="">
+					<?php wp_nonce_field( 'paradb_maintenance_nonce', 'maintenance_nonce' ); ?>
+					<input type="hidden" name="paradb_maintenance_action" value="reset">
+					<input type="submit" class="button" value="<?php esc_attr_e( 'Reset All Data and Settings', 'wp-paradb' ); ?>" onclick="return confirm('<?php esc_attr_e( 'Are you absolutely sure? This will delete ALL ParaDB data and settings and cannot be undone!', 'wp-paradb' ); ?>');">
+					<p class="description"><?php esc_html_e( 'This will remove all plugin data including cases, reports, clients, and evidence files. User roles will be preserved.', 'wp-paradb' ); ?></p>
+				</form>
 			</td>
 		</tr>
 	</table>

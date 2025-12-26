@@ -80,18 +80,30 @@ class WP_ParaDB_Taxonomy_Handler {
 					'urgent' => __( 'Urgent', 'wp-paradb' ),
 				),
 			),
-			'report_types' => array(
-				'label'       => __( 'Report Types', 'wp-paradb' ),
-				'description' => __( 'Types of investigation reports', 'wp-paradb' ),
-				'items'       => array(
-					'investigation' => __( 'Investigation Report', 'wp-paradb' ),
-					'initial'       => __( 'Initial Assessment', 'wp-paradb' ),
-					'followup'      => __( 'Follow-up Report', 'wp-paradb' ),
-					'final'         => __( 'Final Report', 'wp-paradb' ),
-					'analysis'      => __( 'Analysis Report', 'wp-paradb' ),
-				),
-			),
-			'evidence_types' => array(
+			                        'report_types' => array(
+			                                'label'       => __( 'Report Types', 'wp-paradb' ),
+			                                'description' => __( 'Types of investigation reports', 'wp-paradb' ),
+			                                'items'       => array(
+			                                        'investigation' => __( 'Investigation Report', 'wp-paradb' ),
+			                                        'initial'       => __( 'Initial Assessment', 'wp-paradb' ),
+			                                        'followup'      => __( 'Follow-up Report', 'wp-paradb' ),
+			                                        'final'         => __( 'Final Report', 'wp-paradb' ),
+			                                        'analysis'      => __( 'Analysis Report', 'wp-paradb' ),
+			                                ),
+			                        ),
+			                        'activity_types' => array(
+			                                'label'       => __( 'Activity Types', 'wp-paradb' ),
+			                                'description' => __( 'Types of investigation activities', 'wp-paradb' ),
+			                                'items'       => array(
+			                                        'investigation' => __( 'Investigation', 'wp-paradb' ),
+			                                        'research'      => __( 'Research', 'wp-paradb' ),
+			                                        'consultation'  => __( 'Consultation', 'wp-paradb' ),
+			                                        'experiment'    => __( 'Experiment', 'wp-paradb' ),
+			                                        'interview'     => __( 'Interview', 'wp-paradb' ),
+			                                        'surveillance'  => __( 'Surveillance', 'wp-paradb' ),
+			                                        'site_visit'    => __( 'Site Visit', 'wp-paradb' ),
+			                                ),
+			                        ),			'evidence_types' => array(
 				'label'       => __( 'Evidence Types', 'wp-paradb' ),
 				'description' => __( 'Types of evidence files', 'wp-paradb' ),
 				'items'       => array(
