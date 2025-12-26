@@ -22,12 +22,12 @@ jobs:
     timeout-minutes: 7
     outputs:
       available_labels: '${{ steps.get_labels.outputs.available_labels }}'
-      selected_labels: '${{ env.SELECTED_LABELS }}'
+      selected_labels: '${{ steps.export_labels.outputs.selected_labels }}'
     permissions:
       contents: 'read'
       id-token: 'write'
-      issues: 'read'
-      pull-requests: 'read'
+      issues: 'write'
+      pull-requests: 'write'
     steps:
       - name: 'Get repository labels'
         id: 'get_labels'
@@ -96,6 +96,13 @@ jobs:
               }
             }
           prompt: '/gemini-triage'
+
+      - name: 'Export labels'
+        id: 'export_labels'
+        if: |-
+          ${{ steps.gemini_analysis.outcome == 'success' }}
+        run: |-
+          echo "selected_labels=${SELECTED_LABELS}" >> "${GITHUB_OUTPUT}"
 
   label:
     runs-on: 'ubuntu-latest'
