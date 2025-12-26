@@ -33,7 +33,7 @@ class WP_ParaDB_Field_Log_Handler {
 
 		$log_data = array(
 			'case_id'         => absint( $data['case_id'] ),
-			'activity_id'     => isset( $data['activity_id'] ) ? absint( $data['activity_id'] ) : null,
+			'activity_id'     => ( isset( $data['activity_id'] ) && $data['activity_id'] > 0 ) ? absint( $data['activity_id'] ) : null,
 			'investigator_id' => get_current_user_id(),
 			'log_content'     => wp_kses_post( $data['log_content'] ),
 			'latitude'        => isset( $data['latitude'] ) ? floatval( $data['latitude'] ) : null,

@@ -130,10 +130,10 @@ class WP_ParaDB_Admin {
 
 		$log_data = array(
 			'case_id'     => absint( $_POST['case_id'] ),
-			'activity_id' => absint( $_POST['activity_id'] ),
+			'activity_id' => isset( $_POST['activity_id'] ) ? absint( $_POST['activity_id'] ) : 0,
 			'log_content' => sanitize_textarea_field( $_POST['log_content'] ),
-			'latitude'    => isset( $_POST['latitude'] ) ? floatval( $_POST['latitude'] ) : null,
-			'longitude'   => isset( $_POST['longitude'] ) ? floatval( $_POST['longitude'] ) : null,
+			'latitude'    => ( isset( $_POST['latitude'] ) && '' !== $_POST['latitude'] ) ? floatval( $_POST['latitude'] ) : null,
+			'longitude'   => ( isset( $_POST['longitude'] ) && '' !== $_POST['longitude'] ) ? floatval( $_POST['longitude'] ) : null,
 		);
 
 		// Handle file upload if present

@@ -223,10 +223,10 @@ class WP_ParaDB_Log_Book {
 		
 		$log_id = WP_ParaDB_Field_Log_Handler::create_log( array(
 			'case_id'     => $_POST['case_id'],
-			'activity_id' => isset($_POST['activity_id']) ? absint($_POST['activity_id']) : null,
+			'activity_id' => ( isset( $_POST['activity_id'] ) && $_POST['activity_id'] > 0 ) ? absint( $_POST['activity_id'] ) : null,
 			'log_content' => $_POST['log_content'],
-			'latitude'    => $_POST['latitude'],
-			'longitude'   => $_POST['longitude']
+			'latitude'    => ( isset( $_POST['latitude'] ) && '' !== $_POST['latitude'] ) ? $_POST['latitude'] : null,
+			'longitude'   => ( isset( $_POST['longitude'] ) && '' !== $_POST['longitude'] ) ? $_POST['longitude'] : null
 		) );
 
 		if ( is_wp_error( $log_id ) ) {
