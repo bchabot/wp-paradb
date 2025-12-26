@@ -336,7 +336,7 @@ class WP_ParaDB_Database {
 		dbDelta( $sql_witnesses );
 
 		// Store database version
-		update_option( 'wp_paradb_db_version', '1.6.0' );
+		update_option( 'wp_paradb_db_version', '0.0.2' );
 	}
 
 	/**
