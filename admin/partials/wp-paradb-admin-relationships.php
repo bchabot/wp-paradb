@@ -115,8 +115,15 @@ $rel_types = WP_ParaDB_Taxonomy_Handler::get_taxonomy_items( 'relationship_types
 					</select>
 				</div>
 				<div>
-					<label><?php esc_html_e( 'Target Object ID', 'wp-paradb' ); ?></label><br>
-					<input type="number" name="to_id" class="widefat" required placeholder="e.g. 123">
+					<label><?php esc_html_e( 'Target Object', 'wp-paradb' ); ?></label><br>
+					<div id="rel_target_object_container">
+						<select name="to_id" id="rel_target_id" class="widefat" required>
+							<option value=""><?php esc_html_e( 'Select Target Type First', 'wp-paradb' ); ?></option>
+						</select>
+					</div>
+					<div id="rel_target_loading" style="display:none; color: #666; font-style: italic;">
+						<?php esc_html_e( 'Loading objects...', 'wp-paradb' ); ?>
+					</div>
 				</div>
 			</div>
 			<div style="margin-top: 10px;">

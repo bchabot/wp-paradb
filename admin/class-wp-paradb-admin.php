@@ -60,6 +60,8 @@ class WP_ParaDB_Admin {
 		add_action( 'wp_ajax_paradb_submit_log_chat', array( $this, 'ajax_submit_log_chat' ) );
 		add_action( 'wp_ajax_paradb_get_log_chat', array( $this, 'ajax_get_log_chat' ) );
 		add_action( 'wp_ajax_paradb_get_all_logs_live', array( $this, 'ajax_get_all_logs_live' ) );
+		add_action( 'wp_ajax_paradb_get_linkable_objects', array( $this, 'ajax_get_linkable_objects' ) );
+		add_action( 'wp_ajax_paradb_search_locations', array( $this, 'ajax_search_locations' ) );
 		add_action( 'admin_init', array( $this, 'handle_maintenance_actions' ) );
 	}
 
@@ -267,6 +269,97 @@ class WP_ParaDB_Admin {
 	}
 
 	/**
+	 * AJAX handler for getting linkable objects for relationships
+	 */
+	public function ajax_get_linkable_objects() {
+		check_ajax_referer( 'paradb_admin_nonce', 'nonce' );
+
+		if ( ! current_user_can( 'paradb_view_cases' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wp-paradb' ) ) );
+		}
+
+		$type = isset( $_POST['type'] ) ? sanitize_text_field( $_POST['type'] ) : '';
+		$objects = array();
+
+		global $wpdb;
+
+		switch ( $type ) {
+			case 'case':
+				$results = $wpdb->get_results( "SELECT case_id as id, case_number, case_name FROM {$wpdb->prefix}paradb_cases ORDER BY date_created DESC LIMIT 100" );
+				foreach ( $results as $row ) {
+					$objects[] = array( 'id' => $row->id, 'label' => $row->case_number . ' - ' . $row->case_name );
+				}
+				break;
+			case 'activity':
+				$results = $wpdb->get_results( "SELECT activity_id as id, activity_title, activity_date FROM {$wpdb->prefix}paradb_activities ORDER BY activity_date DESC LIMIT 100" );
+				foreach ( $results as $row ) {
+					$objects[] = array( 'id' => $row->id, 'label' => $row->activity_title . ' (' . date( 'Y-m-d', strtotime( $row->activity_date ) ) . ')' );
+				}
+				break;
+			case 'report':
+				$results = $wpdb->get_results( "SELECT report_id as id, report_title, report_date FROM {$wpdb->prefix}paradb_reports ORDER BY report_date DESC LIMIT 100" );
+				foreach ( $results as $row ) {
+					$objects[] = array( 'id' => $row->id, 'label' => $row->report_title . ' (' . date( 'Y-m-d', strtotime( $row->report_date ) ) . ')' );
+				}
+				break;
+			case 'location':
+				$results = $wpdb->get_results( "SELECT location_id as id, location_name FROM {$wpdb->prefix}paradb_locations ORDER BY location_name ASC LIMIT 100" );
+				foreach ( $results as $row ) {
+					$objects[] = array( 'id' => $row->id, 'label' => $row->location_name );
+				}
+				break;
+			case 'witness':
+				$results = $wpdb->get_results( "SELECT account_id as id, account_name, incident_location FROM {$wpdb->prefix}paradb_witness_accounts ORDER BY date_submitted DESC LIMIT 100" );
+				foreach ( $results as $row ) {
+					$objects[] = array( 'id' => $row->id, 'label' => ( $row->account_name ? $row->account_name : 'Anonymous' ) . ' - ' . $row->incident_location );
+				}
+				break;
+			case 'evidence':
+				$results = $wpdb->get_results( "SELECT evidence_id as id, title, file_name FROM {$wpdb->prefix}paradb_evidence ORDER BY date_uploaded DESC LIMIT 100" );
+				foreach ( $results as $row ) {
+					$objects[] = array( 'id' => $row->id, 'label' => ( $row->title ? $row->title : $row->file_name ) );
+				}
+				break;
+		}
+
+		wp_send_json_success( array( 'objects' => $objects ) );
+	}
+
+	/**
+	 * AJAX handler for searching locations
+	 */
+	public function ajax_search_locations() {
+		check_ajax_referer( 'paradb_admin_nonce', 'nonce' );
+
+		if ( ! current_user_can( 'paradb_view_cases' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wp-paradb' ) ) );
+		}
+
+		$term = isset( $_GET['term'] ) ? sanitize_text_field( $_GET['term'] ) : '';
+		
+		if ( strlen( $term ) < 2 ) {
+			wp_send_json_success( array() );
+		}
+
+		global $wpdb;
+		$results = $wpdb->get_results( $wpdb->prepare( 
+			"SELECT * FROM {$wpdb->prefix}paradb_locations WHERE location_name LIKE %s ORDER BY location_name ASC LIMIT 10",
+			'%' . $wpdb->esc_like( $term ) . '%'
+		) );
+
+		$locations = array();
+		foreach ( $results as $row ) {
+			$locations[] = array(
+				'label' => $row->location_name,
+				'value' => $row->location_name,
+				'data'  => $row
+			);
+		}
+
+		wp_send_json_success( $locations );
+	}
+
+	/**
 	 * Register the stylesheets for the admin area.
 	 *
 	 * @since    1.0.0
@@ -307,7 +400,7 @@ class WP_ParaDB_Admin {
 		wp_enqueue_script(
 			$this->plugin_name,
 			plugin_dir_url( __FILE__ ) . 'js/wp-paradb-admin.js',
-			array( 'jquery' ),
+			array( 'jquery', 'jquery-ui-autocomplete' ),
 			$this->version,
 			true // Load in footer for better performance.
 		);

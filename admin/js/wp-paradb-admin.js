@@ -56,6 +56,44 @@
 			}
 		});
 
+		// Location Name Autocomplete
+		$('input[name="location_name"]').autocomplete({
+			source: function(request, response) {
+				$.ajax({
+					url: paradb_admin.ajax_url,
+					dataType: 'json',
+					data: {
+						action: 'paradb_search_locations',
+						term: request.term,
+						nonce: paradb_admin.nonce
+					},
+					success: function(data) {
+						if (data.success) {
+							response(data.data);
+						} else {
+							response([]);
+						}
+					}
+				});
+			},
+			minLength: 2,
+			select: function(event, ui) {
+				var loc = ui.item.data;
+				if (loc) {
+					$('input[name="location_address"], input[name="address"]').val(loc.address || '');
+					$('input[name="location_city"], input[name="city"]').val(loc.city || '');
+					$('input[name="location_state"], input[name="state"]').val(loc.state || '');
+					$('input[name="location_zip"], input[name="zip"]').val(loc.zip || '');
+					$('input[name="location_country"], input[name="country"]').val(loc.country || '');
+					$('input[name="latitude"]').val(loc.latitude || '');
+					$('input[name="longitude"]').val(loc.longitude || '');
+					
+					// Trigger change to update map if initialized
+					$('input[name="latitude"]').trigger('change');
+				}
+			}
+		});
+
 		// Enhanced file upload preview
 		$('input[type="file"]').on('change', function() {
 			var file = this.files[0];
@@ -196,6 +234,32 @@
 				var pos = marker.getPosition();
 				$('#latitude').val(pos.lat().toFixed(6));
 				$('#longitude').val(pos.lng().toFixed(6));
+				
+				// Reverse Geocode
+				var geocoder = new google.maps.Geocoder();
+				geocoder.geocode({ 'location': pos }, function(results, status) {
+					if (status === 'OK' && results[0]) {
+						if (confirm('Update address details from map location?')) {
+							var addr = results[0];
+							$('input[name="location_address"], input[name="address"]').val(addr.formatted_address);
+							
+							// Parse address components
+							var city = '', state = '', zip = '', country = '';
+							for (var i = 0; i < addr.address_components.length; i++) {
+								var comp = addr.address_components[i];
+								if (comp.types.indexOf('locality') !== -1) city = comp.long_name;
+								if (comp.types.indexOf('administrative_area_level_1') !== -1) state = comp.short_name;
+								if (comp.types.indexOf('country') !== -1) country = comp.long_name;
+								if (comp.types.indexOf('postal_code') !== -1) zip = comp.long_name;
+							}
+							
+							$('input[name="location_city"], input[name="city"]').val(city);
+							$('input[name="location_state"], input[name="state"]').val(state);
+							$('input[name="location_zip"], input[name="zip"]').val(zip);
+							$('input[name="location_country"], input[name="country"]').val(country);
+						}
+					}
+				});
 			});
 
 			// Update marker when coordinates change manually
@@ -244,6 +308,27 @@
 				var pos = marker.getLatLng();
 				$('#latitude').val(pos.lat.toFixed(6));
 				$('#longitude').val(pos.lng.toFixed(6));
+				
+				// Reverse Geocode (Nominatim)
+				var url = 'https://nominatim.openstreetmap.org/reverse?format=json&lat=' + pos.lat + '&lon=' + pos.lng;
+				if (paradb_maps.locationiq_key) {
+					url = 'https://us1.locationiq.com/v1/reverse.php?key=' + paradb_maps.locationiq_key + '&lat=' + pos.lat + '&lon=' + pos.lng + '&format=json';
+				}
+
+				$.getJSON(url, function(data) {
+					if (data && data.address) {
+						if (confirm('Update address details from map location?')) {
+							var addr = data.address;
+							var fullAddr = data.display_name;
+							
+							$('input[name="location_address"], input[name="address"]').val(fullAddr);
+							$('input[name="location_city"], input[name="city"]').val(addr.city || addr.town || addr.village || '');
+							$('input[name="location_state"], input[name="state"]').val(addr.state || '');
+							$('input[name="location_zip"], input[name="zip"]').val(addr.postcode || '');
+							$('input[name="location_country"], input[name="country"]').val(addr.country || '');
+						}
+					}
+				});
 			});
 
 			$('#latitude, #longitude').on('change', function() {
@@ -318,6 +403,57 @@
 				$widget.removeClass('loading');
 			}, 1000);
 		});
+
+		// Relationship Target Object loading
+		$('#rel_target_type').on('change', function() {
+			var type = $(this).val();
+			var $select = $('#rel_target_id');
+			var $loading = $('#rel_target_loading');
+
+			if (!type || $select.length === 0) {
+				return;
+			}
+
+			$select.prop('disabled', true);
+			$loading.show();
+
+			$.ajax({
+				url: paradb_admin.ajax_url,
+				type: 'POST',
+				data: {
+					action: 'paradb_get_linkable_objects',
+					nonce: paradb_admin.nonce,
+					type: type
+				},
+				success: function(response) {
+					if (response.success) {
+						var objects = response.data.objects;
+						var options = '<option value="">' + (objects.length > 0 ? 'Select Object' : 'No objects found') + '</option>';
+						
+						$.each(objects, function(i, obj) {
+							options += '<option value="' + obj.id + '">' + obj.label + '</option>';
+						});
+						
+						$select.html(options);
+					} else {
+						$select.html('<option value="">Error loading objects</option>');
+					}
+				},
+				error: function() {
+					$select.html('<option value="">Error loading objects</option>');
+				},
+				complete: function() {
+					$select.prop('disabled', false);
+					$loading.hide();
+				}
+			});
+		});
+		
+		// Trigger initial load if element exists
+		if ($('#rel_target_type').length > 0) {
+			$('#rel_target_type').trigger('change');
+		}
+
 	});
 
 	/**
