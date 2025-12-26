@@ -21,6 +21,34 @@ if ( ! current_user_can( 'paradb_manage_witnesses' ) ) {
 // Load required classes.
 require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-witness-handler.php';
 require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-case-handler.php';
+require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-settings.php';
+
+// Handle creation action.
+if ( isset( $_POST['save_witness'] ) && check_admin_referer( 'save_witness', 'witness_nonce' ) ) {
+	$data = array(
+		'account_name'         => sanitize_text_field( $_POST['account_name'] ),
+		'account_email'        => sanitize_email( $_POST['account_email'] ),
+		'account_phone'        => sanitize_text_field( $_POST['account_phone'] ),
+		'account_address'      => sanitize_textarea_field( $_POST['account_address'] ),
+		'incident_date'        => sanitize_text_field( $_POST['incident_date'] ),
+		'incident_time'        => sanitize_text_field( $_POST['incident_time'] ),
+		'incident_location'    => sanitize_text_field( $_POST['incident_location'] ),
+		'incident_description' => sanitize_textarea_field( $_POST['incident_description'] ),
+		'phenomena_types'      => isset( $_POST['phenomena_types'] ) ? array_map( 'sanitize_text_field', $_POST['phenomena_types'] ) : array(),
+		'consent_status'       => sanitize_text_field( $_POST['consent_status'] ),
+		'status'               => sanitize_text_field( $_POST['status'] ),
+		'case_id'              => absint( $_POST['case_id'] ),
+	);
+
+	$result = WP_ParaDB_Witness_Handler::create_witness_account( $data );
+
+	if ( is_wp_error( $result ) ) {
+		echo '<div class="notice notice-error"><p>' . esc_html( $result->get_error_message() ) . '</p></div>';
+	} else {
+		echo '<div class="notice notice-success"><p>' . esc_html__( 'Witness account created successfully.', 'wp-paradb' ) . '</p></div>';
+		$action = 'list'; // Go back to list after save
+	}
+}
 
 // Handle review action.
 if ( isset( $_POST['review_witness'] ) && check_admin_referer( 'review_witness', 'witness_nonce' ) ) {
@@ -68,7 +96,87 @@ if ( isset( $_GET['action'] ) && 'delete' === $_GET['action'] && isset( $_GET['w
 $action = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : 'list';
 $witness_id = isset( $_GET['witness_id'] ) ? absint( $_GET['witness_id'] ) : 0;
 
-if ( 'view' === $action && $witness_id > 0 ) {
+if ( 'new' === $action ) {
+	$cases = WP_ParaDB_Case_Handler::get_cases( array( 'limit' => 1000 ) );
+	$phenomena_types = WP_ParaDB_Settings::get_phenomena_types();
+	?>
+	<div class="wrap">
+		<h1><?php esc_html_e( 'Add New Witness Account', 'wp-paradb' ); ?></h1>
+		<form method="post" action="">
+			<?php wp_nonce_field( 'save_witness', 'witness_nonce' ); ?>
+			
+			<table class="form-table">
+				<tr>
+					<th scope="row"><label for="account_name"><?php esc_html_e( 'Witness Name', 'wp-paradb' ); ?></label></th>
+					<td><input type="text" name="account_name" id="account_name" class="regular-text"></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="account_email"><?php esc_html_e( 'Email Address', 'wp-paradb' ); ?> *</label></th>
+					<td><input type="email" name="account_email" id="account_email" class="regular-text" required></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="account_phone"><?php esc_html_e( 'Phone', 'wp-paradb' ); ?></label></th>
+					<td><input type="text" name="account_phone" id="account_phone" class="regular-text"></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="incident_location"><?php esc_html_e( 'Incident Location', 'wp-paradb' ); ?> *</label></th>
+					<td><input type="text" name="incident_location" id="incident_location" class="regular-text" required></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="incident_date"><?php esc_html_e( 'Incident Date', 'wp-paradb' ); ?> *</label></th>
+					<td><input type="date" name="incident_date" id="incident_date" required></td>
+				</tr>
+				<tr>
+					<th scope="row"><label><?php esc_html_e( 'Phenomena Types', 'wp-paradb' ); ?> *</label></th>
+					<td>
+						<?php foreach ( $phenomena_types as $key => $label ) : ?>
+							<label style="display:block;"><input type="checkbox" name="phenomena_types[]" value="<?php echo esc_attr( $key ); ?>"> <?php echo esc_html( $label ); ?></label>
+						<?php endforeach; ?>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="incident_description"><?php esc_html_e( 'Description', 'wp-paradb' ); ?> *</label></th>
+					<td><textarea name="incident_description" id="incident_description" rows="5" class="large-text" required></textarea></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="case_id"><?php esc_html_e( 'Link to Case', 'wp-paradb' ); ?></label></th>
+					<td>
+						<select name="case_id" id="case_id">
+							<option value="0"><?php esc_html_e( 'None', 'wp-paradb' ); ?></option>
+							<?php foreach ( $cases as $case ) : ?>
+								<option value="<?php echo esc_attr( $case->case_id ); ?>"><?php echo esc_html( $case->case_number ); ?></option>
+							<?php endforeach; ?>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="consent_status"><?php esc_html_e( 'Consent', 'wp-paradb' ); ?></label></th>
+					<td>
+						<select name="consent_status" id="consent_status">
+							<option value="private"><?php esc_html_e( 'Private', 'wp-paradb' ); ?></option>
+							<option value="anonymize"><?php esc_html_e( 'Anonymize', 'wp-paradb' ); ?></option>
+							<option value="publish"><?php esc_html_e( 'Publish', 'wp-paradb' ); ?></option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="status"><?php esc_html_e( 'Status', 'wp-paradb' ); ?></label></th>
+					<td>
+						<select name="status" id="status">
+							<option value="pending"><?php esc_html_e( 'Pending', 'wp-paradb' ); ?></option>
+							<option value="approved"><?php esc_html_e( 'Approved', 'wp-paradb' ); ?></option>
+						</select>
+					</td>
+				</tr>
+			</table>
+			<p class="submit">
+				<input type="submit" name="save_witness" class="button button-primary" value="<?php esc_attr_e( 'Create Witness Account', 'wp-paradb' ); ?>">
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-witnesses' ) ); ?>" class="button"><?php esc_html_e( 'Cancel', 'wp-paradb' ); ?></a>
+			</p>
+		</form>
+	</div>
+	<?php
+} elseif ( 'view' === $action && $witness_id > 0 ) {
 	// Show detailed view.
 	$witness = WP_ParaDB_Witness_Handler::get_witness_account( $witness_id );
 	if ( ! $witness ) {
@@ -259,6 +367,8 @@ if ( 'view' === $action && $witness_id > 0 ) {
 	
 	<div class="wrap">
 		<h1 class="wp-heading-inline"><?php esc_html_e( 'Witness Accounts', 'wp-paradb' ); ?></h1>
+		
+		<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-witnesses&action=new' ) ); ?>" class="page-title-action"><?php esc_html_e( 'Add New', 'wp-paradb' ); ?></a>
 		
 		<hr class="wp-header-end">
 		

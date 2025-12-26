@@ -86,7 +86,14 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 	?>
 	
 	<div class="wrap">
-		<h1><?php echo 'new' === $action ? esc_html__( 'Add Activity', 'wp-paradb' ) : esc_html__( 'Edit Activity', 'wp-paradb' ); ?></h1>
+		<h1>
+			<?php echo 'new' === $action ? esc_html__( 'Add Activity', 'wp-paradb' ) : esc_html__( 'Edit Activity', 'wp-paradb' ); ?>
+			<?php if ( $activity ) : ?>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-log-chat&activity_id=' . $activity_id ) ); ?>" class="page-title-action">
+					<span class="dashicons dashicons-format-chat" style="margin-top: 4px;"></span> <?php esc_html_e( 'Log My Actions', 'wp-paradb' ); ?>
+				</a>
+			<?php endif; ?>
+		</h1>
 		
 		<form method="post" action="">
 			<?php wp_nonce_field( 'save_activity', 'activity_nonce' ); ?>
@@ -273,6 +280,50 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 			</table>
 
 			<?php if ( $activity && $activity_id > 0 ) : ?>
+				<div class="postbox">
+					<h2 class="hndle">
+						<span><?php esc_html_e( 'Activity Field Logs', 'wp-paradb' ); ?></span>
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-log-chat&activity_id=' . $activity_id ) ); ?>" class="button button-small" style="float: right; margin-top: -4px;">
+							<?php esc_html_e( 'Open Mobile Log', 'wp-paradb' ); ?>
+						</a>
+					</h2>
+					<div class="inside" style="max-height: 400px; overflow-y: auto;">
+						<?php
+						require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-field-log-handler.php';
+						$logs = WP_ParaDB_Field_Log_Handler::get_logs( array( 'activity_id' => $activity_id, 'order' => 'DESC' ) );
+						if ( $logs ) : ?>
+							<table class="wp-list-table widefat fixed striped">
+								<thead>
+									<tr>
+										<th style="width: 150px;"><?php esc_html_e( 'Time', 'wp-paradb' ); ?></th>
+										<th style="width: 150px;"><?php esc_html_e( 'Investigator', 'wp-paradb' ); ?></th>
+										<th><?php esc_html_e( 'Log Entry', 'wp-paradb' ); ?></th>
+									</tr>
+								</thead>
+								<tbody>
+									<?php foreach ( $logs as $log ) : 
+										$inv = get_userdata( $log->investigator_id );
+										?>
+										<tr>
+											<td><?php echo esc_html( gmdate( 'Y-m-d H:i:s', strtotime( $log->date_created ) ) ); ?></td>
+											<td><strong><?php echo $inv ? esc_html( $inv->display_name ) : '—'; ?></strong></td>
+											<td>
+												<?php echo wp_kses_post( $log->log_content ); ?>
+												<?php if ( $log->file_url ) : ?>
+													<div style="margin-top: 5px;">
+														<a href="<?php echo esc_url( $log->file_url ); ?>" target="_blank" class="button button-small"><?php esc_html_e( 'View Attachment', 'wp-paradb' ); ?></a>
+													</div>
+												<?php endif; ?>
+											</td>
+										</tr>
+									<?php endforeach; ?>
+								</tbody>
+							</table>
+						<?php else : ?>
+							<p><?php esc_html_e( 'No field logs recorded for this activity.', 'wp-paradb' ); ?></p>
+						<?php endif; ?>
+					</div>
+				</div>
 				<?php WP_ParaDB_Admin::render_relationship_section( $activity_id, 'activity' ); ?>
 			<?php endif; ?>
 			

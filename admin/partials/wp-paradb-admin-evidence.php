@@ -42,27 +42,18 @@ if ( isset( $_POST['upload_evidence'] ) && check_admin_referer( 'upload_evidence
 
 		$result = WP_ParaDB_Evidence_Handler::upload_evidence( $_FILES['evidence_file'], $metadata );
 		
-			if ( is_wp_error( $result ) ) {
-		
-				echo '<div class="notice notice-error"><p>' . esc_html( $result->get_error_message() ) . '</p></div>';
-		
-			} else {
-		
-				echo '<div class="notice notice-success"><p>' . esc_html__( 'Evidence uploaded successfully.', 'wp-paradb' ) . '</p></div>';
-		
+					if ( is_wp_error( $result ) ) {
+						echo '<div class="notice notice-error"><p>' . esc_html( $result->get_error_message() ) . '</p></div>';
+					} else {
+						echo '<div class="notice notice-success"><p>' . esc_html__( 'Evidence uploaded successfully.', 'wp-paradb' ) . '</p></div>';
+					}
+				} else {
+					echo '<div class="notice notice-error"><p>' . esc_html__( 'Please select a file to upload.', 'wp-paradb' ) . '</p></div>';
+				}
 			}
-		
-		}
-		
-		
-		
-		// Get case_id from URL for pre-selection
-		
-		$pre_case_id = isset( $_GET['case_id'] ) ? absint( $_GET['case_id'] ) : 0; else {
-		echo '<div class="notice notice-error"><p>' . esc_html__( 'Please select a file to upload.', 'wp-paradb' ) . '</p></div>';
-	}
-}
-
+			
+			// Get case_id from URL for pre-selection
+			$pre_case_id = isset( $_GET['case_id'] ) ? absint( $_GET['case_id'] ) : 0;
 // Handle delete action.
 if ( isset( $_GET['action'] ) && 'delete' === $_GET['action'] && isset( $_GET['evidence_id'] ) && isset( $_GET['_wpnonce'] ) ) {
 	if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'delete_evidence_' . absint( $_GET['evidence_id'] ) ) ) {

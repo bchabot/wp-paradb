@@ -57,7 +57,145 @@ class WP_ParaDB_Admin {
 		$this->version     = $version;
 
 		add_action( 'wp_ajax_paradb_fetch_environmental_data', array( $this, 'ajax_fetch_environmental_data' ) );
+		add_action( 'wp_ajax_paradb_submit_log_chat', array( $this, 'ajax_submit_log_chat' ) );
+		add_action( 'wp_ajax_paradb_get_log_chat', array( $this, 'ajax_get_log_chat' ) );
+		add_action( 'wp_ajax_paradb_get_all_logs_live', array( $this, 'ajax_get_all_logs_live' ) );
 		add_action( 'admin_init', array( $this, 'handle_maintenance_actions' ) );
+	}
+
+	/**
+	 * AJAX handler for live log viewer (global)
+	 */
+	public function ajax_get_all_logs_live() {
+		check_ajax_referer( 'paradb_log_viewer_nonce', 'nonce' );
+
+		if ( ! current_user_can( 'paradb_view_cases' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wp-paradb' ) ) );
+		}
+
+		$last_id = absint( $_POST['last_id'] );
+
+		global $wpdb;
+		$table = $wpdb->prefix . 'paradb_field_logs';
+		
+		$query = $wpdb->prepare(
+			"SELECT l.*, u.display_name FROM {$table} l 
+			 JOIN {$wpdb->users} u ON l.investigator_id = u.ID
+			 WHERE l.log_id > %d 
+			 ORDER BY l.date_created ASC LIMIT 50",
+			$last_id
+		);
+
+		$results = $wpdb->get_results( $query );
+		$logs = array();
+
+		foreach ( $results as $row ) {
+			$context = '';
+			$case = WP_ParaDB_Case_Handler::get_case( $row->case_id );
+			if ( $case ) $context .= 'Case: ' . $case->case_number . '<br>';
+			if ( $row->activity_id ) {
+				$act = WP_ParaDB_Activity_Handler::get_activity( $row->activity_id );
+				if ( $act ) $context .= 'Act: ' . $act->activity_title;
+			}
+
+			$logs[] = array(
+				'log_id'    => $row->log_id,
+				'user_name' => $row->display_name,
+				'datetime'  => gmdate( 'Y-m-d H:i:s', strtotime( $row->date_created ) ),
+				'context'   => $context,
+				'content'   => wp_kses_post( $row->log_content ),
+				'file_url'  => $row->file_url,
+			);
+		}
+
+		wp_send_json_success( array( 'logs' => $logs ) );
+	}
+
+	/**
+	 * AJAX handler for submitting log chat entry
+	 */
+	public function ajax_submit_log_chat() {
+		check_admin_referer( 'paradb_submit_log', 'paradb_log_nonce' );
+
+		if ( ! current_user_can( 'paradb_view_cases' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wp-paradb' ) ) );
+		}
+
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-field-log-handler.php';
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-evidence-handler.php';
+
+		$log_data = array(
+			'case_id'     => absint( $_POST['case_id'] ),
+			'activity_id' => absint( $_POST['activity_id'] ),
+			'log_content' => sanitize_textarea_field( $_POST['log_content'] ),
+			'latitude'    => isset( $_POST['latitude'] ) ? floatval( $_POST['latitude'] ) : null,
+			'longitude'   => isset( $_POST['longitude'] ) ? floatval( $_POST['longitude'] ) : null,
+		);
+
+		// Handle file upload if present
+		if ( ! empty( $_FILES['log_file']['name'] ) ) {
+			$file_result = WP_ParaDB_Evidence_Handler::upload_evidence( $_FILES['log_file'], array(
+				'case_id'     => $log_data['case_id'],
+				'activity_id' => $log_data['activity_id'],
+				'title'       => 'Log Attachment - ' . current_time( 'mysql' ),
+			) );
+
+			if ( ! is_wp_error( $file_result ) ) {
+				$log_data['file_url'] = WP_ParaDB_Evidence_Handler::get_evidence_url( WP_ParaDB_Evidence_Handler::get_evidence( $file_result ) );
+			}
+		}
+
+		$result = WP_ParaDB_Field_Log_Handler::create_log( $log_data );
+
+		if ( is_wp_error( $result ) ) {
+			wp_send_json_error( array( 'message' => $result->get_error_message() ) );
+		}
+
+		wp_send_json_success( array( 'log_id' => $result ) );
+	}
+
+	/**
+	 * AJAX handler for getting log chat messages
+	 */
+	public function ajax_get_log_chat() {
+		check_ajax_referer( 'paradb_chat_nonce', 'nonce' );
+
+		if ( ! current_user_can( 'paradb_view_cases' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wp-paradb' ) ) );
+		}
+
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-field-log-handler.php';
+
+		$activity_id = absint( $_POST['activity_id'] );
+		$last_id = absint( $_POST['last_id'] );
+
+		global $wpdb;
+		$table = $wpdb->prefix . 'paradb_field_logs';
+		
+		$query = $wpdb->prepare(
+			"SELECT l.*, u.display_name FROM {$table} l 
+			 JOIN {$wpdb->users} u ON l.investigator_id = u.ID
+			 WHERE l.activity_id = %d AND l.log_id > %d 
+			 ORDER BY l.date_created ASC",
+			$activity_id,
+			$last_id
+		);
+
+		$results = $wpdb->get_results( $query );
+		$logs = array();
+
+		foreach ( $results as $row ) {
+			$logs[] = array(
+				'log_id'          => $row->log_id,
+				'investigator_id' => $row->investigator_id,
+				'user_name'       => $row->display_name,
+				'content'         => wpautop( esc_html( $row->log_content ) ),
+				'file_url'        => $row->file_url,
+				'time'            => gmdate( 'H:i', strtotime( $row->date_created ) ),
+			);
+		}
+
+		wp_send_json_success( array( 'logs' => $logs ) );
 	}
 
 	/**
