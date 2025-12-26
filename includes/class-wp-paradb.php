@@ -87,7 +87,8 @@ class WP_ParaDB {
 		        require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-report-handler.php';
 		        require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-location-handler.php';
 		        		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-relationship-handler.php';
-		        		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-environmental-fetcher.php';		// Admin classes.
+		        		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-environmental-fetcher.php';
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-field-log-handler.php';		// Admin classes.
 		require_once WP_PARADB_PLUGIN_DIR . 'admin/class-wp-paradb-admin.php';
 		require_once WP_PARADB_PLUGIN_DIR . 'admin/class-wp-paradb-admin-menu.php';
 
@@ -101,6 +102,7 @@ class WP_ParaDB {
 		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-settings.php';
 		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-witness-handler.php';
 		require_once WP_PARADB_PLUGIN_DIR . 'public/class-wp-paradb-witness-form.php';
+		require_once WP_PARADB_PLUGIN_DIR . 'public/class-wp-paradb-log-book.php';
 		require_once WP_PARADB_PLUGIN_DIR . 'admin/class-wp-paradb-admin-settings.php';
 
 
@@ -141,6 +143,7 @@ class WP_ParaDB {
 	private function define_public_hooks() {
 		$plugin_public = new WP_ParaDB_Public( $this->get_plugin_name(), $this->get_version() );
 		$witness_form = new WP_ParaDB_Witness_Form();
+		$log_book = new WP_ParaDB_Log_Book();
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 	}

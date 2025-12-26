@@ -237,6 +237,42 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 					<!-- Case Relationships -->
 					<?php if ( ! $is_new && $case_id > 0 ) : ?>
 						<?php WP_ParaDB_Admin::render_relationship_section( $case_id, 'case' ); ?>
+
+						<!-- Field Logs -->
+						<div class="postbox">
+							<h2 class="hndle"><?php esc_html_e( 'Field Log Entries', 'wp-paradb' ); ?></h2>
+							<div class="inside">
+								<?php
+								require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-field-log-handler.php';
+								$logs = WP_ParaDB_Field_Log_Handler::get_logs( array( 'case_id' => $case_id ) );
+								if ( $logs ) : ?>
+									<table class="wp-list-table widefat fixed striped">
+										<thead>
+											<tr>
+												<th><?php esc_html_e( 'Date', 'wp-paradb' ); ?></th>
+												<th><?php esc_html_e( 'Investigator', 'wp-paradb' ); ?></th>
+												<th><?php esc_html_e( 'Content', 'wp-paradb' ); ?></th>
+												<th><?php esc_html_e( 'Location', 'wp-paradb' ); ?></th>
+											</tr>
+										</thead>
+										<tbody>
+											<?php foreach ( $logs as $log ) : 
+												$investigator = get_userdata( $log->investigator_id );
+												?>
+												<tr>
+													<td><?php echo esc_html( gmdate( 'Y-m-d H:i', strtotime( $log->date_created ) ) ); ?></td>
+													<td><?php echo $investigator ? esc_html( $investigator->display_name ) : '—'; ?></td>
+													<td><?php echo wp_kses_post( $log->log_content ); ?></td>
+													<td><?php echo $log->latitude ? esc_html( $log->latitude . ', ' . $log->longitude ) : '—'; ?></td>
+												</tr>
+											<?php endforeach; ?>
+										</tbody>
+									</table>
+								<?php else : ?>
+									<p><?php esc_html_e( 'No field logs recorded for this case.', 'wp-paradb' ); ?></p>
+								<?php endif; ?>
+							</div>
+						</div>
 					<?php endif; ?>
 				</div>
 

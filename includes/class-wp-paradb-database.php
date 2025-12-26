@@ -44,6 +44,7 @@ class WP_ParaDB_Database {
 			case_status varchar(50) NOT NULL DEFAULT 'open',
 			case_type varchar(50) NOT NULL DEFAULT 'investigation',
 			client_id bigint(20) unsigned DEFAULT NULL,
+			location_id bigint(20) unsigned DEFAULT NULL,
 			location_name varchar(200) DEFAULT NULL,
 			location_address varchar(255) DEFAULT NULL,
 			location_city varchar(100) DEFAULT NULL,
@@ -67,6 +68,7 @@ class WP_ParaDB_Database {
 			KEY case_number (case_number),
 			KEY case_status (case_status),
 			KEY client_id (client_id),
+			KEY location_id (location_id),
 			KEY created_by (created_by),
 			KEY assigned_to (assigned_to),
 			KEY is_published (is_published),
@@ -78,6 +80,7 @@ class WP_ParaDB_Database {
 			report_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			case_id bigint(20) unsigned NOT NULL,
 			activity_id bigint(20) unsigned DEFAULT NULL,
+			location_id bigint(20) unsigned DEFAULT NULL,
 			report_title varchar(200) NOT NULL,
 			report_type varchar(50) NOT NULL DEFAULT 'report',
 			report_date datetime NOT NULL,
@@ -91,6 +94,7 @@ class WP_ParaDB_Database {
 			PRIMARY KEY  (report_id),
 			KEY case_id (case_id),
 			KEY activity_id (activity_id),
+			KEY location_id (location_id),
 			KEY investigator_id (investigator_id),
 			KEY report_type (report_type),
 			KEY report_date (report_date),
@@ -101,6 +105,7 @@ class WP_ParaDB_Database {
 		$sql_activities = "CREATE TABLE {$table_prefix}activities (
 			activity_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			case_id bigint(20) unsigned NOT NULL,
+			location_id bigint(20) unsigned DEFAULT NULL,
 			activity_title varchar(200) NOT NULL,
 			activity_type varchar(50) NOT NULL DEFAULT 'investigation',
 			activity_date datetime NOT NULL,
@@ -121,6 +126,7 @@ class WP_ParaDB_Database {
 			date_modified datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY  (activity_id),
 			KEY case_id (case_id),
+			KEY location_id (location_id),
 			KEY investigator_id (investigator_id),
 			KEY activity_type (activity_type),
 			KEY activity_date (activity_date),
@@ -157,6 +163,7 @@ class WP_ParaDB_Database {
 			case_id bigint(20) unsigned NOT NULL,
 			report_id bigint(20) unsigned DEFAULT NULL,
 			activity_id bigint(20) unsigned DEFAULT NULL,
+			location_id bigint(20) unsigned DEFAULT NULL,
 			file_name varchar(255) NOT NULL,
 			file_path varchar(500) NOT NULL,
 			file_type varchar(50) NOT NULL,
@@ -176,6 +183,7 @@ class WP_ParaDB_Database {
 			KEY case_id (case_id),
 			KEY report_id (report_id),
 			KEY activity_id (activity_id),
+			KEY location_id (location_id),
 			KEY evidence_type (evidence_type),
 			KEY uploaded_by (uploaded_by)
 		) $charset_collate;";
@@ -184,6 +192,7 @@ class WP_ParaDB_Database {
 		$sql_notes = "CREATE TABLE {$table_prefix}case_notes (
 			note_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			case_id bigint(20) unsigned NOT NULL,
+			location_id bigint(20) unsigned DEFAULT NULL,
 			note_content text NOT NULL,
 			note_type varchar(50) NOT NULL DEFAULT 'general',
 			is_internal tinyint(1) NOT NULL DEFAULT 1,
@@ -192,6 +201,7 @@ class WP_ParaDB_Database {
 			date_modified datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY  (note_id),
 			KEY case_id (case_id),
+			KEY location_id (location_id),
 			KEY author_id (author_id),
 			KEY note_type (note_type)
 		) $charset_collate;";
@@ -200,13 +210,15 @@ class WP_ParaDB_Database {
 		$sql_team = "CREATE TABLE {$table_prefix}case_team (
 			assignment_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			case_id bigint(20) unsigned NOT NULL,
+			activity_id bigint(20) unsigned DEFAULT NULL,
 			user_id bigint(20) unsigned NOT NULL,
 			role varchar(50) NOT NULL DEFAULT 'investigator',
 			date_assigned datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			assigned_by bigint(20) unsigned NOT NULL,
 			PRIMARY KEY  (assignment_id),
-			UNIQUE KEY case_user (case_id, user_id),
+			UNIQUE KEY assignment_unique (case_id, activity_id, user_id),
 			KEY case_id (case_id),
+			KEY activity_id (activity_id),
 			KEY user_id (user_id)
 		) $charset_collate;";
 
@@ -249,11 +261,29 @@ class WP_ParaDB_Database {
 			KEY relationship_type (relationship_type)
 		) $charset_collate;";
 
+		// Field Logs table - Quick field entries
+		$sql_field_logs = "CREATE TABLE {$table_prefix}field_logs (
+			log_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			case_id bigint(20) unsigned NOT NULL,
+			activity_id bigint(20) unsigned DEFAULT NULL,
+			investigator_id bigint(20) unsigned NOT NULL,
+			log_content text NOT NULL,
+			latitude decimal(10,8) DEFAULT NULL,
+			longitude decimal(11,8) DEFAULT NULL,
+			date_created datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY  (log_id),
+			KEY case_id (case_id),
+			KEY activity_id (activity_id),
+			KEY investigator_id (investigator_id),
+			KEY date_created (date_created)
+		) $charset_collate;";
+
 		// Witness accounts table - For public submissions
 		$sql_witnesses = "CREATE TABLE {$table_prefix}witness_accounts (
 			account_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			user_id bigint(20) unsigned DEFAULT NULL,
-			case_id bigint(20) unsigned DEFAULT NULL,
+			case_id bigint(20) unsigned NOT NULL DEFAULT 0,
+			location_id bigint(20) unsigned DEFAULT NULL,
 			account_email varchar(255) NOT NULL,
 			account_name varchar(255) DEFAULT NULL,
 			account_phone varchar(50) DEFAULT NULL,
@@ -271,6 +301,7 @@ class WP_ParaDB_Database {
 			consent_anonymize tinyint(1) DEFAULT 0,
 			allow_publish tinyint(1) DEFAULT 0,
 			allow_followup tinyint(1) DEFAULT 1,
+			is_private tinyint(1) DEFAULT 0,
 			privacy_accepted tinyint(1) DEFAULT 0,
 			privacy_accepted_date datetime DEFAULT NULL,
 			status varchar(50) NOT NULL DEFAULT 'pending',
@@ -282,6 +313,7 @@ class WP_ParaDB_Database {
 			PRIMARY KEY  (account_id),
 			KEY user_id (user_id),
 			KEY case_id (case_id),
+			KEY location_id (location_id),
 			KEY status (status),
 			KEY consent_status (consent_status),
 			KEY date_submitted (date_submitted)
@@ -297,10 +329,11 @@ class WP_ParaDB_Database {
 		dbDelta( $sql_team );
 		dbDelta( $sql_locations );
 		dbDelta( $sql_relationships );
+		dbDelta( $sql_field_logs );
 		dbDelta( $sql_witnesses );
 
 		// Store database version
-		update_option( 'wp_paradb_db_version', '1.3.0' );
+		update_option( 'wp_paradb_db_version', '1.4.0' );
 	}
 
 	/**
