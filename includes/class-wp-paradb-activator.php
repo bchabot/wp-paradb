@@ -113,16 +113,17 @@ class WP_ParaDB_Activator {
 			                                'data'       => __( 'Sensor Data', 'wp-paradb' ),
 			                                'other'      => __( 'Other', 'wp-paradb' ),
 			                        ),
-			                        'activity_types'             => array(
-			                                'investigation' => __( 'Investigation', 'wp-paradb' ),
-			                                'research'      => __( 'Research', 'wp-paradb' ),
-			                                'consultation'  => __( 'Consultation', 'wp-paradb' ),
-			                                'experiment'    => __( 'Experiment', 'wp-paradb' ),
-			                                'interview'     => __( 'Interview', 'wp-paradb' ),
-			                                'surveillance'  => __( 'Surveillance', 'wp-paradb' ),
-			                                'site_visit'    => __( 'Site Visit', 'wp-paradb' ),
-			                        ),
-			                        'max_upload_size'            => 10485760, // 10MB			'allowed_file_types'         => array(
+			'activity_types'             => array(
+				'investigation' => __( 'Investigation', 'wp-paradb' ),
+				'research'      => __( 'Research', 'wp-paradb' ),
+				'consultation'  => __( 'Consultation', 'wp-paradb' ),
+				'experiment'    => __( 'Experiment', 'wp-paradb' ),
+				'interview'     => __( 'Interview', 'wp-paradb' ),
+				'surveillance'  => __( 'Surveillance', 'wp-paradb' ),
+				'site_visit'    => __( 'Site Visit', 'wp-paradb' ),
+			),
+			'max_upload_size'            => 10485760, // 10MB
+			'allowed_file_types'         => array(
 				'jpg', 'jpeg', 'png', 'gif',
 				'mp3', 'wav', 'ogg',
 				'mp4', 'avi', 'mov',
