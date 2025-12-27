@@ -322,6 +322,13 @@ $active_tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'general';
 			<h2 class="title"><?php esc_html_e( 'Advanced Tools & Database', 'wp-paradb' ); ?></h2>
 			<table class="form-table">
 				<tr>
+					<th scope="row"><?php esc_html_e( 'Status Info', 'wp-paradb' ); ?></th>
+					<td>
+						<p><strong><?php esc_html_e( 'Database Version:', 'wp-paradb' ); ?></strong> <?php echo esc_html( get_option( 'wp_paradb_db_version' ) ); ?></p>
+						<p><strong><?php esc_html_e( 'Plugin Version:', 'wp-paradb' ); ?></strong> <?php echo esc_html( WP_PARADB_VERSION ); ?></p>
+					</td>
+				</tr>
+				<tr>
 					<th scope="row"><?php esc_html_e( 'Data Removal', 'wp-paradb' ); ?></th>
 					<td>
 						<label>
@@ -342,13 +349,6 @@ $active_tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'general';
 							});
 						});
 						</script>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Status Info', 'wp-paradb' ); ?></th>
-					<td>
-						<p><strong><?php esc_html_e( 'Database Version:', 'wp-paradb' ); ?></strong> <?php echo esc_html( get_option( 'wp_paradb_db_version' ) ); ?></p>
-						<p><strong><?php esc_html_e( 'Plugin Version:', 'wp-paradb' ); ?></strong> <?php echo esc_html( WP_PARADB_VERSION ); ?></p>
 					</td>
 				</tr>
 			</table>
