@@ -38,11 +38,10 @@ $cases_table = $wpdb->prefix . 'paradb_cases';
 
 // Start building the query.
 $query_parts = array();
-$query_parts[] = "SELECT * FROM {$cases_table} WHERE is_published = 1";
+$query_parts[] = "SELECT * FROM {$cases_table} WHERE 1=1";
 
-// Handle Visibility
 if ( ! current_user_can( 'paradb_view_cases' ) ) {
-	$query_parts[] = "AND visibility != 'internal'";
+	$query_parts[] = "AND is_published = 1 AND visibility != 'internal'";
 }
 
 // Handle search.

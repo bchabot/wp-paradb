@@ -30,8 +30,13 @@ if ( 0 === $case_id ) {
 // Get case.
 $case = WP_ParaDB_Case_Handler::get_case( $case_id );
 
-if ( ! $case || ! $case->is_published ) {
-	echo '<p>' . esc_html__( 'Case not found or not published.', 'wp-paradb' ) . '</p>';
+if ( ! $case ) {
+	echo '<p>' . esc_html__( 'Case not found.', 'wp-paradb' ) . '</p>';
+	return;
+}
+
+if ( ! $case->is_published && ! current_user_can( 'paradb_view_cases' ) ) {
+	echo '<p>' . esc_html__( 'This case is not yet published.', 'wp-paradb' ) . '</p>';
 	return;
 }
 

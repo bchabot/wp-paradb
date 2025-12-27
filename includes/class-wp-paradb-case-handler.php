@@ -62,6 +62,7 @@ class WP_ParaDB_Case_Handler {
 			'visibility'         => isset( $data['visibility'] ) ? sanitize_text_field( $data['visibility'] ) : 'internal',
 			'password'           => isset( $data['password'] ) ? sanitize_text_field( $data['password'] ) : null,
 			'sanitize_front_end' => isset( $data['sanitize_front_end'] ) ? absint( $data['sanitize_front_end'] ) : 1,
+			'is_published'       => isset( $data['is_published'] ) ? absint( $data['is_published'] ) : 0,
 			'created_by'         => get_current_user_id(),
 			'assigned_to'        => isset( $data['assigned_to'] ) ? absint( $data['assigned_to'] ) : null,
 			'date_created'       => current_time( 'mysql' ),
@@ -70,7 +71,7 @@ class WP_ParaDB_Case_Handler {
 		// Format types for database.
 		$format = array(
 			'%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%s', '%s', '%s',
-			'%f', '%f', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%d', '%s',
+			'%f', '%f', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%d', '%d', '%s',
 		);
 
 		// Insert into database.
@@ -126,7 +127,7 @@ class WP_ParaDB_Case_Handler {
 			'location_address', 'location_city', 'location_state', 'location_zip',
 			'location_country', 'latitude', 'longitude', 'case_description',
 			'phenomena_types', 'case_priority', 'assigned_to',
-			'visibility', 'password', 'sanitize_front_end',
+			'visibility', 'password', 'sanitize_front_end', 'is_published',
 		);
 
 		foreach ( $allowed_fields as $field ) {
