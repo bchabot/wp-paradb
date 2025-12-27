@@ -41,11 +41,11 @@ class WP_ParaDB_Admin_Settings {
 	 */
 	public function add_settings_page() {
 		add_submenu_page(
-			'paradb-dashboard',
+			'wp-paradb',
 			__( 'ParaDB Settings', 'wp-paradb' ),
 			__( 'Settings', 'wp-paradb' ),
-			'manage_paradb_settings',
-			'paradb-settings',
+			'paradb_manage_settings',
+			'wp-paradb-settings',
 			array( $this, 'render_settings_page' )
 		);
 	}
@@ -78,23 +78,23 @@ class WP_ParaDB_Admin_Settings {
 			<?php settings_errors(); ?>
 
 			<h2 class="nav-tab-wrapper">
-				<a href="?page=paradb-settings&tab=witness_form" 
+				<a href="?page=wp-paradb-settings&tab=witness_form" 
 				   class="nav-tab <?php echo 'witness_form' === $active_tab ? 'nav-tab-active' : ''; ?>">
 					<?php esc_html_e( 'Witness Form', 'wp-paradb' ); ?>
 				</a>
-				<a href="?page=paradb-settings&tab=consent" 
+				<a href="?page=wp-paradb-settings&tab=consent" 
 				   class="nav-tab <?php echo 'consent' === $active_tab ? 'nav-tab-active' : ''; ?>">
 					<?php esc_html_e( 'Consent Options', 'wp-paradb' ); ?>
 				</a>
-				<a href="?page=paradb-settings&tab=phenomena" 
+				<a href="?page=wp-paradb-settings&tab=phenomena" 
 				   class="nav-tab <?php echo 'phenomena' === $active_tab ? 'nav-tab-active' : ''; ?>">
 					<?php esc_html_e( 'Phenomena Types', 'wp-paradb' ); ?>
 				</a>
-				<a href="?page=paradb-settings&tab=privacy" 
+				<a href="?page=wp-paradb-settings&tab=privacy" 
 				   class="nav-tab <?php echo 'privacy' === $active_tab ? 'nav-tab-active' : ''; ?>">
 					<?php esc_html_e( 'Privacy Policy', 'wp-paradb' ); ?>
 				</a>
-				<a href="?page=paradb-settings&tab=notifications" 
+				<a href="?page=wp-paradb-settings&tab=notifications" 
 				   class="nav-tab <?php echo 'notifications' === $active_tab ? 'nav-tab-active' : ''; ?>">
 					<?php esc_html_e( 'Notifications', 'wp-paradb' ); ?>
 				</a>
@@ -469,7 +469,7 @@ class WP_ParaDB_Admin_Settings {
 		}
 
 		// Check permissions.
-		if ( ! current_user_can( 'manage_paradb_settings' ) ) {
+		if ( ! current_user_can( 'paradb_manage_settings' ) ) {
 			wp_die( esc_html__( 'You do not have permission to save settings.', 'wp-paradb' ) );
 		}
 
@@ -528,7 +528,7 @@ class WP_ParaDB_Admin_Settings {
 		wp_safe_redirect(
 			add_query_arg(
 				array(
-					'page'     => 'paradb-settings',
+					'page'     => 'wp-paradb-settings',
 					'tab'      => $active_tab,
 					'settings-updated' => 'true',
 				),

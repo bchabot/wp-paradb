@@ -153,7 +153,7 @@ class WP_ParaDB_Admin_Menu {
 		// Settings submenu.
 		add_submenu_page(
 			'wp-paradb',
-			__( 'Settings', 'wp-paradb' ),
+			__( 'ParaDB Settings', 'wp-paradb' ),
 			__( 'Settings', 'wp-paradb' ),
 			'paradb_manage_settings',
 			'wp-paradb-settings',
