@@ -32,34 +32,43 @@ Secure file upload system with validation, file type detection, automatic direct
 **8. class-wp-paradb-witness-handler.php** (Artifact: paradb_witness_handler)
 Public witness submission system with anonymous submission support, status workflow (pending, approved, rejected, spam), case linking capabilities, and automatic email notifications.
 
+**9. class-wp-paradb-location-handler.php** (Artifact: paradb_location_handler)
+Address book management for shared locations, enabling consistent data entry across cases and activities.
+
 ### Admin Interface Components (admin/ directory)
 
-**9. class-wp-paradb-admin-menu.php** (Artifact: paradb_admin_menu)
-Registers eight admin menu pages including Dashboard, Cases, Add Case, Reports, Clients, Evidence, Witness Accounts, and Settings with proper capability checking.
+**10. class-wp-paradb-admin-menu.php** (Artifact: paradb_admin_menu)
+Registers nine admin menu pages including Dashboard, Cases, Add Case, Reports, Activities, Field Logs, Clients, Evidence, Witness Accounts, Locations, and Settings.
 
-**10. partials/wp-paradb-admin-dashboard.php** (Artifact: paradb_admin_dashboard_view)
+**11. partials/wp-paradb-admin-dashboard.php** (Artifact: paradb_admin_dashboard_view)
 Dashboard interface displaying comprehensive statistics, quick action buttons, recent cases listing, and user's assigned cases with responsive grid layout.
 
-**11. partials/wp-paradb-admin-cases.php** (Artifact: paradb_admin_cases_view)
+**12. partials/wp-paradb-admin-cases.php** (Artifact: paradb_admin_cases_view)
 Cases list view with status filtering, search functionality, pagination support, and inline edit/delete actions with nonce verification.
 
-**12. partials/wp-paradb-admin-case-edit.php** (Artifact: paradb_case_edit_view)
+**13. partials/wp-paradb-admin-case-edit.php** (Artifact: paradb_case_edit_view)
 Comprehensive case editing form with all field support including location data, phenomena types, client selection, team assignment, and metadata display in WordPress-standard metabox layout.
 
-**13. partials/wp-paradb-admin-reports.php** (Artifact: paradb_admin_reports_view)
-Reports management interface with list view, add/edit form, moon phase selection, environmental conditions tracking, and case association.
+**14. partials/wp-paradb-admin-reports.php** (Artifact: paradb_admin_reports_view)
+Reports management interface with list view, add/edit form, and case association.
 
-**14. partials/wp-paradb-admin-clients.php** (Artifact: paradb_admin_clients_view)
+**15. partials/wp-paradb-admin-activities.php** (Artifact: paradb_admin_activities_view)
+Activities management interface with support for environmental data auto-fetching, moon phase selection, and integrated field log viewing.
+
+**16. partials/wp-paradb-admin-locations.php** (Artifact: paradb_admin_locations_view)
+Shared Address Book management with geocoding, map previews, and public access controls.
+
+**17. partials/wp-paradb-admin-clients.php** (Artifact: paradb_admin_clients_view)
 Client management system with full contact information, privacy settings (consent and anonymization), and validation preventing deletion of clients with associated cases.
 
-**15. partials/wp-paradb-admin-evidence.php** (Artifact: paradb_admin_evidence_view)
+**18. partials/wp-paradb-admin-evidence.php** (Artifact: paradb_admin_evidence_view)
 Evidence file browser with grid layout, image previews, file upload form, type filtering, case filtering, and metadata editing capabilities.
 
-**16. partials/wp-paradb-admin-witnesses.php** (Artifact: paradb_admin_witnesses_view)
-Witness account review system with detailed view, status management workflow, case linking functionality, and spam filtering options.
+**19. partials/wp-paradb-admin-witnesses.php** (Artifact: paradb_admin_witnesses_view)
+Witness account review system with detailed view, status management workflow, case linking functionality, and conversion to client records.
 
-**17. partials/wp-paradb-admin-settings.php** (Artifact: paradb_admin_settings_view)
-Plugin settings page with general settings, witness submission controls, file upload configuration, feature toggles, and database information display.
+**20. partials/wp-paradb-admin-settings.php** (Artifact: paradb_admin_settings_view)
+Plugin settings page with general settings (units, case formats), witness submission controls, map API configuration, and data maintenance tools (Backup/Restore).
 
 ### Public-Facing Components (public/ directory)
 

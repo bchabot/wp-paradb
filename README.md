@@ -17,6 +17,7 @@ WP-ParaDB is a comprehensive, professional-grade WordPress plugin designed for p
 *   **Privacy & Redaction:** Built-in tools to automatically or manually redact sensitive information from public-facing reports.
 *   **Role-Based Access:** Specialized user roles (Director, Team Leader, Investigator) to manage team permissions.
 *   **Data Maintenance:** Integrated tools for data backup (JSON), restoration, and complete scrubbing on uninstall.
+*   **Address Book:** Shared location database for consistent site tracking across cases and activities.
 
 ## 🚀 Installation
 

@@ -28,6 +28,7 @@ The plugin has been completely restructured and updated to follow WordPress best
 - `includes/class-wp-paradb-i18n.php` (renamed from class-wpparadb-i18n.php)
 - `admin/class-wp-paradb-admin.php` (renamed from class-wpparadb-admin.php)
 - `public/class-wp-paradb-public.php` (renamed from class-wpparadb-public.php)
+- `includes/class-wp-paradb-location-handler.php` (New: Address Book management)
 - CSS/JS files renamed to match new convention
 
 ### 2. Plugin Headers & Metadata
@@ -37,10 +38,18 @@ The plugin has been completely restructured and updated to follow WordPress best
 - Added minimum WordPress version requirement (5.0)
 - Added minimum PHP version requirement (7.4)
 - Enhanced plugin description and author information
-- Standardized version numbering to 1.0.0
+- Standardized version numbering to 0.0.6
 - Updated text domain to 'wp-paradb'
 
-### 3. Security Enhancements
+### 3. Feature Enhancements & Standards
+
+**Added Functionality:**
+- **Reports & Activities Split:** Separated narrative reports from field activities for better data organization.
+- **Address Book (Locations):** Implemented a centralized location management system with geocoding and map support.
+- **Measurement Units:** Added support for both Metric and Imperial systems via settings.
+- **Improved Data Migration:** Robust automated database upgrade routines.
+
+### 4. Security Enhancements
 
 **Added Security Features:**
 - ABSPATH checks in all class files to prevent direct access

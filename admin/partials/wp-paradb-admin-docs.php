@@ -20,6 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="nav-tab-wrapper">
 		<a href="#getting-started" class="nav-tab nav-tab-active"><?php esc_html_e( 'Getting Started', 'wp-paradb' ); ?></a>
 		<a href="#shortcodes" class="nav-tab"><?php esc_html_e( 'Shortcodes', 'wp-paradb' ); ?></a>
+		<a href="#settings-help" class="nav-tab"><?php esc_html_e( 'Settings', 'wp-paradb' ); ?></a>
 		<a href="#user-roles" class="nav-tab"><?php esc_html_e( 'User Roles', 'wp-paradb' ); ?></a>
 		<a href="#environmental-data" class="nav-tab"><?php esc_html_e( 'Environmental Data', 'wp-paradb' ); ?></a>
 		<a href="#api-setup" class="nav-tab"><?php esc_html_e( 'API Setup', 'wp-paradb' ); ?></a>
@@ -31,6 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		
 		<h3><?php esc_html_e( 'Workflow Overview', 'wp-paradb' ); ?></h3>
 		<ol>
+			<li><strong><?php esc_html_e( 'Address Book:', 'wp-paradb' ); ?></strong> <?php esc_html_e( 'Save frequently visited sites in the Address Book (Locations) to reuse them across multiple cases and activities.', 'wp-paradb' ); ?></li>
 			<li><strong><?php esc_html_e( 'Create a Case:', 'wp-paradb' ); ?></strong> <?php esc_html_e( 'Start by creating a new case. This is the top-level container for all your research at a specific location.', 'wp-paradb' ); ?></li>
 			<li><strong><?php esc_html_e( 'Assign a Team:', 'wp-paradb' ); ?></strong> <?php esc_html_e( 'Assign a Case Manager and multiple team members with specific roles (Lead, Researcher, Tech Specialist) to collaborate on the investigation.', 'wp-paradb' ); ?></li>
 			<li><strong><?php esc_html_e( 'Log Activities & Field Notes:', 'wp-paradb' ); ?></strong> <?php esc_html_e( 'Record site visits as Activities. Use the "Log My Actions" button on mobile for real-time field notes with GPS coordinates and photos.', 'wp-paradb' ); ?></li>
@@ -38,6 +40,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<li><strong><?php esc_html_e( 'Upload Evidence:', 'wp-paradb' ); ?></strong> <?php esc_html_e( 'Attach photos, audio, or video files to your cases, activities, or reports.', 'wp-paradb' ); ?></li>
 			<li><strong><?php esc_html_e( 'Publish:', 'wp-paradb' ); ?></strong> <?php esc_html_e( 'When ready, mark your cases and specific activities/reports as published to share them on your website.', 'wp-paradb' ); ?></li>
 		</ol>
+	</div>
+
+	<div id="settings-help" class="tab-content" style="display: none; background: #fff; padding: 20px; border: 1px solid #ccc; border-top: none;">
+		<h2><?php esc_html_e( 'Configuration & Settings', 'wp-paradb' ); ?></h2>
+		<p><?php esc_html_e( 'Customize ParaDB to match your team\'s workflow.', 'wp-paradb' ); ?></p>
+		
+		<h3><?php esc_html_e( 'Measurement Units', 'wp-paradb' ); ?></h3>
+		<p><?php esc_html_e( 'In the General settings tab, you can choose between Metric (Celsius, km/h) and Imperial (Fahrenheit, mph) units. This affects how environmental data is displayed and stored.', 'wp-paradb' ); ?></p>
+		
+		<h3><?php esc_html_e( 'Data Safety', 'wp-paradb' ); ?></h3>
+		<p><?php esc_html_e( 'By default, ParaDB preserves your data even if the plugin is deactivated. You can enable "Permanently delete ALL data on plugin de-activation" in the Advanced tab if you want to wipe all records when disabling the plugin. Use with caution!', 'wp-paradb' ); ?></p>
 	</div>
 
 	<div id="shortcodes" class="tab-content" style="display: none; background: #fff; padding: 20px; border: 1px solid #ccc; border-top: none;">

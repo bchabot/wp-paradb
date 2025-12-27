@@ -234,8 +234,8 @@ $active_tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'general';
 					<td>
 						<input type="password" name="google_maps_api_key" id="google_maps_api_key" class="regular-text" value="<?php echo esc_attr( $options['google_maps_api_key'] ?? '' ); ?>">
 						<p class="description">
-							<?php esc_html_e( 'Required for Maps and Address Auto-suggest.', 'wp-paradb' ); ?>
-							<a href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank"><?php esc_html_e( 'Get Google Maps Key', 'wp-paradb' ); ?></a>
+							<?php esc_html_e( 'Required for Maps and Address Auto-suggest. You MUST enable the "Maps JavaScript API", "Places API", and "Geocoding API" in your Google Cloud Console.', 'wp-paradb' ); ?>
+							<br><a href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank"><?php esc_html_e( 'Get Google Maps Key', 'wp-paradb' ); ?></a>
 						</p>
 					</td>
 				</tr>

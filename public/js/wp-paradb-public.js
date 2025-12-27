@@ -109,7 +109,7 @@
 			}
 		});
 
-		// Smooth scroll for internal links
+		// smooth scroll for internal links
 		$('a[href^="#"]').on('click', function(e) {
 			var target = $(this).attr('href');
 			if (target !== '#' && $(target).length > 0) {
@@ -118,6 +118,81 @@
 					scrollTop: $(target).offset().top - 50
 				}, 500);
 			}
+		});
+
+		// Handle conditional field display
+		$('#previous_experiences').on('change', function() {
+			var $conditional = $('.paradb-conditional[data-depends-on="previous_experiences"]');
+			if ($(this).is(':checked')) {
+				$conditional.slideDown();
+			} else {
+				$conditional.slideUp();
+				$('#previous_details').val('');
+			}
+		});
+
+		// Witness Form AJAX Submission
+		$('#paradb-witness-form').on('submit', function(e) {
+			var isValid = true;
+			var messages = [];
+
+			// Check phenomena types
+			if ($('input[name="phenomena_types[]"]:checked').length === 0) {
+				isValid = false;
+				messages.push('Please select at least one type of phenomenon.');
+			}
+
+			// Check description length
+			var $description = $('#incident_description');
+			var description = $description.val();
+			var minLength = parseInt($description.data('min-length')) || 50;
+			if (description.length < minLength) {
+				isValid = false;
+				messages.push('Description must be at least ' + minLength + ' characters.');
+			}
+
+			if (!isValid) {
+				e.preventDefault();
+				showFormErrors(messages);
+				return false;
+			}
+
+			// Handle AJAX submission
+			e.preventDefault();
+			var $form = $(this);
+			var $button = $form.find('.paradb-submit-button');
+			var originalText = $button.text();
+			
+			$button.prop('disabled', true).text('Submitting...');
+			$('.paradb-form-messages').empty();
+
+			$.ajax({
+				url: paradb_public.ajax_url,
+				type: 'POST',
+				data: $form.serialize() + '&action=paradb_submit_witness_form',
+				dataType: 'json',
+				success: function(response) {
+					if (response.success) {
+						showNotice(response.data.message, 'success');
+						$form[0].reset();
+						$('.paradb-conditional').hide();
+						
+						if (response.data.redirect_url) {
+							setTimeout(function() {
+								window.location.href = response.data.redirect_url;
+							}, 2000);
+						}
+					} else {
+						showFormErrors([response.data.message || 'An error occurred. Please try again.']);
+					}
+				},
+				error: function() {
+					showFormErrors(['An error occurred. Please try again.']);
+				},
+				complete: function() {
+					$button.prop('disabled', false).text(originalText);
+				}
+			});
 		});
 
 		// Read more/less toggle for long content
@@ -244,20 +319,23 @@
 	 * Show form validation errors
 	 */
 	function showFormErrors(messages) {
-		var $errorContainer = $('.form-errors');
-		if ($errorContainer.length === 0) {
-			$errorContainer = $('<div class="form-errors paradb-notice error"></div>');
-			$('.witness-submission-form').prepend($errorContainer);
+		var $container = $('.paradb-form-messages');
+		if ($container.length === 0) {
+			// Fallback if container is missing
+			alert(messages.join('\n'));
+			return;
 		}
 		
-		var errorHtml = '<ul style="margin: 10px 0; padding-left: 20px;">';
+		var errorHtml = '<div class="paradb-notice error"><ul style="margin: 10px 0; padding-left: 20px;">';
 		messages.forEach(function(message) {
 			errorHtml += '<li>' + message + '</li>';
 		});
-		errorHtml += '</ul>';
+		errorHtml += '</ul></div>';
 		
-		$errorContainer.html('<p><strong>Please correct the following errors:</strong></p>' + errorHtml);
-		$errorContainer.show();
+		$container.html(errorHtml);
+		$('html, body').animate({
+			scrollTop: $container.offset().top - 100
+		}, 500);
 	}
 
 	/**
@@ -408,8 +486,11 @@
 		});
 
 		$('#geocode-address').on('click', function() {
-			var address = $('#incident_location').val() || '';
-			if (!address) return;
+			var address = $('#incident_location').val() || $('#account_address').val() || '';
+			if (!address) {
+				alert('Please enter an address first.');
+				return;
+			}
 
 			var geocoder = new google.maps.Geocoder();
 			geocoder.geocode({'address': address}, function(results, status) {
@@ -419,6 +500,12 @@
 					marker.setPosition(pos);
 					$('#latitude').val(pos.lat().toFixed(6));
 					$('#longitude').val(pos.lng().toFixed(6));
+				} else {
+					var msg = 'Geocode was not successful for the following reason: ' + status;
+					if (status === 'REQUEST_DENIED') {
+						msg += '\n\nThis usually means the "Geocoding API" is not enabled for your API key in the Google Cloud Console, or there are restriction issues.';
+					}
+					alert(msg);
 				}
 			});
 		});
@@ -454,8 +541,11 @@
 		});
 
 		$('#geocode-address').on('click', function() {
-			var address = $('#incident_location').val() || '';
-			if (!address) return;
+			var address = $('#incident_location').val() || $('#account_address').val() || '';
+			if (!address) {
+				alert('Please enter an address first.');
+				return;
+			}
 
 			var url = 'https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(address);
 			if (typeof paradb_maps !== 'undefined' && paradb_maps.locationiq_key) {
@@ -469,6 +559,8 @@
 					marker.setLatLng(pos);
 					$('#latitude').val(pos[0].toFixed(6));
 					$('#longitude').val(pos[1].toFixed(6));
+				} else {
+					alert('Location not found.');
 				}
 			});
 		});

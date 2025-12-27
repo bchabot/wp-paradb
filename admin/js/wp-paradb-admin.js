@@ -370,7 +370,11 @@
 						$('#latitude').val(pos.lat().toFixed(6));
 						$('#longitude').val(pos.lng().toFixed(6));
 					} else {
-						alert('Geocode was not successful for the following reason: ' + status);
+						var msg = 'Geocode was not successful for the following reason: ' + status;
+						if (status === 'REQUEST_DENIED') {
+							msg += '\n\nThis usually means the "Geocoding API" is not enabled for your API key in the Google Cloud Console, or there are restriction issues.';
+						}
+						alert(msg);
 					}
 				});
 			});
