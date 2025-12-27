@@ -168,18 +168,16 @@
 			});
 
 			// Location Map handling
-			var mapElement = document.getElementById('location-map');
-			if (mapElement) {
-				initGoogleMap(mapElement);
-			}
+			$('.location-map, #location-map').each(function() {
+				initGoogleMap(this);
+			});
 		} else if (typeof L !== 'undefined' && paradb_maps.provider === 'osm') {
 			$('input[name="location_address"], input[name="address"]').attr('autocomplete', 'off');
 			
 			// Location Map handling for Leaflet
-			var mapElement = document.getElementById('location-map');
-			if (mapElement) {
-				initLeafletMap(mapElement);
-			}
+			$('.location-map, #location-map').each(function() {
+				initLeafletMap(this);
+			});
 		}
 
 		// Environmental data fetching
@@ -268,6 +266,12 @@
 				center: center
 			});
 
+			// Fix for maps in tabs/collapsed containers
+			google.maps.event.addListenerOnce(map, 'idle', function(){
+				google.maps.event.trigger(map, 'resize');
+				map.setCenter(center);
+			});
+
 			var marker = new google.maps.Marker({
 				position: center,
 				map: map,
@@ -346,6 +350,11 @@
 			L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 			}).addTo(map);
+
+			// Fix for maps in hidden containers
+			setTimeout(function() {
+				map.invalidateSize();
+			}, 500);
 
 			var marker = L.marker([lat, lng], {draggable: true}).addTo(map);
 

@@ -158,9 +158,15 @@ if ( 'new' === $action ) {
 					<th scope="row"><label for="incident_location"><?php esc_html_e( 'Incident Location', 'wp-paradb' ); ?> *</label></th>
 					<td>
 						<div style="display:flex; gap: 5px;">
-							<input type="text" name="incident_location" id="incident_location" class="regular-text" required style="flex:1;">
+							<input type="text" name="incident_location" id="incident_location" class="regular-text" required style="flex:1;" autocomplete="off">
 							<button type="button" class="get-current-location button" data-target="#incident_location">📍</button>
 						</div>
+						<div style="margin-top: 5px;">
+							<input type="hidden" name="latitude" id="latitude">
+							<input type="hidden" name="longitude" id="longitude">
+							<button type="button" id="geocode-address" class="button button-small"><?php esc_html_e( 'Find on Map', 'wp-paradb' ); ?></button>
+						</div>
+						<div id="location-map" style="height: 300px; margin-top: 10px; border: 1px solid #ccc;"></div>
 					</td>
 				</tr>
 				<tr>

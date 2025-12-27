@@ -84,6 +84,23 @@ class WP_ParaDB_Public {
 	 * @since    1.0.0
 	 */
 	public function enqueue_scripts() {
+		$options = get_option( 'wp_paradb_options', array() );
+		$provider = isset( $options['map_provider'] ) ? $options['map_provider'] : 'google';
+		$api_key = isset( $options['google_maps_api_key'] ) ? $options['google_maps_api_key'] : '';
+
+		if ( 'google' === $provider && ! empty( $api_key ) ) {
+			wp_enqueue_script(
+				'google-maps',
+				'https://maps.googleapis.com/maps/api/js?key=' . esc_attr( $api_key ) . '&libraries=places',
+				array(),
+				null,
+				true
+			);
+		} elseif ( 'osm' === $provider ) {
+			wp_enqueue_style( 'leaflet', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css', array(), '1.9.4' );
+			wp_enqueue_script( 'leaflet', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js', array(), '1.9.4', true );
+		}
+
 		wp_enqueue_script(
 			$this->plugin_name,
 			plugin_dir_url( __FILE__ ) . 'js/wp-paradb-public.js',
@@ -91,6 +108,16 @@ class WP_ParaDB_Public {
 			$this->version,
 			true // Load in footer for better performance.
 		);
+
+		wp_localize_script( $this->plugin_name, 'paradb_public', array(
+			'ajax_url' => admin_url( 'admin-ajax.php' ),
+		) );
+
+		// Pass provider settings to JS
+		wp_localize_script( $this->plugin_name, 'paradb_maps', array(
+			'provider' => $provider,
+			'locationiq_key' => isset( $options['locationiq_api_key'] ) ? $options['locationiq_api_key'] : ''
+		) );
 	}
 
 	/**

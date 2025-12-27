@@ -152,6 +152,62 @@
 			window.print();
 		});
 
+		// Geolocation Button Logic
+		$('.get-current-location').on('click', function() {
+			var $btn = $(this);
+			var target = $btn.data('target');
+			var $input = $(target);
+			
+			if (!navigator.geolocation) {
+				alert('Geolocation is not supported by your browser.');
+				return;
+			}
+
+			$btn.text('⌛');
+			navigator.geolocation.getCurrentPosition(function(pos) {
+				var lat = pos.coords.latitude.toFixed(6);
+				var lng = pos.coords.longitude.toFixed(6);
+				
+				if ($input.is('textarea') || $input.attr('type') === 'text') {
+					$input.val(lat + ', ' + lng);
+				} else {
+					$('#latitude').val(lat).trigger('change');
+					$('#longitude').val(lng).trigger('change');
+				}
+				$btn.text('📍');
+			}, function(err) {
+				alert('Error: ' + err.message);
+				$btn.text('📍');
+			});
+		});
+
+		// Auto-suggest for location fields
+		if (typeof google !== 'undefined' && google.maps && paradb_maps.provider === 'google') {
+			$('input[name="incident_location"], #incident_location').each(function() {
+				$(this).attr('autocomplete', 'off');
+				var autocomplete = new google.maps.places.Autocomplete(this);
+				
+				autocomplete.addListener('place_changed', function() {
+					var place = autocomplete.getPlace();
+					if (!place.geometry) return;
+					
+					var lat = place.geometry.location.lat();
+					var lng = place.geometry.location.lng();
+					
+					$('#latitude').val(lat.toFixed(6)).trigger('change');
+					$('#longitude').val(lng.toFixed(6)).trigger('change');
+				});
+			});
+
+			$('#location-map').each(function() {
+				initGoogleMap(this);
+			});
+		} else if (typeof L !== 'undefined' && paradb_maps.provider === 'osm') {
+			$('#location-map').each(function() {
+				initLeafletMap(this);
+			});
+		}
+
 		// Share functionality
 		$('.share-case-button').on('click', function(e) {
 			e.preventDefault();
@@ -313,6 +369,109 @@
 	function performSearch(query) {
 		// This would be enhanced with AJAX in a production version
 		console.log('Searching for: ' + query);
+	}
+
+	function initGoogleMap(element) {
+		var lat = parseFloat($('#latitude').val()) || 0;
+		var lng = parseFloat($('#longitude').val()) || 0;
+		var center = {lat: lat, lng: lng};
+		
+		var map = new google.maps.Map(element, {
+			zoom: (lat !== 0) ? 15 : 2,
+			center: center
+		});
+
+		google.maps.event.addListenerOnce(map, 'idle', function(){
+			google.maps.event.trigger(map, 'resize');
+			map.setCenter(center);
+		});
+
+		var marker = new google.maps.Marker({
+			position: center,
+			map: map,
+			draggable: true
+		});
+
+		marker.addListener('dragend', function() {
+			var pos = marker.getPosition();
+			$('#latitude').val(pos.lat().toFixed(6));
+			$('#longitude').val(pos.lng().toFixed(6));
+		});
+
+		$('#latitude, #longitude').on('change', function() {
+			var newPos = {
+				lat: parseFloat($('#latitude').val()) || 0,
+				lng: parseFloat($('#longitude').val()) || 0
+			};
+			marker.setPosition(newPos);
+			map.setCenter(newPos);
+		});
+
+		$('#geocode-address').on('click', function() {
+			var address = $('#incident_location').val() || '';
+			if (!address) return;
+
+			var geocoder = new google.maps.Geocoder();
+			geocoder.geocode({'address': address}, function(results, status) {
+				if (status === 'OK') {
+					var pos = results[0].geometry.location;
+					map.setCenter(pos);
+					marker.setPosition(pos);
+					$('#latitude').val(pos.lat().toFixed(6));
+					$('#longitude').val(pos.lng().toFixed(6));
+				}
+			});
+		});
+	}
+
+	function initLeafletMap(element) {
+		var lat = parseFloat($('#latitude').val()) || 0;
+		var lng = parseFloat($('#longitude').val()) || 0;
+		
+		var map = L.map(element).setView([lat, lng], (lat !== 0) ? 15 : 2);
+
+		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+		}).addTo(map);
+
+		setTimeout(function() {
+			map.invalidateSize();
+		}, 500);
+
+		var marker = L.marker([lat, lng], {draggable: true}).addTo(map);
+
+		marker.on('dragend', function(e) {
+			var pos = marker.getLatLng();
+			$('#latitude').val(pos.lat.toFixed(6));
+			$('#longitude').val(pos.lng.toFixed(6));
+		});
+
+		$('#latitude, #longitude').on('change', function() {
+			var newLat = parseFloat($('#latitude').val()) || 0;
+			var newLng = parseFloat($('#longitude').val()) || 0;
+			marker.setLatLng([newLat, newLng]);
+			map.setView([newLat, newLng]);
+		});
+
+		$('#geocode-address').on('click', function() {
+			var address = $('#incident_location').val() || '';
+			if (!address) return;
+
+			var url = 'https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(address);
+			if (typeof paradb_maps !== 'undefined' && paradb_maps.locationiq_key) {
+				url = 'https://us1.locationiq.com/v1/search.php?key=' + paradb_maps.locationiq_key + '&q=' + encodeURIComponent(address) + '&format=json';
+			}
+
+			$.getJSON(url, function(data) {
+				if (data && data.length > 0) {
+					var pos = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+					map.setView(pos, 15);
+					marker.setLatLng(pos);
+					$('#latitude').val(pos[0].toFixed(6));
+					$('#longitude').val(pos[1].toFixed(6));
+				}
+			});
+		});
 	}
 
 })( jQuery );
