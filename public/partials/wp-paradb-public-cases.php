@@ -40,6 +40,11 @@ $cases_table = $wpdb->prefix . 'paradb_cases';
 $query_parts = array();
 $query_parts[] = "SELECT * FROM {$cases_table} WHERE is_published = 1";
 
+// Handle Visibility
+if ( ! current_user_can( 'paradb_view_cases' ) ) {
+	$query_parts[] = "AND visibility != 'internal'";
+}
+
 // Handle search.
 if ( ! empty( $_GET['search'] ) ) {
 	$search_term = '%' . $wpdb->esc_like( sanitize_text_field( wp_unslash( $_GET['search'] ) ) ) . '%';

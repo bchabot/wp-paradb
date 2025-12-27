@@ -83,6 +83,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<code>limit="20"</code> - <?php esc_html_e( 'Number of entries to show.', 'wp-paradb' ); ?>
 					</td>
 				</tr>
+				<tr>
+					<td><code>[paradb_reports]</code></td>
+					<td><?php esc_html_e( 'Displays a grid of all published investigation reports.', 'wp-paradb' ); ?></td>
+					<td>
+						<code>limit="10"</code> - <?php esc_html_e( 'Number of reports to show.', 'wp-paradb' ); ?><br>
+						<code>case_id="123"</code> - <?php esc_html_e( 'Filter reports by a specific Case ID.', 'wp-paradb' ); ?>
+					</td>
+				</tr>
+				<tr>
+					<td><code>[paradb_single_report]</code></td>
+					<td><?php esc_html_e( 'Displays full details for a specific report, including summaries of linked activities.', 'wp-paradb' ); ?></td>
+					<td>
+						<code>id="123"</code> - (<strong><?php esc_html_e( 'Required', 'wp-paradb' ); ?></strong>) <?php esc_html_e( 'The Report ID to display.', 'wp-paradb' ); ?>
+					</td>
+				</tr>
 			</tbody>
 		</table>
 	</div>

@@ -169,25 +169,44 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 					</td>
 				</tr>
 				
-				<tr>
-					<th scope="row">
-						<label for="report_content"><?php esc_html_e( 'Report Content', 'wp-paradb' ); ?> *</label>
-					</th>
-					<td>
-						<?php
-						wp_editor(
-							$report ? $report->report_content : '',
-							'report_content',
-							array(
-								'textarea_name' => 'report_content',
-								'textarea_rows' => 15,
-								'media_buttons' => false,
-							)
-						);
-						?>
-					</td>
+								<tr>
+									<th scope="row">
+										<label for="report_summary"><?php esc_html_e( 'Executive Summary', 'wp-paradb' ); ?></label>
+									</th>
+									<td>
+										<?php
+										wp_editor(
+											$report ? $report->report_summary : '',
+											'report_summary',
+											array(
+												'textarea_name' => 'report_summary',
+												'textarea_rows' => 5,
+												'media_buttons' => true,
+											)
+										);
+										?>
+										<p class="description"><?php esc_html_e( 'Brief overview of the report findings.', 'wp-paradb' ); ?></p>
+									</td>
 								</tr>
-							</table>
+								
+								<tr>
+									<th scope="row">
+										<label for="report_content"><?php esc_html_e( 'Report Content', 'wp-paradb' ); ?> *</label>
+									</th>
+									<td>
+										<?php
+										wp_editor(
+											$report ? $report->report_content : '',
+											'report_content',
+											array(
+												'textarea_name' => 'report_content',
+												'textarea_rows' => 15,
+												'media_buttons' => true,
+											)
+										);
+										?>
+									</td>
+								</tr>							</table>
 				
 							<?php if ( $report && $report_id > 0 ) : ?>
 								<?php WP_ParaDB_Admin::render_relationship_section( $report_id, 'report' ); ?>

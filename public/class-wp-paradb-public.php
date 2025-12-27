@@ -56,6 +56,8 @@ class WP_ParaDB_Public {
 		add_shortcode( 'paradb_cases', array( $this, 'cases_shortcode' ) );
 		add_shortcode( 'paradb_witness_form', array( $this, 'witness_form_shortcode' ) );
 		add_shortcode( 'paradb_single_case', array( $this, 'single_case_shortcode' ) );
+		add_shortcode( 'paradb_reports', array( $this, 'reports_shortcode' ) );
+		add_shortcode( 'paradb_single_report', array( $this, 'single_report_shortcode' ) );
 
 		// Handle witness form submission.
 		add_action( 'init', array( $this, 'handle_witness_submission' ) );
@@ -147,6 +149,47 @@ class WP_ParaDB_Public {
 
 		ob_start();
 		include WP_PARADB_PLUGIN_DIR . 'public/partials/wp-paradb-public-case-single.php';
+		return ob_get_clean();
+	}
+
+	/**
+	 * Reports listing shortcode.
+	 *
+	 * @since    1.6.0
+	 */
+	public function reports_shortcode( $atts ) {
+		$atts = shortcode_atts(
+			array(
+				'limit'   => 10,
+				'orderby' => 'report_date',
+				'order'   => 'DESC',
+				'case_id' => 0,
+			),
+			$atts,
+			'paradb_reports'
+		);
+
+		ob_start();
+		include WP_PARADB_PLUGIN_DIR . 'public/partials/wp-paradb-public-reports.php';
+		return ob_get_clean();
+	}
+
+	/**
+	 * Single report display shortcode.
+	 *
+	 * @since    1.6.0
+	 */
+	public function single_report_shortcode( $atts ) {
+		$atts = shortcode_atts(
+			array(
+				'id' => 0,
+			),
+			$atts,
+			'paradb_single_report'
+		);
+
+		ob_start();
+		include WP_PARADB_PLUGIN_DIR . 'public/partials/wp-paradb-public-report-single.php';
 		return ob_get_clean();
 	}
 
