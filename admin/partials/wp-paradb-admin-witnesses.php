@@ -249,7 +249,7 @@ if ( 'new' === $action ) {
 		});
 
 		if ($.fn.autocomplete) {
-			$('#incident_location').autocomplete({
+			$('#incident_location, #account_address').autocomplete({
 				source: function(request, response) {
 					$.ajax({
 						url: ajaxurl,

@@ -298,7 +298,7 @@ class WP_ParaDB_Witness_Form {
 
 				// Location autocomplete (Address Book)
 				if ($.fn.autocomplete) {
-					$('#incident_location').autocomplete({
+					$('#incident_location, #account_address').autocomplete({
 						source: function(request, response) {
 							$.ajax({
 								url: '<?php echo esc_js( admin_url( 'admin-ajax.php' ) ); ?>',
