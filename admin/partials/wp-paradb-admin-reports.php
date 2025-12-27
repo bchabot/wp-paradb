@@ -37,7 +37,7 @@ if ( isset( $_POST['save_report'] ) && check_admin_referer( 'save_report', 'repo
 		'report_summary'     => isset( $_POST['report_summary'] ) ? sanitize_textarea_field( wp_unslash( $_POST['report_summary'] ) ) : '',
 		'visibility'         => isset( $_POST['visibility'] ) ? sanitize_text_field( wp_unslash( $_POST['visibility'] ) ) : 'public',
 		'sanitize_front_end' => isset( $_POST['sanitize_front_end'] ) ? 1 : 0,
-		'is_published'       => isset( $_POST['is_published'] ) ? 1 : 0,
+		'is_published'       => ( isset( $_POST['visibility'] ) && $_POST['visibility'] !== 'internal' ) ? 1 : 0,
 	);
 
 	if ( $report_id > 0 ) {
@@ -178,16 +178,6 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 						<label>
 							<input type="checkbox" name="sanitize_front_end" value="1" <?php checked( $report ? $report->sanitize_front_end : 1, 1 ); ?>>
 							<?php esc_html_e( 'Redact sensitive details on public pages.', 'wp-paradb' ); ?>
-						</label>
-					</td>
-				</tr>
-
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Publish Status', 'wp-paradb' ); ?></th>
-					<td>
-						<label>
-							<input type="checkbox" name="is_published" value="1" <?php checked( $report ? $report->is_published : 0, 1 ); ?>>
-							<?php esc_html_e( 'Publish this report on the public case page', 'wp-paradb' ); ?>
 						</label>
 					</td>
 				</tr>

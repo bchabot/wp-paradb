@@ -157,7 +157,7 @@ class WP_ParaDB_Admin_Menu {
 			__( 'Settings', 'wp-paradb' ),
 			'paradb_manage_settings',
 			'wp-paradb-settings',
-			array( __CLASS__, 'settings_page' )
+			array( 'WP_ParaDB_Admin_Settings', 'render_settings_page' )
 		);
 
 		// Documentation submenu.
@@ -299,13 +299,4 @@ class WP_ParaDB_Admin_Menu {
 	public static function taxonomies_page() {
 		require_once WP_PARADB_PLUGIN_DIR . 'admin/partials/wp-paradb-admin-taxonomies.php';
 	}	
-
-	/**
-	 * Settings page
-	 *
-	 * @since    1.0.0
-	 */
-	public static function settings_page() {
-		require_once WP_PARADB_PLUGIN_DIR . 'admin/partials/wp-paradb-admin-settings.php';
-	}
 }

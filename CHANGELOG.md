@@ -1,6 +1,11 @@
 # Changelog
 
-## [0.0.3] - 2025-12-26
+## [0.0.5] - 2025-12-26
+### Changed
+- Updated plugin version to 0.0.5.
+- Added BETA software warning to README.md.
+
+## [0.0.4] - 2025-12-26
 ### Added
 - **Case Visibility & Protection**: Added Visibility settings (Public, Private/Protected, Internal) and password protection for cases.
 - **Data Sanitization**: New "Sanitize Front End" option for cases to automatically redact witness/client names and specific locations on public pages.

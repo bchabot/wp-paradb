@@ -1,5 +1,8 @@
 # WordPress Paranormal Database (WP-ParaDB)
 
+> [!WARNING]
+> **BETA SOFTWARE**: This plugin is currently in active development. It may be buggy and features may change significantly between versions. Use with caution in production environments.
+
 WP-ParaDB is a comprehensive, professional-grade WordPress plugin designed for paranormal researchers, parapsychologists, and investigation teams. It provides a standardized and secure platform for recording, archiving, and sharing paranormal witness reports, field observations, experiments, and detailed investigation cases.
 
 ## 🌟 Key Features

@@ -42,7 +42,7 @@ if ( isset( $_POST['save_activity'] ) && check_admin_referer( 'save_activity', '
 		'duration_minutes'   => isset( $_POST['duration_minutes'] ) ? absint( $_POST['duration_minutes'] ) : 0,
 		'visibility'         => isset( $_POST['visibility'] ) ? sanitize_text_field( wp_unslash( $_POST['visibility'] ) ) : 'internal',
 		'sanitize_front_end' => isset( $_POST['sanitize_front_end'] ) ? 1 : 0,
-		'is_published'       => isset( $_POST['is_published'] ) ? 1 : 0,
+		'is_published'       => ( isset( $_POST['visibility'] ) && $_POST['visibility'] !== 'internal' ) ? 1 : 0,
 	);
 
 	if ( $activity_id > 0 ) {
@@ -218,16 +218,6 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 						<label>
 							<input type="checkbox" name="sanitize_front_end" value="1" <?php checked( $activity ? $activity->sanitize_front_end : 1, 1 ); ?>>
 							<?php esc_html_e( 'Redact sensitive details on public pages.', 'wp-paradb' ); ?>
-						</label>
-					</td>
-				</tr>
-
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Publish Status', 'wp-paradb' ); ?></th>
-					<td>
-						<label>
-							<input type="checkbox" name="is_published" value="1" <?php checked( $activity ? $activity->is_published : 0, 1 ); ?>>
-							<?php esc_html_e( 'Publish this activity on the public case page', 'wp-paradb' ); ?>
 						</label>
 					</td>
 				</tr>

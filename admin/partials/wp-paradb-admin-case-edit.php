@@ -62,7 +62,7 @@ if ( isset( $_POST['save_case'] ) && check_admin_referer( 'save_case_' . $case_i
 		'visibility'         => isset( $_POST['visibility'] ) ? sanitize_text_field( wp_unslash( $_POST['visibility'] ) ) : 'internal',
 		'password'           => isset( $_POST['password'] ) ? sanitize_text_field( wp_unslash( $_POST['password'] ) ) : null,
 		'sanitize_front_end' => isset( $_POST['sanitize_front_end'] ) ? 1 : 0,
-		'is_published'       => isset( $_POST['is_published'] ) ? 1 : 0,
+		'is_published'       => ( isset( $_POST['visibility'] ) && $_POST['visibility'] !== 'internal' ) ? 1 : 0,
 	);
 
 		if ( $is_new ) {
@@ -606,14 +606,6 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 									<strong><?php esc_html_e( 'Sanitize Front End', 'wp-paradb' ); ?></strong>
 								</label>
 								<small class="description" style="display: block; margin-top: 5px;"><?php esc_html_e( 'Redact names and specific locations on public pages.', 'wp-paradb' ); ?></small>
-							</p>
-
-							<p>
-								<label>
-									<input type="checkbox" name="is_published" value="1" <?php checked($case ? $case->is_published : 0, 1); ?>>
-									<strong><?php esc_html_e( 'Publish Status', 'wp-paradb' ); ?></strong>
-								</label>
-								<small class="description" style="display: block; margin-top: 5px;"><?php esc_html_e( 'Make this case visible on the public site.', 'wp-paradb' ); ?></small>
 							</p>
 
 							<script>
