@@ -56,9 +56,9 @@ class WP_ParaDB_Database {
 			case_description longtext DEFAULT NULL,
 			phenomena_types text DEFAULT NULL,
 			case_priority varchar(20) DEFAULT 'normal',
-			visibility varchar(20) NOT NULL DEFAULT 'public',
+			visibility varchar(20) NOT NULL DEFAULT 'internal',
 			password varchar(255) DEFAULT NULL,
-			sanitize_front_end tinyint(1) NOT NULL DEFAULT 0,
+			sanitize_front_end tinyint(1) NOT NULL DEFAULT 1,
 			date_created datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			date_modified datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			date_closed datetime DEFAULT NULL,
@@ -90,6 +90,8 @@ class WP_ParaDB_Database {
 			report_content longtext NOT NULL,
 			report_summary text DEFAULT NULL,
 			investigator_id bigint(20) unsigned NOT NULL,
+			visibility varchar(20) NOT NULL DEFAULT 'public',
+			sanitize_front_end tinyint(1) NOT NULL DEFAULT 1,
 			is_published tinyint(1) NOT NULL DEFAULT 0,
 			publish_date datetime DEFAULT NULL,
 			date_created datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -125,6 +127,8 @@ class WP_ParaDB_Database {
 			phenomena_observed text DEFAULT NULL,
 			duration_minutes int(11) DEFAULT NULL,
 			participants text DEFAULT NULL,
+			visibility varchar(20) NOT NULL DEFAULT 'internal',
+			sanitize_front_end tinyint(1) NOT NULL DEFAULT 1,
 			is_published tinyint(1) NOT NULL DEFAULT 0,
 			publish_date datetime DEFAULT NULL,
 			date_created datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -339,7 +343,7 @@ class WP_ParaDB_Database {
 		dbDelta( $sql_witnesses );
 
 		// Store database version
-		update_option( 'wp_paradb_db_version', '0.0.3' );
+		update_option( 'wp_paradb_db_version', '0.0.4' );
 	}
 
 	/**

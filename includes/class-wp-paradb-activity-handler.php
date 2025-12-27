@@ -57,6 +57,8 @@ class WP_ParaDB_Activity_Handler {
 			'phenomena_observed' => isset( $data['phenomena_observed'] ) ? sanitize_textarea_field( $data['phenomena_observed'] ) : null,
 			'duration_minutes'   => isset( $data['duration_minutes'] ) ? absint( $data['duration_minutes'] ) : null,
 			'participants'       => isset( $data['participants'] ) ? sanitize_textarea_field( $data['participants'] ) : null,
+			'visibility'         => isset( $data['visibility'] ) ? sanitize_text_field( $data['visibility'] ) : 'internal',
+			'sanitize_front_end' => isset( $data['sanitize_front_end'] ) ? absint( $data['sanitize_front_end'] ) : 1,
 			'is_published'       => isset( $data['is_published'] ) ? absint( $data['is_published'] ) : 0,
 			'date_created'       => current_time( 'mysql' ),
 		);
@@ -64,7 +66,7 @@ class WP_ParaDB_Activity_Handler {
 		// Format types for database.
 		$format = array(
 			'%d', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s',
-			'%s', '%s', '%s', '%s', '%s', '%d', '%s', '%d', '%s',
+			'%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%d', '%d', '%s',
 		);		// Insert into database.
 		$result = $wpdb->insert(
 			$wpdb->prefix . 'paradb_activities',
@@ -113,7 +115,8 @@ class WP_ParaDB_Activity_Handler {
 		$allowed_fields = array(
 			'activity_title', 'activity_type', 'activity_date', 'activity_content', 'activity_summary',
 			'weather_conditions', 'moon_phase', 'temperature', 'astrological_data', 'geomagnetic_data', 
-			'equipment_used', 'evidence_collected', 'phenomena_observed', 'duration_minutes', 'participants', 'is_published',
+			'equipment_used', 'evidence_collected', 'phenomena_observed', 'duration_minutes', 'participants', 
+			'visibility', 'sanitize_front_end', 'is_published',
 		);
 
 		foreach ( $allowed_fields as $field ) {
@@ -171,10 +174,17 @@ class WP_ParaDB_Activity_Handler {
 			return null;
 		}
 
-		return $wpdb->get_row( $wpdb->prepare(
+		$activity = $wpdb->get_row( $wpdb->prepare(
 			"SELECT * FROM {$wpdb->prefix}paradb_activities WHERE activity_id = %d",
 			$activity_id
 		) );
+
+		if ( $activity ) {
+			if ( ! isset( $activity->visibility ) ) $activity->visibility = 'internal';
+			if ( ! isset( $activity->sanitize_front_end ) ) $activity->sanitize_front_end = 1;
+		}
+
+		return $activity;
 	}
 
 	/**

@@ -35,6 +35,8 @@ if ( isset( $_POST['save_report'] ) && check_admin_referer( 'save_report', 'repo
 		'report_date'        => isset( $_POST['report_date'] ) ? sanitize_text_field( wp_unslash( $_POST['report_date'] ) ) : current_time( 'mysql' ),
 		'report_content'     => isset( $_POST['report_content'] ) ? wp_kses_post( wp_unslash( $_POST['report_content'] ) ) : '',
 		'report_summary'     => isset( $_POST['report_summary'] ) ? sanitize_textarea_field( wp_unslash( $_POST['report_summary'] ) ) : '',
+		'visibility'         => isset( $_POST['visibility'] ) ? sanitize_text_field( wp_unslash( $_POST['visibility'] ) ) : 'public',
+		'sanitize_front_end' => isset( $_POST['sanitize_front_end'] ) ? 1 : 0,
 		'is_published'       => isset( $_POST['is_published'] ) ? 1 : 0,
 	);
 
@@ -159,6 +161,27 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 					</td>
 				</tr>
 				
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Visibility', 'wp-paradb' ); ?> *</th>
+					<td>
+						<select name="visibility" id="visibility">
+							<option value="public" <?php selected( $report ? $report->visibility : 'public', 'public' ); ?>><?php esc_html_e( 'Public', 'wp-paradb' ); ?></option>
+							<option value="private" <?php selected( $report ? $report->visibility : 'public', 'private' ); ?>><?php esc_html_e( 'Private (Protected)', 'wp-paradb' ); ?></option>
+							<option value="internal" <?php selected( $report ? $report->visibility : 'public', 'internal' ); ?>><?php esc_html_e( 'Internal Only', 'wp-paradb' ); ?></option>
+						</select>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Front-End Sanitization', 'wp-paradb' ); ?></th>
+					<td>
+						<label>
+							<input type="checkbox" name="sanitize_front_end" value="1" <?php checked( $report ? $report->sanitize_front_end : 1, 1 ); ?>>
+							<?php esc_html_e( 'Redact sensitive details on public pages.', 'wp-paradb' ); ?>
+						</label>
+					</td>
+				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Publish Status', 'wp-paradb' ); ?></th>
 					<td>

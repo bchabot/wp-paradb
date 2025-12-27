@@ -39,6 +39,8 @@ if ( isset( $_POST['save_activity'] ) && check_admin_referer( 'save_activity', '
 		'astrological_data'  => isset( $_POST['astrological_data'] ) ? sanitize_textarea_field( wp_unslash( $_POST['astrological_data'] ) ) : '',
 		'geomagnetic_data'   => isset( $_POST['geomagnetic_data'] ) ? sanitize_textarea_field( wp_unslash( $_POST['geomagnetic_data'] ) ) : '',
 		'duration_minutes'   => isset( $_POST['duration_minutes'] ) ? absint( $_POST['duration_minutes'] ) : 0,
+		'visibility'         => isset( $_POST['visibility'] ) ? sanitize_text_field( wp_unslash( $_POST['visibility'] ) ) : 'internal',
+		'sanitize_front_end' => isset( $_POST['sanitize_front_end'] ) ? 1 : 0,
 		'is_published'       => isset( $_POST['is_published'] ) ? 1 : 0,
 	);
 
@@ -174,6 +176,27 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 					</td>
 				</tr>
 				
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Visibility', 'wp-paradb' ); ?></th>
+					<td>
+						<select name="visibility" id="visibility">
+							<option value="public" <?php selected( $activity ? $activity->visibility : 'internal', 'public' ); ?>><?php esc_html_e( 'Public', 'wp-paradb' ); ?></option>
+							<option value="private" <?php selected( $activity ? $activity->visibility : 'internal', 'private' ); ?>><?php esc_html_e( 'Private (Protected)', 'wp-paradb' ); ?></option>
+							<option value="internal" <?php selected( $activity ? $activity->visibility : 'internal', 'internal' ); ?>><?php esc_html_e( 'Internal Only', 'wp-paradb' ); ?></option>
+						</select>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Front-End Sanitization', 'wp-paradb' ); ?></th>
+					<td>
+						<label>
+							<input type="checkbox" name="sanitize_front_end" value="1" <?php checked( $activity ? $activity->sanitize_front_end : 1, 1 ); ?>>
+							<?php esc_html_e( 'Redact sensitive details on public pages.', 'wp-paradb' ); ?>
+						</label>
+					</td>
+				</tr>
+
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Publish Status', 'wp-paradb' ); ?></th>
 					<td>

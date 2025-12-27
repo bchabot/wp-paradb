@@ -47,6 +47,8 @@ class WP_ParaDB_Report_Handler {
 			'report_date'        => isset( $data['report_date'] ) ? sanitize_text_field( $data['report_date'] ) : current_time( 'mysql' ),
 			'report_content'     => wp_kses_post( $data['report_content'] ),
 			'report_summary'     => isset( $data['report_summary'] ) ? sanitize_textarea_field( $data['report_summary'] ) : null,
+			'visibility'         => isset( $data['visibility'] ) ? sanitize_text_field( $data['visibility'] ) : 'public',
+			'sanitize_front_end' => isset( $data['sanitize_front_end'] ) ? absint( $data['sanitize_front_end'] ) : 1,
 			'is_published'       => isset( $data['is_published'] ) ? absint( $data['is_published'] ) : 0,
 			'investigator_id'    => get_current_user_id(),
 			'date_created'       => current_time( 'mysql' ),
@@ -54,7 +56,7 @@ class WP_ParaDB_Report_Handler {
 
 		// Format types for database.
 		$format = array(
-			'%d', '%d', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s',
+			'%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%d', '%s',
 		);
 		// Insert into database.
 		$result = $wpdb->insert(
@@ -102,7 +104,8 @@ class WP_ParaDB_Report_Handler {
 		$format = array();
 
 		$allowed_fields = array(
-			'activity_id', 'report_title', 'report_type', 'report_date', 'report_content', 'report_summary', 'is_published',
+			'activity_id', 'report_title', 'report_type', 'report_date', 'report_content', 'report_summary', 
+			'visibility', 'sanitize_front_end', 'is_published',
 		);
 
 		foreach ( $allowed_fields as $field ) {
@@ -159,10 +162,17 @@ class WP_ParaDB_Report_Handler {
 			return null;
 		}
 
-		return $wpdb->get_row( $wpdb->prepare(
+		$report = $wpdb->get_row( $wpdb->prepare(
 			"SELECT * FROM {$wpdb->prefix}paradb_reports WHERE report_id = %d",
 			$report_id
 		) );
+
+		if ( $report ) {
+			if ( ! isset( $report->visibility ) ) $report->visibility = 'public';
+			if ( ! isset( $report->sanitize_front_end ) ) $report->sanitize_front_end = 1;
+		}
+
+		return $report;
 	}
 
 	/**
