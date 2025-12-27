@@ -91,7 +91,7 @@ class WP_ParaDB_Witness_Handler {
 		$account_data = array(
 			'account_email'         => $email,
 			'user_id'               => isset( $data['user_id'] ) ? absint( $data['user_id'] ) : null,
-			'case_id'               => isset( $data['case_id'] ) ? absint( $data['case_id'] ) : null,
+			'case_id'               => ( isset( $data['case_id'] ) && $data['case_id'] > 0 ) ? absint( $data['case_id'] ) : 0,
 			'account_name'          => ! empty( $data['account_name'] ) ? sanitize_text_field( $data['account_name'] ) : null,
 			'account_phone'         => ! empty( $data['account_phone'] ) ? sanitize_text_field( $data['account_phone'] ) : null,
 			'account_address'       => ! empty( $data['account_address'] ) ? sanitize_textarea_field( $data['account_address'] ) : null,
