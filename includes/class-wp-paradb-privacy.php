@@ -88,20 +88,26 @@ class WP_ParaDB_Privacy {
 		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-client-handler.php';
 
 		$options = WP_ParaDB_Settings::get_settings();
+		$case = WP_ParaDB_Case_Handler::get_case( $case_id );
+		if ( ! $case ) return array();
 
 		// Get Client names
-		$case = WP_ParaDB_Case_Handler::get_case( $case_id );
-		if ( $case && $case->client_id ) {
+		if ( $case->client_id ) {
 			$client = WP_ParaDB_Client_Handler::get_client( $case->client_id );
 			if ( $client ) {
 				$terms[] = $client->first_name;
 				$terms[] = $client->last_name;
 				$terms[] = $client->first_name . ' ' . $client->last_name;
+				if ( $case->sanitize_front_end ) {
+					$terms[] = $client->address;
+					$terms[] = $client->email;
+					$terms[] = $client->phone;
+				}
 			}
 		}
 
-		// Get Witness names if redaction enabled
-		if ( ! empty( $options['redact_witness_names'] ) ) {
+		// Get Witness names if redaction enabled or case sanitized
+		if ( ! empty( $options['redact_witness_names'] ) || $case->sanitize_front_end ) {
 			$witnesses = WP_ParaDB_Witness_Handler::get_witness_accounts( array( 'case_id' => $case_id, 'limit' => 100 ) );
 			foreach ( $witnesses as $witness ) {
 				if ( ! empty( $witness->account_name ) ) {
@@ -112,7 +118,22 @@ class WP_ParaDB_Privacy {
 						$terms = array_merge( $terms, $parts );
 					}
 				}
+				if ( $case->sanitize_front_end ) {
+					$terms[] = $witness->account_address;
+					$terms[] = $witness->account_email;
+					$terms[] = $witness->account_phone;
+					$terms[] = $witness->incident_location;
+				}
 			}
+		}
+
+		// Add case location if sanitized
+		if ( $case->sanitize_front_end ) {
+			$terms[] = $case->location_name;
+			$terms[] = $case->location_address;
+			// We don't necessarily want to redact city/state unless they are very specific, 
+			// but the user said "locations", so let's be safe.
+			$terms[] = $case->location_city;
 		}
 
 		return array_unique( array_filter( $terms ) );

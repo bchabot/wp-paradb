@@ -56,6 +56,71 @@ class WP_ParaDB_Field_Log_Handler {
 	}
 
 	/**
+	 * Update an existing field log entry
+	 *
+	 * @since    1.6.0
+	 */
+	public static function update_log( $log_id, $data ) {
+		global $wpdb;
+
+		$log_id = absint( $log_id );
+		if ( ! $log_id ) {
+			return new WP_Error( 'invalid_id', __( 'Invalid Log ID.', 'wp-paradb' ) );
+		}
+
+		$update_data = array();
+		$format = array();
+
+		if ( isset( $data['log_content'] ) ) {
+			$update_data['log_content'] = wp_kses_post( $data['log_content'] );
+			$format[] = '%s';
+		}
+
+		if ( isset( $data['latitude'] ) ) {
+			$update_data['latitude'] = ( '' === $data['latitude'] ) ? null : floatval( $data['latitude'] );
+			$format[] = ( null === $update_data['latitude'] ) ? null : '%f';
+		}
+
+		if ( isset( $data['longitude'] ) ) {
+			$update_data['longitude'] = ( '' === $data['longitude'] ) ? null : floatval( $data['longitude'] );
+			$format[] = ( null === $update_data['longitude'] ) ? null : '%f';
+		}
+
+		if ( empty( $update_data ) ) {
+			return true;
+		}
+
+		$result = $wpdb->update(
+			$wpdb->prefix . 'paradb_field_logs',
+			$update_data,
+			array( 'log_id' => $log_id ),
+			$format,
+			array( '%d' )
+		);
+
+		if ( false === $result ) {
+			return new WP_Error( 'db_update_error', __( 'Failed to update log entry.', 'wp-paradb' ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Delete a field log entry
+	 *
+	 * @since    1.6.0
+	 */
+	public static function delete_log( $log_id ) {
+		global $wpdb;
+
+		return $wpdb->delete(
+			$wpdb->prefix . 'paradb_field_logs',
+			array( 'log_id' => absint( $log_id ) ),
+			array( '%d' )
+		);
+	}
+
+	/**
 	 * Get logs for a case or activity
 	 *
 	 * @since    1.4.0

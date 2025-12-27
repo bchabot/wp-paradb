@@ -24,80 +24,57 @@ if ( ! $object_id || ! $object_type ) {
 }
 
 // Handle adding relationship.
-if ( isset( $_POST['add_relationship'] ) && check_admin_referer( 'add_relationship_' . $object_id, 'relationship_nonce' ) ) {
-	$rel_data = array(
-		'from_id'           => $object_id,
-		'from_type'         => $object_type,
-		'to_id'             => absint( $_POST['to_id'] ),
-		'to_type'           => sanitize_text_field( $_POST['to_type'] ),
-		'relationship_type' => sanitize_text_field( $_POST['relationship_type'] ),
-		'notes'             => sanitize_textarea_field( $_POST['relationship_notes'] ),
-	);
-
-	$result = WP_ParaDB_Relationship_Handler::create_relationship( $rel_data );
-	if ( is_wp_error( $result ) ) {
-		echo '<div class="notice notice-error"><p>' . esc_html( $result->get_error_message() ) . '</p></div>';
-	} else {
-		echo '<div class="notice notice-success"><p>' . esc_html__( 'Relationship added.', 'wp-paradb' ) . '</p></div>';
-	}
-}
-
-// Handle deleting relationship.
-if ( isset( $_GET['del_rel'] ) && isset( $_GET['_wpnonce'] ) ) {
-	if ( wp_verify_nonce( $_GET['_wpnonce'], 'delete_rel_' . $_GET['del_rel'] ) ) {
-		WP_ParaDB_Relationship_Handler::delete_relationship( $_GET['del_rel'] );
-		echo '<div class="notice notice-success"><p>' . esc_html__( 'Relationship removed.', 'wp-paradb' ) . '</p></div>';
-	}
-}
+// (Removing the direct POST handling since we will use AJAX)
 
 $relationships = WP_ParaDB_Relationship_Handler::get_relationships( $object_id, $object_type );
 $rel_types = WP_ParaDB_Taxonomy_Handler::get_taxonomy_items( 'relationship_types' );
 ?>
 
-<div class="paradb-relationships-section postbox">
+<div class="paradb-relationships-section postbox" id="paradb-relationships-box">
 	<h2 class="hndle"><?php esc_html_e( 'Linked Relationships', 'wp-paradb' ); ?></h2>
 	<div class="inside">
-		<?php if ( $relationships ) : ?>
-			<table class="wp-list-table widefat fixed striped" style="margin-bottom: 20px;">
-				<thead>
-					<tr>
-						<th><?php esc_html_e( 'Relationship', 'wp-paradb' ); ?></th>
-						<th><?php esc_html_e( 'Object', 'wp-paradb' ); ?></th>
-						<th><?php esc_html_e( 'Notes', 'wp-paradb' ); ?></th>
-						<th style="width: 50px;"></th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php foreach ( $relationships as $rel ) : 
-						$is_from = ( absint( $rel->from_id ) === $object_id && $rel->from_type === $object_type );
-						$target_id = $is_from ? $rel->to_id : $rel->from_id;
-						$target_type = $is_from ? $rel->to_type : $rel->from_type;
-						$label = WP_ParaDB_Relationship_Handler::get_object_label( $target_id, $target_type );
-						$type_label = isset( $rel_types[ $rel->relationship_type ] ) ? $rel_types[ $rel->relationship_type ] : $rel->relationship_type;
-						?>
+		<div id="paradb-relationships-table-container">
+			<?php if ( $relationships ) : ?>
+				<table class="wp-list-table widefat fixed striped" style="margin-bottom: 20px;">
+					<thead>
 						<tr>
-							<td><?php echo esc_html( $type_label ); ?></td>
-							<td><strong><?php echo esc_html( $label ); ?></strong> (<?php echo esc_html( ucfirst( $target_type ) ); ?>)</td>
-							<td><?php echo esc_html( $rel->notes ); ?></td>
-							<td>
-								<a href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'del_rel', $rel->relationship_id ), 'delete_rel_' . $rel->relationship_id ) ); ?>" class="button button-small" onclick="return confirm('<?php esc_attr_e( 'Remove this link?', 'wp-paradb' ); ?>');">×</a>
-							</td>
+							<th><?php esc_html_e( 'Relationship', 'wp-paradb' ); ?></th>
+							<th><?php esc_html_e( 'Object', 'wp-paradb' ); ?></th>
+							<th><?php esc_html_e( 'Notes', 'wp-paradb' ); ?></th>
+							<th style="width: 50px;"></th>
 						</tr>
-					<?php endforeach; ?>
-				</tbody>
-			</table>
-		<?php else : ?>
-			<p><?php esc_html_e( 'No relationships linked yet.', 'wp-paradb' ); ?></p>
-		<?php endif; ?>
+					</thead>
+					<tbody>
+						<?php foreach ( $relationships as $rel ) : 
+							$is_from = ( absint( $rel->from_id ) === $object_id && $rel->from_type === $object_type );
+							$target_id = $is_from ? $rel->to_id : $rel->from_id;
+							$target_type = $is_from ? $rel->to_type : $rel->from_type;
+							$label = WP_ParaDB_Relationship_Handler::get_object_label( $target_id, $target_type );
+							$type_label = isset( $rel_types[ $rel->relationship_type ] ) ? $rel_types[ $rel->relationship_type ] : $rel->relationship_type;
+							?>
+							<tr data-rel-id="<?php echo esc_attr($rel->relationship_id); ?>">
+								<td><?php echo esc_html( $type_label ); ?></td>
+								<td><strong><?php echo esc_html( $label ); ?></strong> (<?php echo esc_html( ucfirst( $target_type ) ); ?>)</td>
+								<td><?php echo esc_html( $rel->notes ); ?></td>
+								<td>
+									<button type="button" class="button button-small delete-rel-btn" data-id="<?php echo esc_attr($rel->relationship_id); ?>">×</button>
+								</td>
+							</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+			<?php else : ?>
+				<p class="no-rels"><?php esc_html_e( 'No relationships linked yet.', 'wp-paradb' ); ?></p>
+			<?php endif; ?>
+		</div>
 
 		<hr>
 		<h4><?php esc_html_e( 'Add New Relationship', 'wp-paradb' ); ?></h4>
-		<form method="post" action="">
-			<?php wp_nonce_field( 'add_relationship_' . $object_id, 'relationship_nonce' ); ?>
+		<div id="add-relationship-form-fields">
 			<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; align-items: end;">
 				<div>
 					<label><?php esc_html_e( 'Link Type', 'wp-paradb' ); ?></label><br>
-					<select name="relationship_type" class="widefat" required>
+					<select id="rel_type" class="widefat">
 						<?php foreach ( $rel_types as $key => $label ) : ?>
 							<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></option>
 						<?php endforeach; ?>
@@ -105,7 +82,7 @@ $rel_types = WP_ParaDB_Taxonomy_Handler::get_taxonomy_items( 'relationship_types
 				</div>
 				<div>
 					<label><?php esc_html_e( 'Target Type', 'wp-paradb' ); ?></label><br>
-					<select name="to_type" id="rel_target_type" class="widefat" required>
+					<select id="rel_target_type" class="widefat">
 						<option value="case"><?php esc_html_e( 'Case', 'wp-paradb' ); ?></option>
 						<option value="activity"><?php esc_html_e( 'Activity', 'wp-paradb' ); ?></option>
 						<option value="report"><?php esc_html_e( 'Report', 'wp-paradb' ); ?></option>
@@ -117,7 +94,7 @@ $rel_types = WP_ParaDB_Taxonomy_Handler::get_taxonomy_items( 'relationship_types
 				<div>
 					<label><?php esc_html_e( 'Target Object', 'wp-paradb' ); ?></label><br>
 					<div id="rel_target_object_container">
-						<select name="to_id" id="rel_target_id" class="widefat" required>
+						<select id="rel_target_id" class="widefat">
 							<option value=""><?php esc_html_e( 'Select Target Type First', 'wp-paradb' ); ?></option>
 						</select>
 					</div>
@@ -128,11 +105,94 @@ $rel_types = WP_ParaDB_Taxonomy_Handler::get_taxonomy_items( 'relationship_types
 			</div>
 			<div style="margin-top: 10px;">
 				<label><?php esc_html_e( 'Notes', 'wp-paradb' ); ?></label><br>
-				<textarea name="relationship_notes" class="widefat" rows="2"></textarea>
+				<textarea id="rel_notes" class="widefat" rows="2"></textarea>
 			</div>
 			<div style="margin-top: 10px;">
-				<input type="submit" name="add_relationship" class="button" value="<?php esc_attr_e( 'Add Link', 'wp-paradb' ); ?>">
+				<button type="button" id="submit-add-rel" class="button"><?php esc_attr_e( 'Add Link', 'wp-paradb' ); ?></button>
 			</div>
-		</form>
+		</div>
 	</div>
 </div>
+
+<script>
+jQuery(document).ready(function($) {
+	var objId = <?php echo $object_id; ?>;
+	var objType = '<?php echo esc_js($object_type); ?>';
+
+	function loadLinkableObjects() {
+		var type = $('#rel_target_type').val();
+		$('#rel_target_object_container').hide();
+		$('#rel_target_loading').show();
+
+		$.post(ajaxurl, {
+			action: 'paradb_get_linkable_objects',
+			type: type,
+			nonce: '<?php echo wp_create_nonce("paradb_admin_nonce"); ?>'
+		}, function(res) {
+			$('#rel_target_loading').hide();
+			var $select = $('#rel_target_id');
+			$select.empty();
+			
+			if (res.success && res.data.length > 0) {
+				res.data.forEach(function(obj) {
+					$select.append('<option value="' + obj.id + '">' + obj.label + '</option>');
+				});
+				$('#rel_target_object_container').show();
+			} else {
+				$select.append('<option value=""><?php esc_html_e( 'No objects found', 'wp-paradb' ); ?></option>');
+				$('#rel_target_object_container').show();
+			}
+		});
+	}
+
+	$('#rel_target_type').on('change', loadLinkableObjects);
+	loadLinkableObjects(); // Initial load
+
+	$('#submit-add-rel').on('click', function() {
+		var data = {
+			action: 'paradb_add_relationship',
+			from_id: objId,
+			from_type: objType,
+			to_id: $('#rel_target_id').val(),
+			to_type: $('#rel_target_type').val(),
+			relationship_type: $('#rel_type').val(),
+			notes: $('#rel_notes').val(),
+			nonce: '<?php echo wp_create_nonce("paradb_admin_nonce"); ?>'
+		};
+
+		if (!data.to_id) {
+			alert('<?php esc_html_e( "Please select a target object.", "wp-paradb" ); ?>');
+			return;
+		}
+
+		$(this).prop('disabled', true).text('<?php esc_html_e( "Adding...", "wp-paradb" ); ?>');
+
+		$.post(ajaxurl, data, function(res) {
+			if (res.success) {
+				location.reload(); // Simplest way to refresh the table for now
+			} else {
+				alert(res.data.message);
+				$('#submit-add-rel').prop('disabled', false).text('<?php esc_html_e( "Add Link", "wp-paradb" ); ?>');
+			}
+		});
+	});
+
+	$(document).on('click', '.delete-rel-btn', function() {
+		if (!confirm('<?php esc_html_e( "Remove this link?", "wp-paradb" ); ?>')) return;
+		var id = $(this).data('id');
+		var $row = $(this).closest('tr');
+
+		$.post(ajaxurl, {
+			action: 'paradb_delete_relationship',
+			rel_id: id,
+			nonce: '<?php echo wp_create_nonce("paradb_admin_nonce"); ?>'
+		}, function(res) {
+			if (res.success) {
+				$row.remove();
+			} else {
+				alert(res.data.message);
+			}
+		});
+	});
+});
+</script>

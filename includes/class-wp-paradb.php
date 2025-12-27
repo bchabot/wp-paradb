@@ -59,7 +59,7 @@ class WP_ParaDB {
 		if ( defined( 'WP_PARADB_VERSION' ) ) {
 			$this->version = WP_PARADB_VERSION;
 		} else {
-			$this->version = '0.0.2';
+			$this->version = '0.0.3';
 		}
 		$this->plugin_name = 'wp-paradb';
 

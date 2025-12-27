@@ -56,6 +56,9 @@ class WP_ParaDB_Database {
 			case_description longtext DEFAULT NULL,
 			phenomena_types text DEFAULT NULL,
 			case_priority varchar(20) DEFAULT 'normal',
+			visibility varchar(20) NOT NULL DEFAULT 'public',
+			password varchar(255) DEFAULT NULL,
+			sanitize_front_end tinyint(1) NOT NULL DEFAULT 0,
 			date_created datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			date_modified datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			date_closed datetime DEFAULT NULL,
@@ -336,7 +339,7 @@ class WP_ParaDB_Database {
 		dbDelta( $sql_witnesses );
 
 		// Store database version
-		update_option( 'wp_paradb_db_version', '0.0.2' );
+		update_option( 'wp_paradb_db_version', '0.0.3' );
 	}
 
 	/**

@@ -92,25 +92,25 @@ class WP_ParaDB_Witness_Handler {
 			'account_email'         => $email,
 			'user_id'               => isset( $data['user_id'] ) ? absint( $data['user_id'] ) : null,
 			'case_id'               => isset( $data['case_id'] ) ? absint( $data['case_id'] ) : null,
-			'account_name'          => isset( $data['account_name'] ) ? sanitize_text_field( $data['account_name'] ) : null,
-			'account_phone'         => isset( $data['account_phone'] ) ? sanitize_text_field( $data['account_phone'] ) : null,
-			'account_address'       => isset( $data['account_address'] ) ? sanitize_textarea_field( $data['account_address'] ) : null,
+			'account_name'          => ! empty( $data['account_name'] ) ? sanitize_text_field( $data['account_name'] ) : null,
+			'account_phone'         => ! empty( $data['account_phone'] ) ? sanitize_text_field( $data['account_phone'] ) : null,
+			'account_address'       => ! empty( $data['account_address'] ) ? sanitize_textarea_field( $data['account_address'] ) : null,
 			'incident_date'         => sanitize_text_field( $data['incident_date'] ),
-			'incident_time'         => isset( $data['incident_time'] ) ? sanitize_text_field( $data['incident_time'] ) : null,
+			'incident_time'         => ! empty( $data['incident_time'] ) ? sanitize_text_field( $data['incident_time'] ) : null,
 			'incident_location'     => sanitize_text_field( $data['incident_location'] ),
 			'incident_description'  => sanitize_textarea_field( $data['incident_description'] ),
 			'phenomena_types'       => wp_json_encode( $phenomena_types ),
 			'witnesses_present'     => isset( $data['witnesses_present'] ) ? absint( $data['witnesses_present'] ) : null,
-			'witness_names'         => isset( $data['witness_names'] ) ? sanitize_textarea_field( $data['witness_names'] ) : null,
+			'witness_names'         => ! empty( $data['witness_names'] ) ? sanitize_textarea_field( $data['witness_names'] ) : null,
 			'previous_experiences'  => isset( $data['previous_experiences'] ) ? (bool) $data['previous_experiences'] : false,
-			'previous_details'      => isset( $data['previous_details'] ) ? sanitize_textarea_field( $data['previous_details'] ) : null,
+			'previous_details'      => ! empty( $data['previous_details'] ) ? sanitize_textarea_field( $data['previous_details'] ) : null,
 			'consent_status'        => $consent_status,
 			'consent_anonymize'     => ( 'anonymize' === $consent_status ) ? 1 : 0,
 			'allow_publish'         => ( 'publish' === $consent_status ) ? 1 : 0,
 			'allow_followup'        => isset( $data['allow_followup'] ) ? (bool) $data['allow_followup'] : true,
 			'privacy_accepted'      => isset( $data['privacy_accepted'] ) ? (bool) $data['privacy_accepted'] : false,
 			'privacy_accepted_date' => isset( $data['privacy_accepted'] ) && $data['privacy_accepted'] ? current_time( 'mysql' ) : null,
-			'status'                => 'pending',
+			'status'                => isset( $data['status'] ) ? sanitize_text_field( $data['status'] ) : 'pending',
 			'ip_address'            => self::get_client_ip(),
 			'user_agent'            => isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : null,
 			'date_submitted'        => current_time( 'mysql' ),
@@ -139,7 +139,7 @@ class WP_ParaDB_Witness_Handler {
 		);
 
 		if ( false === $result ) {
-			return new WP_Error( 'db_insert_error', __( 'Failed to submit witness report.', 'wp-paradb' ) );
+			return new WP_Error( 'db_insert_error', __( 'Failed to submit witness report.', 'wp-paradb' ) . ' ' . $wpdb->last_error );
 		}
 
 		$account_id = $wpdb->insert_id;
@@ -336,15 +336,15 @@ class WP_ParaDB_Witness_Handler {
 
 		foreach ( $text_fields as $field ) {
 			if ( isset( $data[ $field ] ) ) {
-				$update_data[ $field ] = sanitize_text_field( $data[ $field ] );
-				$format[] = '%s';
+				$update_data[ $field ] = ! empty( $data[ $field ] ) ? sanitize_text_field( $data[ $field ] ) : null;
+				$format[] = ( null === $update_data[ $field ] ) ? null : '%s';
 			}
 		}
 
 		foreach ( $textarea_fields as $field ) {
 			if ( isset( $data[ $field ] ) ) {
-				$update_data[ $field ] = sanitize_textarea_field( $data[ $field ] );
-				$format[] = '%s';
+				$update_data[ $field ] = ! empty( $data[ $field ] ) ? sanitize_textarea_field( $data[ $field ] ) : null;
+				$format[] = ( null === $update_data[ $field ] ) ? null : '%s';
 			}
 		}
 

@@ -59,6 +59,9 @@ if ( isset( $_POST['save_case'] ) && check_admin_referer( 'save_case_' . $case_i
 		'phenomena_types'    => isset( $_POST['phenomena_types'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['phenomena_types'] ) ) : array(),
 		'case_priority'      => isset( $_POST['case_priority'] ) ? sanitize_text_field( wp_unslash( $_POST['case_priority'] ) ) : 'normal',
 		'assigned_to'        => isset( $_POST['assigned_to'] ) ? absint( $_POST['assigned_to'] ) : null,
+		'visibility'         => isset( $_POST['visibility'] ) ? sanitize_text_field( wp_unslash( $_POST['visibility'] ) ) : 'public',
+		'password'           => isset( $_POST['password'] ) ? sanitize_text_field( wp_unslash( $_POST['password'] ) ) : null,
+		'sanitize_front_end' => isset( $_POST['sanitize_front_end'] ) ? 1 : 0,
 	);
 
 		if ( $is_new ) {
@@ -359,8 +362,15 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 						<?php WP_ParaDB_Admin::render_relationship_section( $case_id, 'case' ); ?>
 
 						<!-- Field Logs -->
-						<div class="postbox">
-							<h2 class="hndle"><?php esc_html_e( 'Field Log Entries', 'wp-paradb' ); ?></h2>
+						<div class="postbox closed">
+							<div class="postbox-header">
+								<h2 class="hndle"><?php esc_html_e( 'Field Log Entries', 'wp-paradb' ); ?></h2>
+								<div class="handle-actions hide-if-no-js">
+									<button type="button" class="handle-order-higher" aria-disabled="false" aria-label="<?php esc_attr_e( 'Move up', 'wp-paradb' ); ?>"><span class="dashicons dashicons-arrow-up-alt2"></span></button>
+									<button type="button" class="handle-order-lower" aria-disabled="false" aria-label="<?php esc_attr_e( 'Move down', 'wp-paradb' ); ?>"><span class="dashicons dashicons-arrow-down-alt2"></span></button>
+									<button type="button" class="handlediv" aria-expanded="false"><span class="screen-reader-text"><?php esc_html_e( 'Toggle panel: Field Log Entries', 'wp-paradb' ); ?></span><span class="toggle-indicator" aria-hidden="true"></span></button>
+								</div>
+							</div>
 							<div class="inside">
 								<?php
 								require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-field-log-handler.php';
@@ -373,36 +383,116 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 												<th><?php esc_html_e( 'Investigator', 'wp-paradb' ); ?></th>
 												<th><?php esc_html_e( 'Content', 'wp-paradb' ); ?></th>
 												<th><?php esc_html_e( 'Location', 'wp-paradb' ); ?></th>
+												<th style="width: 100px;"><?php esc_html_e( 'Actions', 'wp-paradb' ); ?></th>
 											</tr>
 										</thead>
 										<tbody>
 											<?php foreach ( $logs as $log ) : 
 												$investigator = get_userdata( $log->investigator_id );
 												?>
-												<tr>
+												<tr id="log-row-<?php echo $log->log_id; ?>" data-id="<?php echo $log->log_id; ?>">
 													<td><?php echo esc_html( gmdate( 'Y-m-d H:i', strtotime( $log->date_created ) ) ); ?></td>
 													<td><?php echo $investigator ? esc_html( $investigator->display_name ) : '—'; ?></td>
-													<td>
-														<?php echo wp_kses_post( $log->log_content ); ?>
-														<?php if ( $log->file_url ) : ?>
+													<td class="log-content-cell">
+														<div class="log-display">
+															<?php echo wp_kses_post( $log->log_content ); ?>
+															<?php if ( $log->file_url ) : ?>
+																<div style="margin-top: 5px;">
+																	<?php 
+																	$is_img = preg_match( '/\.(jpg|jpeg|png|gif)$/i', $log->file_url );
+																	if ( $is_img ) : ?>
+																		<a href="<?php echo esc_url( $log->file_url ); ?>" target="_blank">
+																			<img src="<?php echo esc_url( $log->file_url ); ?>" style="max-width: 60px; max-height: 60px; border-radius: 2px; border: 1px solid #ddd;">
+																		</a>
+																	<?php else : ?>
+																		<a href="<?php echo esc_url( $log->file_url ); ?>" target="_blank" style="font-size: 11px;"><?php esc_html_e( 'View Attachment', 'wp-paradb' ); ?></a>
+																	<?php endif; ?>
+																</div>
+															<?php endif; ?>
+														</div>
+														<div class="log-edit" style="display: none;">
+															<textarea class="edit-log-content" style="width: 100%;" rows="3"><?php echo esc_textarea( $log->log_content ); ?></textarea>
 															<div style="margin-top: 5px;">
-																<?php 
-																$is_img = preg_match( '/\.(jpg|jpeg|png|gif)$/i', $log->file_url );
-																if ( $is_img ) : ?>
-																	<a href="<?php echo esc_url( $log->file_url ); ?>" target="_blank">
-																		<img src="<?php echo esc_url( $log->file_url ); ?>" style="max-width: 60px; max-height: 60px; border-radius: 2px; border: 1px solid #ddd;">
-																	</a>
-																<?php else : ?>
-																	<a href="<?php echo esc_url( $log->file_url ); ?>" target="_blank" style="font-size: 11px;"><?php esc_html_e( 'View Attachment', 'wp-paradb' ); ?></a>
-																<?php endif; ?>
+																<input type="text" class="edit-log-lat" placeholder="Lat" value="<?php echo esc_attr( $log->latitude ); ?>" style="width: 80px;">
+																<input type="text" class="edit-log-lng" placeholder="Lng" value="<?php echo esc_attr( $log->longitude ); ?>" style="width: 80px;">
+																<button type="button" class="button button-small save-log-edit"><?php esc_html_e( 'Save', 'wp-paradb' ); ?></button>
+																<button type="button" class="button button-small cancel-log-edit"><?php esc_html_e( 'Cancel', 'wp-paradb' ); ?></button>
 															</div>
+														</div>
+													</td>
+													<td>
+														<?php if ( $log->latitude ) : ?>
+															<a href="#" class="view-log-map" data-lat="<?php echo esc_attr($log->latitude); ?>" data-lng="<?php echo esc_attr($log->longitude); ?>" data-title="<?php echo esc_attr(gmdate( 'Y-m-d H:i:s', strtotime( $log->date_created ) ) . ' - ' . ($investigator ? $investigator->display_name : '')); ?>">
+																<?php echo esc_html( $log->latitude . ', ' . $log->longitude ); ?>
+															</a>
+														<?php else : ?>
+															—
 														<?php endif; ?>
 													</td>
-													<td><?php echo $log->latitude ? esc_html( $log->latitude . ', ' . $log->longitude ) : '—'; ?></td>
+													<td>
+														<button type="button" class="button-link edit-log-btn"><?php esc_html_e( 'Edit', 'wp-paradb' ); ?></button> | 
+														<button type="button" class="button-link-delete delete-log-btn"><?php esc_html_e( 'Delete', 'wp-paradb' ); ?></button>
+													</td>
 												</tr>
 											<?php endforeach; ?>
 										</tbody>
 									</table>
+									<script>
+									jQuery(document).ready(function($) {
+										$('.edit-log-btn').on('click', function() {
+											var $row = $(this).closest('tr');
+											$row.find('.log-display').hide();
+											$row.find('.log-edit').show();
+										});
+
+										$('.cancel-log-edit').on('click', function() {
+											var $row = $(this).closest('tr');
+											$row.find('.log-edit').hide();
+											$row.find('.log-display').show();
+										});
+
+										$('.save-log-edit').on('click', function() {
+											var $row = $(this).closest('tr');
+											var logId = $row.data('id');
+											var content = $row.find('.edit-log-content').val();
+											var lat = $row.find('.edit-log-lat').val();
+											var lng = $row.find('.edit-log-lng').val();
+
+											$.post(ajaxurl, {
+												action: 'paradb_update_log',
+												log_id: logId,
+												log_content: content,
+												latitude: lat,
+												longitude: lng,
+												nonce: '<?php echo wp_create_nonce("paradb_log_nonce"); ?>'
+											}, function(res) {
+												if (res.success) {
+													location.reload();
+												} else {
+													alert(res.data.message);
+												}
+											});
+										});
+
+										$('.delete-log-btn').on('click', function() {
+											if (!confirm('<?php echo esc_js(__("Are you sure you want to delete this log entry?", "wp-paradb")); ?>')) return;
+											var $row = $(this).closest('tr');
+											var logId = $row.data('id');
+
+											$.post(ajaxurl, {
+												action: 'paradb_delete_log',
+												log_id: logId,
+												nonce: '<?php echo wp_create_nonce("paradb_log_nonce"); ?>'
+											}, function(res) {
+												if (res.success) {
+													$row.remove();
+												} else {
+													alert(res.data.message);
+												}
+											});
+										});
+									});
+									</script>
 								<?php else : ?>
 									<p><?php esc_html_e( 'No field logs recorded for this case.', 'wp-paradb' ); ?></p>
 								<?php endif; ?>
@@ -490,6 +580,42 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 									<?php endforeach; ?>
 								</select>
 							</p>
+
+							<hr>
+
+							<p>
+								<label for="visibility"><strong><?php esc_html_e( 'Visibility', 'wp-paradb' ); ?></strong></label><br>
+								<select name="visibility" id="visibility" class="widefat">
+									<option value="public" <?php selected( $case ? $case->visibility : 'public', 'public' ); ?>><?php esc_html_e( 'Public', 'wp-paradb' ); ?></option>
+									<option value="private" <?php selected( $case ? $case->visibility : 'public', 'private' ); ?>><?php esc_html_e( 'Private (Protected)', 'wp-paradb' ); ?></option>
+									<option value="internal" <?php selected( $case ? $case->visibility : 'public', 'internal' ); ?>><?php esc_html_e( 'Internal Only', 'wp-paradb' ); ?></option>
+								</select>
+							</p>
+
+							<p id="password-field" style="display: <?php echo ($case && $case->visibility === 'private') ? 'block' : 'none'; ?>;">
+								<label for="password"><strong><?php esc_html_e( 'Case Password', 'wp-paradb' ); ?></strong></label><br>
+								<input type="text" name="password" id="password" value="<?php echo $case ? esc_attr($case->password) : ''; ?>" class="widefat">
+							</p>
+
+							<p>
+								<label>
+									<input type="checkbox" name="sanitize_front_end" value="1" <?php checked($case ? $case->sanitize_front_end : 0, 1); ?>>
+									<strong><?php esc_html_e( 'Sanitize Front End', 'wp-paradb' ); ?></strong>
+								</label>
+								<small class="description" style="display: block; margin-top: 5px;"><?php esc_html_e( 'Redact names and specific locations on public pages.', 'wp-paradb' ); ?></small>
+							</p>
+
+							<script>
+							jQuery(document).ready(function($) {
+								$('#visibility').on('change', function() {
+									if ($(this).val() === 'private') {
+										$('#password-field').show();
+									} else {
+										$('#password-field').hide();
+									}
+								});
+							});
+							</script>
 						</div>
 					</div>
 
@@ -654,3 +780,82 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 		</div>
 	</form>
 </div>
+
+<div id="paradb-map-modal" style="display:none; position: fixed; z-index: 100000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+	<div style="background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 80%; height: 80%; position: relative;">
+		<span id="close-map-modal" style="position: absolute; right: 10px; top: 5px; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+		<div id="map-canvas" style="width: 100%; height: 100%;"></div>
+	</div>
+</div>
+
+<script>
+jQuery(document).ready(function($) {
+	// Map Logic
+	var map;
+
+	function initMap() {
+		if (typeof L === 'undefined' && (typeof google === 'undefined' || !google.maps)) {
+			console.error('Map library not loaded');
+			return false;
+		}
+		return true;
+	}
+
+	function showMapModal(locations) {
+		$('#paradb-map-modal').show();
+		if (!initMap()) return;
+
+		var provider = '<?php echo esc_js(get_option("wp_paradb_options")["map_provider"] ?? "osm"); ?>';
+		
+		if (provider === 'osm') {
+			if (map && map.remove) map.remove();
+			map = L.map('map-canvas');
+			L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				attribution: '© OpenStreetMap contributors'
+			}).addTo(map);
+
+			var group = new L.featureGroup();
+			locations.forEach(function(loc) {
+				var marker = L.marker([loc.lat, loc.lng]).addTo(map).bindPopup(loc.title);
+				group.addLayer(marker);
+			});
+			map.fitBounds(group.getBounds());
+		} else if (provider === 'google') {
+			var mapOptions = {
+				zoom: 12,
+				center: new google.maps.LatLng(locations[0].lat, locations[0].lng)
+			};
+			map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+			var bounds = new google.maps.LatLngBounds();
+			locations.forEach(function(loc) {
+				var latLng = new google.maps.LatLng(loc.lat, loc.lng);
+				var marker = new google.maps.Marker({
+					position: latLng,
+					map: map,
+					title: loc.title
+				});
+				bounds.extend(latLng);
+			});
+			if (locations.length > 1) map.fitBounds(bounds);
+		}
+	}
+
+	$(document).on('click', '.view-log-map', function(e) {
+		e.preventDefault();
+		var lat = $(this).data('lat');
+		var lng = $(this).data('lng');
+		var title = $(this).data('title');
+		showMapModal([{lat: lat, lng: lng, title: title}]);
+	});
+
+	$('#close-map-modal').on('click', function() {
+		$('#paradb-map-modal').hide();
+	});
+
+	$(window).on('click', function(event) {
+		if (event.target.id == 'paradb-map-modal') {
+			$('#paradb-map-modal').hide();
+		}
+	});
+});
+</script>

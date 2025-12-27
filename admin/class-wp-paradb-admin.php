@@ -62,9 +62,26 @@ class WP_ParaDB_Admin {
 		add_action( 'wp_ajax_paradb_assign_team_member', array( $this, 'ajax_assign_team_member' ) );
 		add_action( 'wp_ajax_paradb_remove_team_member', array( $this, 'ajax_remove_team_member' ) );
 		add_action( 'wp_ajax_paradb_get_all_logs_live', array( $this, 'ajax_get_all_logs_live' ) );
+		add_action( 'wp_ajax_paradb_update_log', array( $this, 'ajax_update_log' ) );
+		add_action( 'wp_ajax_paradb_delete_log', array( $this, 'ajax_delete_log' ) );
 		add_action( 'wp_ajax_paradb_get_linkable_objects', array( $this, 'ajax_get_linkable_objects' ) );
+		add_action( 'wp_ajax_paradb_add_relationship', array( $this, 'ajax_add_relationship' ) );
+		add_action( 'wp_ajax_paradb_delete_relationship', array( $this, 'ajax_delete_relationship' ) );
 		add_action( 'wp_ajax_paradb_search_locations', array( $this, 'ajax_search_locations' ) );
+		add_action( 'wp_ajax_nopriv_paradb_search_locations', array( $this, 'ajax_search_locations' ) );
 		add_action( 'admin_init', array( $this, 'handle_maintenance_actions' ) );
+		add_action( 'admin_init', array( $this, 'upgrade_check' ) );
+	}
+
+	/**
+	 * Check if database needs upgrade.
+	 */
+	public function upgrade_check() {
+		$db_version = get_option( 'wp_paradb_db_version', '0.0.0' );
+		if ( version_compare( $db_version, $this->version, '<' ) ) {
+			require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-database.php';
+			WP_ParaDB_Database::create_tables();
+		}
 	}
 
 	/**
@@ -188,19 +205,35 @@ class WP_ParaDB_Admin {
 		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-field-log-handler.php';
 
 		$activity_id = absint( $_POST['activity_id'] );
-		$last_id = absint( $_POST['last_id'] );
+		$last_id     = absint( $_POST['last_id'] );
+		$limit       = isset( $_POST['limit'] ) ? absint( $_POST['limit'] ) : 20;
 
 		global $wpdb;
 		$table = $wpdb->prefix . 'paradb_field_logs';
 		
-		$query = $wpdb->prepare(
-			"SELECT l.*, u.display_name FROM {$table} l 
-			 JOIN {$wpdb->users} u ON l.investigator_id = u.ID
-			 WHERE l.activity_id = %d AND l.log_id > %d 
-			 ORDER BY l.date_created ASC",
-			$activity_id,
-			$last_id
-		);
+		// If last_id is 0, we want the LAST $limit messages.
+		// If last_id > 0, we want messages AFTER last_id.
+		if ( $last_id > 0 ) {
+			$query = $wpdb->prepare(
+				"SELECT l.*, u.display_name FROM {$table} l 
+				 JOIN {$wpdb->users} u ON l.investigator_id = u.ID
+				 WHERE l.activity_id = %d AND l.log_id > %d 
+				 ORDER BY l.date_created ASC",
+				$activity_id,
+				$last_id
+			);
+		} else {
+			$query = $wpdb->prepare(
+				"SELECT * FROM (
+					SELECT l.*, u.display_name FROM {$table} l 
+					JOIN {$wpdb->users} u ON l.investigator_id = u.ID
+					WHERE l.activity_id = %d 
+					ORDER BY l.date_created DESC LIMIT %d
+				) AS sub ORDER BY date_created ASC",
+				$activity_id,
+				$limit
+			);
+		}
 
 		$results = $wpdb->get_results( $query );
 		$logs = array();
@@ -217,6 +250,56 @@ class WP_ParaDB_Admin {
 		}
 
 		wp_send_json_success( array( 'logs' => $logs ) );
+	}
+
+	/**
+	 * AJAX handler for updating a log entry
+	 */
+	public function ajax_update_log() {
+		check_ajax_referer( 'paradb_log_nonce', 'nonce' );
+
+		if ( ! current_user_can( 'paradb_view_cases' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wp-paradb' ) ) );
+		}
+
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-field-log-handler.php';
+
+		$log_id = absint( $_POST['log_id'] );
+		$data = array(
+			'log_content' => sanitize_textarea_field( $_POST['log_content'] ),
+			'latitude'    => isset( $_POST['latitude'] ) ? $_POST['latitude'] : '',
+			'longitude'   => isset( $_POST['longitude'] ) ? $_POST['longitude'] : '',
+		);
+
+		$result = WP_ParaDB_Field_Log_Handler::update_log( $log_id, $data );
+
+		if ( is_wp_error( $result ) ) {
+			wp_send_json_error( array( 'message' => $result->get_error_message() ) );
+		}
+
+		wp_send_json_success();
+	}
+
+	/**
+	 * AJAX handler for deleting a log entry
+	 */
+	public function ajax_delete_log() {
+		check_ajax_referer( 'paradb_log_nonce', 'nonce' );
+
+		if ( ! current_user_can( 'paradb_view_cases' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wp-paradb' ) ) );
+		}
+
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-field-log-handler.php';
+
+		$log_id = absint( $_POST['log_id'] );
+		$result = WP_ParaDB_Field_Log_Handler::delete_log( $log_id );
+
+		if ( ! $result ) {
+			wp_send_json_error( array( 'message' => __( 'Failed to delete log entry.', 'wp-paradb' ) ) );
+		}
+
+		wp_send_json_success();
 	}
 
 	/**
@@ -394,13 +477,68 @@ class WP_ParaDB_Admin {
 	}
 
 	/**
-	 * AJAX handler for searching locations
+	 * AJAX handler for adding a relationship
 	 */
-	public function ajax_search_locations() {
+	public function ajax_add_relationship() {
 		check_ajax_referer( 'paradb_admin_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'paradb_view_cases' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wp-paradb' ) ) );
+		}
+
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-relationship-handler.php';
+
+		$data = array(
+			'from_id'           => absint( $_POST['from_id'] ),
+			'from_type'         => sanitize_text_field( $_POST['from_type'] ),
+			'to_id'             => absint( $_POST['to_id'] ),
+			'to_type'           => sanitize_text_field( $_POST['to_type'] ),
+			'relationship_type' => sanitize_text_field( $_POST['relationship_type'] ),
+			'notes'             => sanitize_textarea_field( $_POST['notes'] ),
+		);
+
+		$result = WP_ParaDB_Relationship_Handler::create_relationship( $data );
+
+		if ( is_wp_error( $result ) ) {
+			wp_send_json_error( array( 'message' => $result->get_error_message() ) );
+		}
+
+		wp_send_json_success();
+	}
+
+	/**
+	 * AJAX handler for deleting a relationship
+	 */
+	public function ajax_delete_relationship() {
+		check_ajax_referer( 'paradb_admin_nonce', 'nonce' );
+
+		if ( ! current_user_can( 'paradb_view_cases' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wp-paradb' ) ) );
+		}
+
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-relationship-handler.php';
+
+		$rel_id = absint( $_POST['rel_id'] );
+		$result = WP_ParaDB_Relationship_Handler::delete_relationship( $rel_id );
+
+		if ( ! $result ) {
+			wp_send_json_error( array( 'message' => __( 'Failed to delete relationship.', 'wp-paradb' ) ) );
+		}
+
+		wp_send_json_success();
+	}
+
+	/**
+	 * AJAX handler for searching locations
+	 */
+	public function ajax_search_locations() {
+		// Only check admin nonce if user is logged in and trying to search all locations.
+		if ( current_user_can( 'paradb_view_cases' ) ) {
+			check_ajax_referer( 'paradb_admin_nonce', 'nonce' );
+			$is_admin_search = true;
+		} else {
+			// Public search, only show public locations.
+			$is_admin_search = false;
 		}
 
 		$term = isset( $_GET['term'] ) ? sanitize_text_field( $_GET['term'] ) : '';
@@ -410,8 +548,13 @@ class WP_ParaDB_Admin {
 		}
 
 		global $wpdb;
+		$where = "location_name LIKE %s";
+		if ( ! $is_admin_search ) {
+			$where .= " AND is_public = 1";
+		}
+
 		$results = $wpdb->get_results( $wpdb->prepare( 
-			"SELECT * FROM {$wpdb->prefix}paradb_locations WHERE location_name LIKE %s ORDER BY location_name ASC LIMIT 10",
+			"SELECT * FROM {$wpdb->prefix}paradb_locations WHERE {$where} ORDER BY location_name ASC LIMIT 10",
 			'%' . $wpdb->esc_like( $term ) . '%'
 		) );
 

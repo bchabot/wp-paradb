@@ -29,15 +29,16 @@ if ( isset( $_POST['save_witness'] ) && check_admin_referer( 'save_witness', 'wi
 		'account_name'         => sanitize_text_field( $_POST['account_name'] ),
 		'account_email'        => sanitize_email( $_POST['account_email'] ),
 		'account_phone'        => sanitize_text_field( $_POST['account_phone'] ),
-		'account_address'      => sanitize_textarea_field( $_POST['account_address'] ),
+		'account_address'      => isset( $_POST['account_address'] ) ? sanitize_textarea_field( $_POST['account_address'] ) : '',
 		'incident_date'        => sanitize_text_field( $_POST['incident_date'] ),
-		'incident_time'        => sanitize_text_field( $_POST['incident_time'] ),
+		'incident_time'        => isset( $_POST['incident_time'] ) ? sanitize_text_field( $_POST['incident_time'] ) : '',
 		'incident_location'    => sanitize_text_field( $_POST['incident_location'] ),
 		'incident_description' => sanitize_textarea_field( $_POST['incident_description'] ),
 		'phenomena_types'      => isset( $_POST['phenomena_types'] ) ? array_map( 'sanitize_text_field', $_POST['phenomena_types'] ) : array(),
 		'consent_status'       => sanitize_text_field( $_POST['consent_status'] ),
 		'status'               => sanitize_text_field( $_POST['status'] ),
 		'case_id'              => absint( $_POST['case_id'] ),
+		'privacy_accepted'     => 1, // Assume accepted if added via admin
 	);
 
 	$result = WP_ParaDB_Witness_Handler::create_witness_account( $data );
@@ -47,6 +48,32 @@ if ( isset( $_POST['save_witness'] ) && check_admin_referer( 'save_witness', 'wi
 	} else {
 		echo '<div class="notice notice-success"><p>' . esc_html__( 'Witness account created successfully.', 'wp-paradb' ) . '</p></div>';
 		$action = 'list'; // Go back to list after save
+	}
+}
+
+// Handle convert to client action.
+if ( isset( $_POST['convert_to_client'] ) && check_admin_referer( 'convert_witness', 'convert_nonce' ) ) {
+	$witness_id = isset( $_POST['witness_id'] ) ? absint( $_POST['witness_id'] ) : 0;
+	if ( $witness_id > 0 ) {
+		$witness = WP_ParaDB_Witness_Handler::get_witness_account( $witness_id );
+		if ( $witness ) {
+			require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-client-handler.php';
+			$name_parts = explode( ' ', $witness->account_name, 2 );
+			$client_data = array(
+				'first_name' => $name_parts[0],
+				'last_name'  => $name_parts[1] ?? '',
+				'email'      => $witness->account_email,
+				'phone'      => $witness->account_phone,
+				'address'    => $witness->account_address,
+				'notes'      => sprintf( __( 'Converted from Witness Account #%d', 'wp-paradb' ), $witness_id ),
+			);
+			$client_id = WP_ParaDB_Client_Handler::create_client( $client_data );
+			if ( ! is_wp_error( $client_id ) ) {
+				echo '<div class="notice notice-success"><p>' . esc_html__( 'Witness successfully converted to Client.', 'wp-paradb' ) . '</p></div>';
+			} else {
+				echo '<div class="notice notice-error"><p>' . esc_html( $client_id->get_error_message() ) . '</p></div>';
+			}
+		}
 	}
 }
 
@@ -119,15 +146,32 @@ if ( 'new' === $action ) {
 					<td><input type="text" name="account_phone" id="account_phone" class="regular-text"></td>
 				</tr>
 				<tr>
+					<th scope="row"><label for="account_address"><?php esc_html_e( 'Witness Address', 'wp-paradb' ); ?></label></th>
+					<td>
+						<div style="display:flex; gap: 5px;">
+							<textarea name="account_address" id="account_address" class="regular-text" rows="2" style="flex:1;"></textarea>
+							<button type="button" class="get-current-location button" data-target="#account_address">📍</button>
+						</div>
+					</td>
+				</tr>
+				<tr>
 					<th scope="row"><label for="incident_location"><?php esc_html_e( 'Incident Location', 'wp-paradb' ); ?> *</label></th>
-					<td><input type="text" name="incident_location" id="incident_location" class="regular-text" required></td>
+					<td>
+						<div style="display:flex; gap: 5px;">
+							<input type="text" name="incident_location" id="incident_location" class="regular-text" required style="flex:1;">
+							<button type="button" class="get-current-location button" data-target="#incident_location">📍</button>
+						</div>
+					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="incident_date"><?php esc_html_e( 'Incident Date', 'wp-paradb' ); ?> *</label></th>
-					<td><input type="date" name="incident_date" id="incident_date" required></td>
+					<th scope="row"><label for="incident_date"><?php esc_html_e( 'Incident Date & Time', 'wp-paradb' ); ?> *</label></th>
+					<td>
+						<input type="date" name="incident_date" id="incident_date" required>
+						<input type="time" name="incident_time" id="incident_time">
+					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label><?php esc_html_e( 'Phenomena Types', 'wp-paradb' ); ?> *</label></th>
+					<th scope="row"><label><?php esc_html_e( 'Phenomena Types', 'wp-paradb' ); ?></label></th>
 					<td>
 						<?php foreach ( $phenomena_types as $key => $label ) : ?>
 							<label style="display:block;"><input type="checkbox" name="phenomena_types[]" value="<?php echo esc_attr( $key ); ?>"> <?php echo esc_html( $label ); ?></label>
@@ -175,6 +219,51 @@ if ( 'new' === $action ) {
 			</p>
 		</form>
 	</div>
+	<script>
+	jQuery(document).ready(function($) {
+		$('.get-current-location').on('click', function() {
+			var $btn = $(this);
+			var target = $btn.data('target');
+			var $input = $(target);
+			
+			if (!navigator.geolocation) {
+				alert('<?php echo esc_js( __( 'Geolocation is not supported by your browser.', 'wp-paradb' ) ); ?>');
+				return;
+			}
+
+			$btn.text('⌛');
+			navigator.geolocation.getCurrentPosition(function(pos) {
+				var coords = pos.coords.latitude.toFixed(6) + ', ' + pos.coords.longitude.toFixed(6);
+				$input.val(coords);
+				$btn.text('📍');
+			}, function(err) {
+				alert('Error: ' + err.message);
+				$btn.text('📍');
+			});
+		});
+
+		if ($.fn.autocomplete) {
+			$('#incident_location').autocomplete({
+				source: function(request, response) {
+					$.ajax({
+						url: ajaxurl,
+						data: {
+							action: 'paradb_search_locations',
+							term: request.term,
+							nonce: '<?php echo wp_create_nonce("paradb_admin_nonce"); ?>'
+						},
+						success: function(res) {
+							if (res.success) {
+								response(res.data);
+							}
+						}
+					});
+				},
+				minLength: 2
+			});
+		}
+	});
+	</script>
 	<?php
 } elseif ( 'view' === $action && $witness_id > 0 ) {
 	// Show detailed view.
@@ -339,7 +428,12 @@ if ( 'new' === $action ) {
 					<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-witnesses' ) ); ?>" class="button">
 						<?php esc_html_e( 'Back to List', 'wp-paradb' ); ?>
 					</a>
-					<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=wp-paradb-witnesses&action=delete&witness_id=' . $witness_id ), 'delete_witness_' . $witness_id ) ); ?>" class="button" onclick="return confirm('<?php esc_attr_e( 'Are you sure you want to delete this witness account?', 'wp-paradb' ); ?>');">
+					<form method="post" action="" style="display:inline-block; margin-left: 5px;">
+						<?php wp_nonce_field( 'convert_witness', 'convert_nonce' ); ?>
+						<input type="hidden" name="witness_id" value="<?php echo esc_attr( $witness_id ); ?>">
+						<input type="submit" name="convert_to_client" class="button button-secondary" value="<?php esc_attr_e( 'Create Client from Witness', 'wp-paradb' ); ?>" onclick="return confirm('<?php esc_attr_e( 'This will create a new Client record using this witness\'s information. Continue?', 'wp-paradb' ); ?>');">
+					</form>
+					<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=wp-paradb-witnesses&action=delete&witness_id=' . $witness_id ), 'delete_witness_' . $witness_id ) ); ?>" class="button" style="margin-left: 5px;" onclick="return confirm('<?php esc_attr_e( 'Are you sure you want to delete this witness account?', 'wp-paradb' ); ?>');">
 						<?php esc_html_e( 'Delete', 'wp-paradb' ); ?>
 					</a>
 				</p>

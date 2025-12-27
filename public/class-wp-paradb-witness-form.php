@@ -95,8 +95,11 @@ class WP_ParaDB_Witness_Form {
 								<?php esc_html_e( '(Optional)', 'wp-paradb' ); ?>
 							<?php endif; ?>
 						</label>
-						<textarea id="account_address" name="account_address" rows="3" 
-							<?php echo WP_ParaDB_Settings::get_setting( 'require_address', false ) ? 'required' : ''; ?>></textarea>
+						<div style="display:flex; gap: 5px;">
+							<textarea id="account_address" name="account_address" rows="3" style="flex:1;"
+								<?php echo WP_ParaDB_Settings::get_setting( 'require_address', false ) ? 'required' : ''; ?>></textarea>
+							<button type="button" class="get-current-location button" data-target="#account_address" title="<?php esc_attr_e( 'Use current GPS location', 'wp-paradb' ); ?>" style="align-self: flex-start;">📍</button>
+						</div>
 					</p>
 				</fieldset>
 
@@ -116,12 +119,15 @@ class WP_ParaDB_Witness_Form {
 
 					<p class="paradb-form-field required">
 						<label for="incident_location"><?php esc_html_e( 'Location of Incident', 'wp-paradb' ); ?> *</label>
-						<input type="text" id="incident_location" name="incident_location" required 
-							placeholder="<?php esc_attr_e( 'e.g., 123 Main St, City, State', 'wp-paradb' ); ?>" />
+						<div style="display:flex; gap: 5px;">
+							<input type="text" id="incident_location" name="incident_location" required style="flex:1;"
+								placeholder="<?php esc_attr_e( 'e.g., 123 Main St, City, State', 'wp-paradb' ); ?>" />
+							<button type="button" class="get-current-location button" data-target="#incident_location" title="<?php esc_attr_e( 'Use current GPS location', 'wp-paradb' ); ?>">📍</button>
+						</div>
 					</p>
 
 					<p class="paradb-form-field required">
-						<label><?php esc_html_e( 'Type(s) of Phenomenon Experienced', 'wp-paradb' ); ?> *</label>
+						<label><?php esc_html_e( 'Type(s) of Phenomenon Experienced', 'wp-paradb' ); ?></label>
 						<span class="paradb-help-text"><?php esc_html_e( 'Select all that apply', 'wp-paradb' ); ?></span>
 						<?php
 						$phenomena_types = WP_ParaDB_Settings::get_phenomena_types();
@@ -262,6 +268,49 @@ class WP_ParaDB_Witness_Form {
 			'use strict';
 
 			$(document).ready(function() {
+				// Geolocation support
+				$('.get-current-location').on('click', function() {
+					var $btn = $(this);
+					var target = $btn.data('target');
+					var $input = $(target);
+					
+					if (!navigator.geolocation) {
+						alert('<?php echo esc_js( __( 'Geolocation is not supported by your browser.', 'wp-paradb' ) ); ?>');
+						return;
+					}
+
+					$btn.text('⌛');
+					navigator.geolocation.getCurrentPosition(function(pos) {
+						var coords = pos.coords.latitude.toFixed(6) + ', ' + pos.coords.longitude.toFixed(6);
+						$input.val(coords);
+						$btn.text('📍');
+					}, function(err) {
+						alert('Error: ' + err.message);
+						$btn.text('📍');
+					});
+				});
+
+				// Location autocomplete (Address Book)
+				if ($.fn.autocomplete) {
+					$('#incident_location').autocomplete({
+						source: function(request, response) {
+							$.ajax({
+								url: '<?php echo esc_js( admin_url( 'admin-ajax.php' ) ); ?>',
+								data: {
+									action: 'paradb_search_locations',
+									term: request.term
+								},
+								success: function(res) {
+									if (res.success) {
+										response(res.data);
+									}
+								}
+							});
+						},
+						minLength: 2
+					});
+				}
+
 				// Handle conditional field display
 				$('#previous_experiences').on('change', function() {
 					var $conditional = $('.paradb-conditional[data-depends-on="previous_experiences"]');

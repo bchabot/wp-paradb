@@ -89,7 +89,7 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 		<h1>
 			<?php echo 'new' === $action ? esc_html__( 'Add Activity', 'wp-paradb' ) : esc_html__( 'Edit Activity', 'wp-paradb' ); ?>
 			<?php if ( $activity ) : ?>
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-log-chat&activity_id=' . $activity_id ) ); ?>" class="page-title-action">
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-log-chat&activity_id=' . $activity_id ) ); ?>" class="page-title-action" target="_blank">
 					<span class="dashicons dashicons-format-chat" style="margin-top: 4px;"></span> <?php esc_html_e( 'Log My Actions', 'wp-paradb' ); ?>
 				</a>
 			<?php endif; ?>
@@ -280,13 +280,18 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 			</table>
 
 			<?php if ( $activity && $activity_id > 0 ) : ?>
-				<div class="postbox">
-					<h2 class="hndle">
-						<span><?php esc_html_e( 'Activity Field Logs', 'wp-paradb' ); ?></span>
-						<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-log-chat&activity_id=' . $activity_id ) ); ?>" class="button button-small" style="float: right; margin-top: -4px;">
+				<div class="postbox closed">
+					<div class="postbox-header">
+						<h2 class="hndle">
+							<span><?php esc_html_e( 'Activity Field Logs', 'wp-paradb' ); ?></span>
+						</h2>
+						<div class="handle-actions hide-if-no-js">
+							<button type="button" class="handlediv" aria-expanded="false"><span class="screen-reader-text"><?php esc_html_e( 'Toggle panel: Activity Field Logs', 'wp-paradb' ); ?></span><span class="toggle-indicator" aria-hidden="true"></span></button>
+						</div>
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-log-chat&activity_id=' . $activity_id ) ); ?>" class="button button-small" style="float: right; margin: 7px 10px 0 0;" target="_blank">
 							<?php esc_html_e( 'Open Mobile Log', 'wp-paradb' ); ?>
 						</a>
-					</h2>
+					</div>
 					<div class="inside" style="max-height: 400px; overflow-y: auto;">
 						<?php
 						require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-field-log-handler.php';
@@ -298,35 +303,106 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 										<th style="width: 150px;"><?php esc_html_e( 'Time', 'wp-paradb' ); ?></th>
 										<th style="width: 150px;"><?php esc_html_e( 'Investigator', 'wp-paradb' ); ?></th>
 										<th><?php esc_html_e( 'Log Entry', 'wp-paradb' ); ?></th>
+										<th style="width: 100px;"><?php esc_html_e( 'Actions', 'wp-paradb' ); ?></th>
 									</tr>
 								</thead>
 								<tbody>
 									<?php foreach ( $logs as $log ) : 
 										$inv = get_userdata( $log->investigator_id );
 										?>
-										<tr>
-											<td><?php echo esc_html( gmdate( 'Y-m-d H:i:s', strtotime( $log->date_created ) ) ); ?></td>
+										<tr id="log-row-<?php echo $log->log_id; ?>" data-id="<?php echo $log->log_id; ?>">
+											<td>
+												<?php echo esc_html( gmdate( 'Y-m-d H:i:s', strtotime( $log->date_created ) ) ); ?>
+												<?php if ( $log->latitude ) : ?>
+													<br><a href="#" class="view-log-map" data-lat="<?php echo esc_attr($log->latitude); ?>" data-lng="<?php echo esc_attr($log->longitude); ?>" data-title="<?php echo esc_attr(gmdate( 'Y-m-d H:i:s', strtotime( $log->date_created ) ) . ' - ' . ($inv ? $inv->display_name : '')); ?>" style="font-size: 10px;">[<?php esc_html_e( 'Map', 'wp-paradb' ); ?>]</a>
+												<?php endif; ?>
+											</td>
 											<td><strong><?php echo $inv ? esc_html( $inv->display_name ) : '—'; ?></strong></td>
 											<td>
-												<?php echo wp_kses_post( $log->log_content ); ?>
-												<?php if ( $log->file_url ) : ?>
+												<div class="log-display">
+													<?php echo wp_kses_post( $log->log_content ); ?>
+													<?php if ( $log->file_url ) : ?>
+														<div style="margin-top: 5px;">
+															<?php 
+															$is_img = preg_match( '/\.(jpg|jpeg|png|gif)$/i', $log->file_url );
+															if ( $is_img ) : ?>
+																<a href="<?php echo esc_url( $log->file_url ); ?>" target="_blank">
+																	<img src="<?php echo esc_url( $log->file_url ); ?>" style="max-width: 60px; max-height: 60px; border-radius: 2px; border: 1px solid #ddd;">
+																</a>
+															<?php else : ?>
+																<a href="<?php echo esc_url( $log->file_url ); ?>" target="_blank" class="button button-small"><?php esc_html_e( 'View Attachment', 'wp-paradb' ); ?></a>
+															<?php endif; ?>
+														</div>
+													<?php endif; ?>
+												</div>
+												<div class="log-edit" style="display: none;">
+													<textarea class="edit-log-content" style="width: 100%;" rows="3"><?php echo esc_textarea( $log->log_content ); ?></textarea>
 													<div style="margin-top: 5px;">
-														<?php 
-														$is_img = preg_match( '/\.(jpg|jpeg|png|gif)$/i', $log->file_url );
-														if ( $is_img ) : ?>
-															<a href="<?php echo esc_url( $log->file_url ); ?>" target="_blank">
-																<img src="<?php echo esc_url( $log->file_url ); ?>" style="max-width: 60px; max-height: 60px; border-radius: 2px; border: 1px solid #ddd;">
-															</a>
-														<?php else : ?>
-															<a href="<?php echo esc_url( $log->file_url ); ?>" target="_blank" class="button button-small"><?php esc_html_e( 'View Attachment', 'wp-paradb' ); ?></a>
-														<?php endif; ?>
+														<button type="button" class="button button-small save-log-edit"><?php esc_html_e( 'Save', 'wp-paradb' ); ?></button>
+														<button type="button" class="button button-small cancel-log-edit"><?php esc_html_e( 'Cancel', 'wp-paradb' ); ?></button>
 													</div>
-												<?php endif; ?>
+												</div>
+											</td>
+											<td>
+												<button type="button" class="button-link edit-log-btn"><?php esc_html_e( 'Edit', 'wp-paradb' ); ?></button> | 
+												<button type="button" class="button-link-delete delete-log-btn"><?php esc_html_e( 'Delete', 'wp-paradb' ); ?></button>
 											</td>
 										</tr>
 									<?php endforeach; ?>
 								</tbody>
 							</table>
+							<script>
+							jQuery(document).ready(function($) {
+								$('.edit-log-btn').on('click', function() {
+									var $row = $(this).closest('tr');
+									$row.find('.log-display').hide();
+									$row.find('.log-edit').show();
+								});
+
+								$('.cancel-log-edit').on('click', function() {
+									var $row = $(this).closest('tr');
+									$row.find('.log-edit').hide();
+									$row.find('.log-display').show();
+								});
+
+								$('.save-log-edit').on('click', function() {
+									var $row = $(this).closest('tr');
+									var logId = $row.data('id');
+									var content = $row.find('.edit-log-content').val();
+
+									$.post(ajaxurl, {
+										action: 'paradb_update_log',
+										log_id: logId,
+										log_content: content,
+										nonce: '<?php echo wp_create_nonce("paradb_log_nonce"); ?>'
+									}, function(res) {
+										if (res.success) {
+											location.reload();
+										} else {
+											alert(res.data.message);
+										}
+									});
+								});
+
+								$('.delete-log-btn').on('click', function() {
+									if (!confirm('<?php echo esc_js(__("Are you sure you want to delete this log entry?", "wp-paradb")); ?>')) return;
+									var $row = $(this).closest('tr');
+									var logId = $row.data('id');
+
+									$.post(ajaxurl, {
+										action: 'paradb_delete_log',
+										log_id: logId,
+										nonce: '<?php echo wp_create_nonce("paradb_log_nonce"); ?>'
+									}, function(res) {
+										if (res.success) {
+											$row.remove();
+										} else {
+											alert(res.data.message);
+										}
+									});
+								});
+							});
+							</script>
 						<?php else : ?>
 							<p><?php esc_html_e( 'No field logs recorded for this activity.', 'wp-paradb' ); ?></p>
 						<?php endif; ?>
@@ -344,6 +420,84 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 		</form>
 	</div>
 	
+	<div id="paradb-map-modal" style="display:none; position: fixed; z-index: 100000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+		<div style="background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 80%; height: 80%; position: relative;">
+			<span id="close-map-modal" style="position: absolute; right: 10px; top: 5px; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+			<div id="map-canvas" style="width: 100%; height: 100%;"></div>
+		</div>
+	</div>
+
+	<script>
+	jQuery(document).ready(function($) {
+		// Map Logic
+		var map;
+
+		function initMap() {
+			if (typeof L === 'undefined' && (typeof google === 'undefined' || !google.maps)) {
+				console.error('Map library not loaded');
+				return false;
+			}
+			return true;
+		}
+
+		function showMapModal(locations) {
+			$('#paradb-map-modal').show();
+			if (!initMap()) return;
+
+			var provider = '<?php echo esc_js(get_option("wp_paradb_options")["map_provider"] ?? "osm"); ?>';
+			
+			if (provider === 'osm') {
+				if (map && map.remove) map.remove();
+				map = L.map('map-canvas');
+				L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+					attribution: '© OpenStreetMap contributors'
+				}).addTo(map);
+
+				var group = new L.featureGroup();
+				locations.forEach(function(loc) {
+					var marker = L.marker([loc.lat, loc.lng]).addTo(map).bindPopup(loc.title);
+					group.addLayer(marker);
+				});
+				map.fitBounds(group.getBounds());
+			} else if (provider === 'google') {
+				var mapOptions = {
+					zoom: 12,
+					center: new google.maps.LatLng(locations[0].lat, locations[0].lng)
+				};
+				map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+				var bounds = new google.maps.LatLngBounds();
+				locations.forEach(function(loc) {
+					var latLng = new google.maps.LatLng(loc.lat, loc.lng);
+					var marker = new google.maps.Marker({
+						position: latLng,
+						map: map,
+						title: loc.title
+					});
+					bounds.extend(latLng);
+				});
+				if (locations.length > 1) map.fitBounds(bounds);
+			}
+		}
+
+		$(document).on('click', '.view-log-map', function(e) {
+			e.preventDefault();
+			var lat = $(this).data('lat');
+			var lng = $(this).data('lng');
+			var title = $(this).data('title');
+			showMapModal([{lat: lat, lng: lng, title: title}]);
+		});
+
+		$('#close-map-modal').on('click', function() {
+			$('#paradb-map-modal').hide();
+		});
+
+		$(window).on('click', function(event) {
+			if (event.target.id == 'paradb-map-modal') {
+				$('#paradb-map-modal').hide();
+			}
+		});
+	});
+	</script>
 	<?php
 } else {
 	// Show list.

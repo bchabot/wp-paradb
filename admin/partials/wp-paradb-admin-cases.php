@@ -107,7 +107,7 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 				</select>
 
 				<select name="assigned_to" id="filter-by-assignee">
-					<option value=""><?php esc_html_e( 'All Assignees', 'wp-paradb' ); ?></option>
+					<option value=""><?php esc_html_e( 'All Managers', 'wp-paradb' ); ?></option>
 					<?php foreach ( $investigators as $investigator ) : ?>
 						<option value="<?php echo esc_attr( $investigator->ID ); ?>" <?php selected( $assigned_to, $investigator->ID ); ?>>
 							<?php echo esc_html( $investigator->display_name ); ?>
@@ -149,7 +149,7 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 			<tr>
 				<th scope="col" class="manage-column column-primary"><?php esc_html_e( 'Case Number', 'wp-paradb' ); ?></th>
 				<th scope="col" class="manage-column"><?php esc_html_e( 'Name', 'wp-paradb' ); ?></th>
-				<th scope="col" class="manage-column"><?php esc_html_e( 'Assignee', 'wp-paradb' ); ?></th>
+				<th scope="col" class="manage-column"><?php esc_html_e( 'Case Manager', 'wp-paradb' ); ?></th>
 				<th scope="col" class="manage-column"><?php esc_html_e( 'Stats', 'wp-paradb' ); ?></th>
 				<th scope="col" class="manage-column"><?php esc_html_e( 'Status', 'wp-paradb' ); ?></th>
 				<th scope="col" class="manage-column"><?php esc_html_e( 'Created', 'wp-paradb' ); ?></th>
@@ -195,7 +195,7 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 							<?php echo esc_html( $case->case_name ); ?><br>
 							<small><?php echo esc_html( $case->location_name ? $case->location_name : $case->location_city ); ?></small>
 						</td>
-						<td data-colname="<?php esc_attr_e( 'Assignee', 'wp-paradb' ); ?>">
+						<td data-colname="<?php esc_attr_e( 'Case Manager', 'wp-paradb' ); ?>">
 							<?php echo $assignee ? esc_html( $assignee->display_name ) : '—'; ?>
 						</td>
 						<td data-colname="<?php esc_attr_e( 'Stats', 'wp-paradb' ); ?>">

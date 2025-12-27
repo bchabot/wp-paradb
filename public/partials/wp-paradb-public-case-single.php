@@ -35,6 +35,31 @@ if ( ! $case || ! $case->is_published ) {
 	return;
 }
 
+// Handle Visibility
+if ( $case->visibility === 'internal' && ! current_user_can( 'paradb_view_cases' ) ) {
+	echo '<p>' . esc_html__( 'This case is for internal use only.', 'wp-paradb' ) . '</p>';
+	return;
+}
+
+if ( $case->visibility === 'private' && ! current_user_can( 'paradb_view_cases' ) ) {
+	$entered_password = isset( $_POST['case_password'] ) ? sanitize_text_field( wp_unslash( $_POST['case_password'] ) ) : '';
+	if ( $entered_password !== $case->password ) {
+		?>
+		<div class="paradb-password-form">
+			<form method="post" action="">
+				<p><?php esc_html_e( 'This case is password protected. Please enter the password to view details:', 'wp-paradb' ); ?></p>
+				<input type="password" name="case_password" required>
+				<button type="submit" class="button"><?php esc_html_e( 'Submit', 'wp-paradb' ); ?></button>
+				<?php if ( $entered_password ) : ?>
+					<p style="color:red;"><?php esc_html_e( 'Incorrect password.', 'wp-paradb' ); ?></p>
+				<?php endif; ?>
+			</form>
+		</div>
+		<?php
+		return;
+	}
+}
+
 // Get related data.
 $reports = WP_ParaDB_Report_Handler::get_reports( array( 'case_id' => $case_id, 'limit' => 100 ) );
 $activities = WP_ParaDB_Activity_Handler::get_activities( array( 'case_id' => $case_id, 'limit' => 100 ) );
