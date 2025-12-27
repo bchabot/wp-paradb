@@ -491,6 +491,18 @@
 			});
 		});
 		
+		// Postbox toggle handler
+		$(document).on('click', '.postbox .handlediv, .postbox .hndle', function() {
+			var $postbox = $(this).closest('.postbox');
+			$postbox.toggleClass('closed');
+			
+			// Update aria-expanded if the button was clicked
+			var $btn = $postbox.find('.handlediv');
+			if ($btn.length > 0) {
+				$btn.attr('aria-expanded', !$postbox.hasClass('closed'));
+			}
+		});
+		
 		// Trigger initial load if element exists
 		if ($('#rel_target_type').length > 0) {
 			$('#rel_target_type').trigger('change');

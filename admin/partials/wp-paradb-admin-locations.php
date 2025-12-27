@@ -83,7 +83,12 @@ if ( 'new' === $action || 'edit' === $action ) {
 				</tr>
 				<tr>
 					<th scope="row"><label for="address"><?php esc_html_e( 'Address', 'wp-paradb' ); ?></label></th>
-					<td><input name="address" type="text" id="address" value="<?php echo $location ? esc_attr( $location->address ) : ''; ?>" class="regular-text"></td>
+					<td>
+						<div style="display:flex; gap: 5px;">
+							<input name="address" type="text" id="address" value="<?php echo $location ? esc_attr( $location->address ) : ''; ?>" class="regular-text" style="flex:1;">
+							<button type="button" class="get-current-location button" data-target="#address" title="<?php esc_attr_e( 'Use current GPS location', 'wp-paradb' ); ?>">📍</button>
+						</div>
+					</td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="city"><?php esc_html_e( 'City', 'wp-paradb' ); ?></label></th>
