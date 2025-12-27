@@ -6,6 +6,13 @@
 - Added BETA software warning to README.md.
 
 ## [0.0.4] - 2025-12-26
+### Changed
+- Set default visibility to internal for cases and activities.
+- Set default visibility to public and sanitized for reports.
+- Added activity location selection.
+- Finalized map integration and embedded maps.
+
+## [0.0.3] - 2025-12-26
 ### Added
 - **Case Visibility & Protection**: Added Visibility settings (Public, Private/Protected, Internal) and password protection for cases.
 - **Data Sanitization**: New "Sanitize Front End" option for cases to automatically redact witness/client names and specific locations on public pages.
