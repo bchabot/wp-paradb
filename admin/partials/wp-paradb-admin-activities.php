@@ -124,8 +124,8 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 				}
 			}
 			?>
-			<input type="hidden" id="latitude" value="<?php echo esc_attr( $activity_lat ); ?>">
-			<input type="hidden" id="longitude" value="<?php echo esc_attr( $activity_lng ); ?>">
+			<input type="hidden" id="latitude" name="latitude" value="<?php echo esc_attr( $activity_lat ); ?>">
+			<input type="hidden" id="longitude" name="longitude" value="<?php echo esc_attr( $activity_lng ); ?>">
 			
 			<table class="form-table">
 				<tr>
@@ -248,6 +248,18 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 							)
 						);
 						?>
+					</td>
+				</tr>
+				
+				<tr>
+					<th scope="row">
+						<label for="latitude"><?php esc_html_e( 'Coordinates', 'wp-paradb' ); ?></label>
+					</th>
+					<td>
+						<input type="number" step="any" name="latitude" id="latitude" placeholder="Latitude" value="<?php echo esc_attr($activity_lat); ?>" style="width: 150px;">
+						<input type="number" step="any" name="longitude" id="longitude" placeholder="Longitude" value="<?php echo esc_attr($activity_lng); ?>" style="width: 150px;">
+						<button type="button" id="geocode-address" class="button"><?php esc_html_e( 'Find on Map', 'wp-paradb' ); ?></button>
+						<div id="location-map" style="height: 300px; margin-top: 10px; border: 1px solid #ccc;"></div>
 					</td>
 				</tr>
 				

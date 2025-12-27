@@ -79,20 +79,20 @@ if ( 'new' === $action || 'edit' === $action ) {
 			<table class="form-table">
 				<tr>
 					<th scope="row"><label for="location_name"><?php esc_html_e( 'Location Name', 'wp-paradb' ); ?> *</label></th>
-					<td><input name="location_name" type="text" id="location_name" value="<?php echo $location ? esc_attr( $location->location_name ) : ''; ?>" class="regular-text" required></td>
+					<td><input name="location_name" type="text" id="location_name" value="<?php echo $location ? esc_attr( $location->location_name ) : ''; ?>" class="regular-text" required autocomplete="off"></td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="address"><?php esc_html_e( 'Address', 'wp-paradb' ); ?></label></th>
 					<td>
 						<div style="display:flex; gap: 5px;">
-							<input name="address" type="text" id="address" value="<?php echo $location ? esc_attr( $location->address ) : ''; ?>" class="regular-text" style="flex:1;">
+							<input name="address" type="text" id="address" value="<?php echo $location ? esc_attr( $location->address ) : ''; ?>" class="regular-text" style="flex:1;" autocomplete="off">
 							<button type="button" class="get-current-location button" data-target="#address" title="<?php esc_attr_e( 'Use current GPS location', 'wp-paradb' ); ?>">📍</button>
 						</div>
 					</td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="city"><?php esc_html_e( 'City', 'wp-paradb' ); ?></label></th>
-					<td><input name="city" type="text" id="city" value="<?php echo $location ? esc_attr( $location->city ) : ''; ?>" class="regular-text"></td>
+					<td><input name="city" type="text" id="city" value="<?php echo $location ? esc_attr( $location->city ) : ''; ?>" class="regular-text" autocomplete="off"></td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="latitude"><?php esc_html_e( 'Coordinates', 'wp-paradb' ); ?></label></th>

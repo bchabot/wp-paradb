@@ -59,7 +59,7 @@ if ( isset( $_POST['save_case'] ) && check_admin_referer( 'save_case_' . $case_i
 		'phenomena_types'    => isset( $_POST['phenomena_types'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['phenomena_types'] ) ) : array(),
 		'case_priority'      => isset( $_POST['case_priority'] ) ? sanitize_text_field( wp_unslash( $_POST['case_priority'] ) ) : 'normal',
 		'assigned_to'        => isset( $_POST['assigned_to'] ) ? absint( $_POST['assigned_to'] ) : null,
-		'visibility'         => isset( $_POST['visibility'] ) ? sanitize_text_field( wp_unslash( $_POST['visibility'] ) ) : 'public',
+		'visibility'         => isset( $_POST['visibility'] ) ? sanitize_text_field( wp_unslash( $_POST['visibility'] ) ) : 'internal',
 		'password'           => isset( $_POST['password'] ) ? sanitize_text_field( wp_unslash( $_POST['password'] ) ) : null,
 		'sanitize_front_end' => isset( $_POST['sanitize_front_end'] ) ? 1 : 0,
 	);
@@ -185,7 +185,7 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 										<label for="location_address"><?php esc_html_e( 'Address', 'wp-paradb' ); ?></label>
 									</th>
 									<td>
-										<input type="text" name="location_address" id="location_address" class="regular-text" value="<?php echo $case ? esc_attr( $case->location_address ) : ''; ?>">
+										<input type="text" name="location_address" id="location_address" class="regular-text" value="<?php echo $case ? esc_attr( $case->location_address ) : ''; ?>" autocomplete="off">
 									</td>
 								</tr>
 
@@ -194,7 +194,7 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 										<label for="location_city"><?php esc_html_e( 'City', 'wp-paradb' ); ?></label>
 									</th>
 									<td>
-										<input type="text" name="location_city" id="location_city" class="regular-text" value="<?php echo $case ? esc_attr( $case->location_city ) : ''; ?>">
+										<input type="text" name="location_city" id="location_city" class="regular-text" value="<?php echo $case ? esc_attr( $case->location_city ) : ''; ?>" autocomplete="off">
 									</td>
 								</tr>
 
@@ -203,7 +203,7 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 										<label for="location_state"><?php esc_html_e( 'State/Province', 'wp-paradb' ); ?></label>
 									</th>
 									<td>
-										<input type="text" name="location_state" id="location_state" class="regular-text" value="<?php echo $case ? esc_attr( $case->location_state ) : ''; ?>">
+										<input type="text" name="location_state" id="location_state" class="regular-text" value="<?php echo $case ? esc_attr( $case->location_state ) : ''; ?>" autocomplete="off">
 									</td>
 								</tr>
 
@@ -212,7 +212,7 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 										<label for="location_zip"><?php esc_html_e( 'ZIP/Postal Code', 'wp-paradb' ); ?></label>
 									</th>
 									<td>
-										<input type="text" name="location_zip" id="location_zip" class="regular-text" value="<?php echo $case ? esc_attr( $case->location_zip ) : ''; ?>">
+										<input type="text" name="location_zip" id="location_zip" class="regular-text" value="<?php echo $case ? esc_attr( $case->location_zip ) : ''; ?>" autocomplete="off">
 									</td>
 								</tr>
 
@@ -221,7 +221,7 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 										<label for="location_country"><?php esc_html_e( 'Country', 'wp-paradb' ); ?></label>
 									</th>
 									<td>
-										<input type="text" name="location_country" id="location_country" class="regular-text" value="<?php echo $case ? esc_attr( $case->location_country ) : 'United States'; ?>">
+										<input type="text" name="location_country" id="location_country" class="regular-text" value="<?php echo $case ? esc_attr( $case->location_country ) : 'United States'; ?>" autocomplete="off">
 									</td>
 								</tr>
 
@@ -230,8 +230,10 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 										<label for="latitude"><?php esc_html_e( 'Coordinates', 'wp-paradb' ); ?></label>
 									</th>
 									<td>
-										<input type="number" step="0.000001" name="latitude" id="latitude" placeholder="<?php esc_attr_e( 'Latitude', 'wp-paradb' ); ?>" value="<?php echo $case ? esc_attr( $case->latitude ) : ''; ?>" style="width: 150px;">
-										<input type="number" step="0.000001" name="longitude" id="longitude" placeholder="<?php esc_attr_e( 'Longitude', 'wp-paradb' ); ?>" value="<?php echo $case ? esc_attr( $case->longitude ) : ''; ?>" style="width: 150px;">
+										<input type="number" step="any" name="latitude" id="latitude" placeholder="<?php esc_attr_e( 'Latitude', 'wp-paradb' ); ?>" value="<?php echo $case ? esc_attr( $case->latitude ) : ''; ?>" style="width: 150px;">
+										<input type="number" step="any" name="longitude" id="longitude" placeholder="<?php esc_attr_e( 'Longitude', 'wp-paradb' ); ?>" value="<?php echo $case ? esc_attr( $case->longitude ) : ''; ?>" style="width: 150px;">
+										<button type="button" id="geocode-address" class="button"><?php esc_html_e( 'Find on Map', 'wp-paradb' ); ?></button>
+										<div id="location-map" style="height: 300px; margin-top: 10px; border: 1px solid #ccc;"></div>
 									</td>
 								</tr>
 							</table>

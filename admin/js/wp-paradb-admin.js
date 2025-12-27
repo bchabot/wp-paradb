@@ -152,7 +152,19 @@
 		// Auto-suggest for location fields
 		if (typeof google !== 'undefined' && google.maps && paradb_maps.provider === 'google') {
 			$('input[name="location_address"], input[name="address"]').each(function() {
+				$(this).attr('autocomplete', 'off'); // Prevent browser interference
 				var autocomplete = new google.maps.places.Autocomplete(this);
+				
+				autocomplete.addListener('place_changed', function() {
+					var place = autocomplete.getPlace();
+					if (!place.geometry) return;
+					
+					var lat = place.geometry.location.lat();
+					var lng = place.geometry.location.lng();
+					
+					$('#latitude').val(lat.toFixed(6)).trigger('change');
+					$('#longitude').val(lng.toFixed(6)).trigger('change');
+				});
 			});
 
 			// Location Map handling
@@ -161,6 +173,8 @@
 				initGoogleMap(mapElement);
 			}
 		} else if (typeof L !== 'undefined' && paradb_maps.provider === 'osm') {
+			$('input[name="location_address"], input[name="address"]').attr('autocomplete', 'off');
+			
 			// Location Map handling for Leaflet
 			var mapElement = document.getElementById('location-map');
 			if (mapElement) {
