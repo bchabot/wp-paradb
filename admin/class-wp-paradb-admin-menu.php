@@ -169,26 +169,6 @@ class WP_ParaDB_Admin_Menu {
 			'wp-paradb-docs',
 			array( __CLASS__, 'docs_page' )
 		);
-
-		// Hidden Log Chat page (registered then removed to hide).
-		add_submenu_page(
-			'wp-paradb',
-			__( 'Log Action', 'wp-paradb' ),
-			__( 'Log Action', 'wp-paradb' ),
-			'paradb_view_cases',
-			'wp-paradb-log-chat',
-			array( __CLASS__, 'log_chat_page' )
-		);
-		// remove_submenu_page( 'wp-paradb', 'wp-paradb-log-chat' );
-	}
-
-	/**
-	 * Log chat page
-	 *
-	 * @since    1.6.0
-	 */
-	public static function log_chat_page() {
-		require_once WP_PARADB_PLUGIN_DIR . 'admin/partials/wp-paradb-admin-log-chat.php';
 	}
 
 	/**
