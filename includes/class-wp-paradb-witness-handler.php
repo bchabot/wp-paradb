@@ -92,9 +92,11 @@ class WP_ParaDB_Witness_Handler {
 			'account_email'         => $email,
 			'user_id'               => isset( $data['user_id'] ) ? absint( $data['user_id'] ) : null,
 			'case_id'               => ( isset( $data['case_id'] ) && $data['case_id'] > 0 ) ? absint( $data['case_id'] ) : 0,
-			'account_name'          => ! empty( $data['account_name'] ) ? sanitize_text_field( $data['account_name'] ) : null,
+			'first_name'            => ! empty( $data['first_name'] ) ? sanitize_text_field( $data['first_name'] ) : null,
+			'last_name'             => ! empty( $data['last_name'] ) ? sanitize_text_field( $data['last_name'] ) : null,
 			'account_phone'         => ! empty( $data['account_phone'] ) ? sanitize_text_field( $data['account_phone'] ) : null,
 			'account_address'       => ! empty( $data['account_address'] ) ? sanitize_textarea_field( $data['account_address'] ) : null,
+			'contact_preference'    => ! empty( $data['contact_preference'] ) ? sanitize_text_field( $data['contact_preference'] ) : 'email',
 			'incident_date'         => sanitize_text_field( $data['incident_date'] ),
 			'incident_time'         => ! empty( $data['incident_time'] ) ? sanitize_text_field( $data['incident_time'] ) : null,
 			'incident_location'     => sanitize_text_field( $data['incident_location'] ),
@@ -127,7 +129,7 @@ class WP_ParaDB_Witness_Handler {
 		// Format types for database.
 		$format = array(
 			'%s', '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s',
-			'%s', '%d', '%s', '%d', '%s', '%s', '%d', '%d', '%d', '%d',
+			'%s', '%s', '%s', '%d', '%s', '%d', '%s', '%s', '%d', '%d', '%d', '%d',
 			'%s', '%s', '%s', '%s', '%s',
 		);
 
@@ -206,15 +208,12 @@ class WP_ParaDB_Witness_Handler {
 		}
 
 		// Update user meta.
-		if ( isset( $data['account_name'] ) ) {
-			$name_parts = explode( ' ', $data['account_name'], 2 );
-			wp_update_user( array(
-				'ID'           => $user_id,
-				'first_name'   => $name_parts[0],
-				'last_name'    => isset( $name_parts[1] ) ? $name_parts[1] : '',
-				'display_name' => $data['account_name'],
-			) );
-		}
+		wp_update_user( array(
+			'ID'           => $user_id,
+			'first_name'   => isset( $data['first_name'] ) ? sanitize_text_field($data['first_name']) : '',
+			'last_name'    => isset( $data['last_name'] ) ? sanitize_text_field($data['last_name']) : '',
+			'display_name' => ( ! empty( $data['first_name'] ) || ! empty( $data['last_name'] ) ) ? trim( ( $data['first_name'] ?? '' ) . ' ' . ( $data['last_name'] ?? '' ) ) : $email,
+		) );
 
 		// Set user role to subscriber by default.
 		$user = new WP_User( $user_id );
@@ -324,7 +323,7 @@ class WP_ParaDB_Witness_Handler {
 
 		// Handle other updatable fields.
 		$text_fields = array( 
-			'account_name', 'account_email', 'account_phone', 'incident_location', 
+			'first_name', 'last_name', 'account_email', 'account_phone', 'contact_preference', 'incident_location', 
 			'incident_date', 'incident_time', 'status' 
 		);
 		$textarea_fields = array( 
@@ -470,8 +469,9 @@ class WP_ParaDB_Witness_Handler {
 
 		// Search.
 		if ( ! empty( $args['search'] ) ) {
-			$where[] = '(account_name LIKE %s OR account_email LIKE %s OR incident_location LIKE %s OR incident_description LIKE %s)';
+			$where[] = '(first_name LIKE %s OR last_name LIKE %s OR account_email LIKE %s OR incident_location LIKE %s OR incident_description LIKE %s)';
 			$search_term = '%' . $wpdb->esc_like( $args['search'] ) . '%';
+			$where_values[] = $search_term;
 			$where_values[] = $search_term;
 			$where_values[] = $search_term;
 			$where_values[] = $search_term;

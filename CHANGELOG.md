@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.0.6] - 2025-12-26
+### Added
+- **Restore Data**: Added a new "Restore from Backup" feature in settings.
+- **Witness Contact Preferences**: Added "Contact Preference" field for witnesses.
+### Changed
+- **Witness Name Split**: Split 'Witness Name' into 'First Name' and 'Last Name' for better integration.
+- **Improved Validation**: Enhanced data sanitization and validation for witness reports and locations.
+- **UI Enhancements**: Refactored witness and location admin interfaces with improved maps and geolocation buttons.
+- **Deactivation Safety**: Removed data deletion on plugin deactivation; data is now only purged on actual uninstall if configured.
+- **Database Version**: Updated database schema to version 0.0.6 with data migration for existing witness names.
+
 ## [0.0.5] - 2025-12-26
 ### Changed
 - Updated plugin version to 0.0.5.

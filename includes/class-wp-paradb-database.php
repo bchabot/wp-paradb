@@ -295,9 +295,11 @@ class WP_ParaDB_Database {
 			case_id bigint(20) unsigned NOT NULL DEFAULT 0,
 			location_id bigint(20) unsigned DEFAULT NULL,
 			account_email varchar(255) NOT NULL,
-			account_name varchar(255) DEFAULT NULL,
+			first_name varchar(100) DEFAULT NULL,
+			last_name varchar(100) DEFAULT NULL,
 			account_phone varchar(50) DEFAULT NULL,
 			account_address text DEFAULT NULL,
+			contact_preference varchar(50) DEFAULT 'email',
 			incident_date date NOT NULL,
 			incident_time time DEFAULT NULL,
 			incident_location varchar(255) NOT NULL,
@@ -342,8 +344,34 @@ class WP_ParaDB_Database {
 		dbDelta( $sql_field_logs );
 		dbDelta( $sql_witnesses );
 
+		// Data Migration: Split account_name into first_name and last_name for existing records.
+		$results = $wpdb->get_results( "SELECT account_id, account_name FROM {$table_prefix}witness_accounts WHERE account_name IS NOT NULL AND first_name IS NULL" );
+		if ( $results ) {
+			foreach ( $results as $row ) {
+				$name = trim( $row->account_name );
+				if ( empty( $name ) ) {
+					continue;
+				}
+				$parts = explode( ' ', $name, 2 );
+				$first_name = $parts[0];
+				$last_name = isset( $parts[1] ) ? $parts[1] : '';
+
+				$wpdb->update(
+					$table_prefix . 'witness_accounts',
+					array(
+						'first_name'   => $first_name,
+						'last_name'    => $last_name,
+						'account_name' => null, // Clear it out so we don't process it again
+					),
+					array( 'account_id' => $row->account_id ),
+					array( '%s', '%s', '%s' ),
+					array( '%d' )
+				);
+			}
+		}
+
 		// Store database version
-		update_option( 'wp_paradb_db_version', '0.0.5' );
+		update_option( 'wp_paradb_db_version', '0.0.6' );
 	}
 
 	/**

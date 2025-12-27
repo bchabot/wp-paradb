@@ -120,7 +120,15 @@ By submitting a witness report, you acknowledge that you have read and understoo
 			'witness_account_auto_approve'   => false,
 			'require_privacy_acceptance'     => true,
 			'privacy_policy_text'            => self::DEFAULT_PRIVACY_POLICY,
+			'allow_public_submissions'       => true,
+			'moderate_submissions'           => true,
 			
+			// Case settings.
+			'case_number_format'             => 'CASE-%Y-%ID%',
+			'require_client_consent'         => true,
+			'items_per_page'                 => 20,
+			'default_case_status'            => 'open',
+
 			// Consent settings.
 			'consent_default'                => 'none', // none, private, anonymize, publish
 			'consent_options_enabled'        => array(
@@ -133,6 +141,7 @@ By submitting a witness report, you acknowledge that you have read and understoo
 			'notify_admin_new_submission'    => true,
 			'notify_witness_confirmation'    => true,
 			'admin_notification_email'       => get_option( 'admin_email' ),
+			'witness_success_message'        => __( 'Thank you for submitting your report. We will review it and may contact you for follow-up.', 'wp-paradb' ),
 			
 			// Phenomena types (can be customized).
 			'phenomena_types'                => array(
@@ -170,6 +179,10 @@ By submitting a witness report, you acknowledge that you have read and understoo
 			'redact_investigator_names'      => false,
 			'redaction_placeholder'          => '[REDACTED]',
 			'delete_data_on_uninstall'       => false,
+			'allowed_file_types'             => array( 'jpg', 'jpeg', 'png', 'gif', 'mp3', 'wav', 'ogg', 'mp4', 'avi', 'mov', 'pdf', 'doc', 'docx', 'txt', 'csv' ),
+			'max_upload_size'                => 10485760, // 10MB
+			'enable_geolocation'             => true,
+			'enable_moon_phase'              => true,
 		);
 	}
 
@@ -254,6 +267,10 @@ By submitting a witness report, you acknowledge that you have read and understoo
 		// Text settings.
 		if ( isset( $settings['privacy_policy_text'] ) ) {
 			$sanitized['privacy_policy_text'] = wp_kses_post( $settings['privacy_policy_text'] );
+		}
+
+		if ( isset( $settings['witness_success_message'] ) ) {
+			$sanitized['witness_success_message'] = sanitize_textarea_field( $settings['witness_success_message'] );
 		}
 
 		if ( isset( $settings['redaction_keywords'] ) ) {

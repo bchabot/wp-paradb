@@ -6,7 +6,7 @@
  * Plugin Name:       WordPress Paranormal Database
  * Plugin URI:        https://github.com/bchabot/wp-paradb
  * Description:       A comprehensive system for recording, archiving, and sharing paranormal witness reports, investigations, and research.
- * Version:           0.0.5
+ * Version:           0.0.6
  * Requires at least: 5.0
  * Requires PHP:      7.4
  * Author:            Brian Chabot
@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Plugin version.
  */
-define( 'WP_PARADB_VERSION', '0.0.5' );
+define( 'WP_PARADB_VERSION', '0.0.6' );
 
 /**
  * Plugin paths.

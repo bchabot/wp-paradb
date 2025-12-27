@@ -90,13 +90,22 @@ if ( isset( $_POST['paradb_maintenance_action'] ) && check_admin_referer( 'parad
 	$action = sanitize_text_field( $_POST['paradb_maintenance_action'] );
 	
 	if ( 'backup' === $action ) {
-		// Backup is usually handled via redirect or direct exit, but let's see.
 		$data = WP_ParaDB_Maintenance_Handler::export_data();
 		$filename = 'paradb-backup-' . date( 'Y-m-d-His' ) . '.json';
 		header( 'Content-Type: application/json' );
 		header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
 		echo $data;
 		exit;
+	} elseif ( 'restore' === $action ) {
+		if ( ! empty( $_FILES['restore_file']['tmp_name'] ) ) {
+			$json = file_get_contents( $_FILES['restore_file']['tmp_name'] );
+			$result = WP_ParaDB_Maintenance_Handler::import_data( $json );
+			if ( is_wp_error( $result ) ) {
+				echo '<div class="notice notice-error"><p>' . esc_html( $result->get_error_message() ) . '</p></div>';
+			} else {
+				echo '<div class="notice notice-success"><p>' . esc_html__( 'Data restored successfully.', 'wp-paradb' ) . '</p></div>';
+			}
+		}
 	} elseif ( 'reset' === $action ) {
 		WP_ParaDB_Maintenance_Handler::reset_all();
 		echo '<div class="notice notice-warning"><p>' . esc_html__( 'All ParaDB data and settings have been reset.', 'wp-paradb' ) . '</p></div>';
@@ -178,6 +187,15 @@ $active_tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'general';
 						</label>
 					</td>
 				</tr>
+				<tr>
+					<th scope="row">
+						<label for="witness_success_message"><?php esc_html_e( 'Success Message', 'wp-paradb' ); ?></label>
+					</th>
+					<td>
+						<textarea name="witness_success_message" id="witness_success_message" rows="3" class="large-text"><?php echo esc_textarea( $options['witness_success_message'] ); ?></textarea>
+						<p class="description"><?php esc_html_e( 'Message shown to witnesses after successful submission.', 'wp-paradb' ); ?></p>
+					</td>
+				</tr>
 			</table>
 		<?php endif; ?>
 
@@ -202,7 +220,8 @@ $active_tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'general';
 					<td>
 						<input type="password" name="google_maps_api_key" id="google_maps_api_key" class="regular-text" value="<?php echo esc_attr( $options['google_maps_api_key'] ); ?>">
 						<p class="description">
-							<?php esc_html_e( 'Required for Maps and Address Auto-suggest. Must have Maps JS, Places, and Geocoding APIs enabled.', 'wp-paradb' ); ?>
+							<?php esc_html_e( 'Required for Maps and Address Auto-suggest.', 'wp-paradb' ); ?>
+							<a href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank"><?php esc_html_e( 'Get Google Maps Key', 'wp-paradb' ); ?></a>
 						</p>
 					</td>
 				</tr>
@@ -212,7 +231,10 @@ $active_tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'general';
 					</th>
 					<td>
 						<input type="password" name="locationiq_api_key" id="locationiq_api_key" class="regular-text" value="<?php echo esc_attr( $options['locationiq_api_key'] ); ?>">
-						<p class="description"><?php esc_html_e( 'Optional: Used for free geocoding with OpenStreetMap.', 'wp-paradb' ); ?></p>
+						<p class="description">
+							<?php esc_html_e( 'Optional: Used for free geocoding with OpenStreetMap.', 'wp-paradb' ); ?>
+							<a href="https://locationiq.com/" target="_blank"><?php esc_html_e( 'Get LocationIQ Key', 'wp-paradb' ); ?></a>
+						</p>
 					</td>
 				</tr>
 				<tr>
@@ -221,6 +243,9 @@ $active_tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'general';
 					</th>
 					<td>
 						<input type="password" name="weatherapi_api_key" id="weatherapi_api_key" class="regular-text" value="<?php echo esc_attr( $options['weatherapi_api_key'] ); ?>">
+						<p class="description">
+							<a href="https://www.weatherapi.com/signup.aspx" target="_blank"><?php esc_html_e( 'Get WeatherAPI Key', 'wp-paradb' ); ?></a>
+						</p>
 					</td>
 				</tr>
 				<tr>
@@ -229,6 +254,9 @@ $active_tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'general';
 					</th>
 					<td>
 						<input type="password" name="freeastroapi_api_key" id="freeastroapi_api_key" class="regular-text" value="<?php echo esc_attr( $options['freeastroapi_api_key'] ); ?>">
+						<p class="description">
+							<a href="https://freeastroapi.com/" target="_blank"><?php esc_html_e( 'Get FreeAstroAPI Key', 'wp-paradb' ); ?></a>
+						</p>
 					</td>
 				</tr>
 			</table>
@@ -281,13 +309,15 @@ $active_tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'general';
 			<table class="form-table">
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Data Removal', 'wp-paradb' ); ?></th>
-					<td>
-						<label>
-							<input type="checkbox" name="delete_data_on_uninstall" value="1" <?php checked( $options['delete_data_on_uninstall'], 1 ); ?>>
-							<span style="color: #dc3232; font-weight: bold;"><?php esc_html_e( 'Permanently delete ALL data on uninstall', 'wp-paradb' ); ?></span>
-						</label>
-					</td>
-				</tr>
+					                                       <td>
+					                                               <label>
+					                                                       <input type="checkbox" name="delete_data_on_uninstall" value="1" <?php checked( $options['delete_data_on_uninstall'], 1 ); ?>>
+					                                                       <span style="color: #dc3232; font-weight: bold;"><?php esc_html_e( 'Permanently delete ALL data on uninstall', 'wp-paradb' ); ?></span>
+					                                               </label>
+					                                               <p class="description" style="color: #dc3232;">
+					                                                       <?php esc_html_e( 'WARNING: If enabled, all cases, witness reports, and evidence will be PERMANENTLY DELETED whenever the plugin is uninstalled from the WordPress Plugins page. This cannot be undone.', 'wp-paradb' ); ?>
+					                                               </p>
+					                                       </td>				</tr>
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Status Info', 'wp-paradb' ); ?></th>
 					<td>
@@ -314,6 +344,17 @@ $active_tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'general';
 						<?php wp_nonce_field( 'paradb_maintenance_nonce', 'maintenance_nonce' ); ?>
 						<input type="hidden" name="paradb_maintenance_action" value="backup">
 						<input type="submit" class="button" value="<?php esc_attr_e( 'Download Backup (JSON)', 'wp-paradb' ); ?>">
+					</form>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Restore Data', 'wp-paradb' ); ?></th>
+				<td>
+					<form method="post" action="" enctype="multipart/form-data">
+						<?php wp_nonce_field( 'paradb_maintenance_nonce', 'maintenance_nonce' ); ?>
+						<input type="hidden" name="paradb_maintenance_action" value="restore">
+						<input type="file" name="restore_file" accept=".json" required>
+						<input type="submit" class="button" value="<?php esc_attr_e( 'Restore from Backup', 'wp-paradb' ); ?>" onclick="return confirm('<?php esc_attr_e( 'Warning: This will overwrite all current data. Continue?', 'wp-paradb' ); ?>');">
 					</form>
 				</td>
 			</tr>

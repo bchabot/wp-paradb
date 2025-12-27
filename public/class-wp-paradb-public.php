@@ -54,7 +54,6 @@ class WP_ParaDB_Public {
 
 		// Register shortcodes.
 		add_shortcode( 'paradb_cases', array( $this, 'cases_shortcode' ) );
-		add_shortcode( 'paradb_witness_form', array( $this, 'witness_form_shortcode' ) );
 		add_shortcode( 'paradb_single_case', array( $this, 'single_case_shortcode' ) );
 		add_shortcode( 'paradb_reports', array( $this, 'reports_shortcode' ) );
 		add_shortcode( 'paradb_single_report', array( $this, 'single_report_shortcode' ) );
@@ -140,21 +139,6 @@ class WP_ParaDB_Public {
 
 		ob_start();
 		include WP_PARADB_PLUGIN_DIR . 'public/partials/wp-paradb-public-cases.php';
-		return ob_get_clean();
-	}
-
-	/**
-	 * Witness submission form shortcode.
-	 *
-	 * @since    1.0.0
-	 * @param    array    $atts    Shortcode attributes.
-	 * @return   string            HTML output.
-	 */
-	public function witness_form_shortcode( $atts ) {
-		$atts = shortcode_atts( array(), $atts, 'paradb_witness_form' );
-
-		ob_start();
-		include WP_PARADB_PLUGIN_DIR . 'public/partials/wp-paradb-public-witness-form.php';
 		return ob_get_clean();
 	}
 

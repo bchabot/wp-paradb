@@ -35,15 +35,15 @@ if ( 'delete' === $action && $location_id > 0 && isset( $_GET['_wpnonce'] ) ) {
 // Handle form submission.
 if ( isset( $_POST['save_location'] ) && check_admin_referer( 'save_location', 'location_nonce' ) ) {
 	$location_data = array(
-		'location_name'  => sanitize_text_field( $_POST['location_name'] ),
-		'address'        => sanitize_text_field( $_POST['address'] ),
-		'city'           => sanitize_text_field( $_POST['city'] ),
-		'state'          => sanitize_text_field( $_POST['state'] ),
-		'zip'            => sanitize_text_field( $_POST['zip'] ),
-		'country'        => sanitize_text_field( $_POST['country'] ),
-		'latitude'       => floatval( $_POST['latitude'] ),
-		'longitude'      => floatval( $_POST['longitude'] ),
-		'location_notes' => sanitize_textarea_field( $_POST['location_notes'] ),
+		'location_name'  => sanitize_text_field( wp_unslash( $_POST['location_name'] ) ),
+		'address'        => sanitize_text_field( wp_unslash( $_POST['address'] ) ),
+		'city'           => sanitize_text_field( wp_unslash( $_POST['city'] ) ),
+		'state'          => sanitize_text_field( wp_unslash( $_POST['state'] ) ),
+		'zip'            => sanitize_text_field( wp_unslash( $_POST['zip'] ) ),
+		'country'        => sanitize_text_field( wp_unslash( $_POST['country'] ) ),
+		'latitude'       => ( isset( $_POST['latitude'] ) && '' !== $_POST['latitude'] ) ? floatval( $_POST['latitude'] ) : null,
+		'longitude'      => ( isset( $_POST['longitude'] ) && '' !== $_POST['longitude'] ) ? floatval( $_POST['longitude'] ) : null,
+		'location_notes' => sanitize_textarea_field( wp_unslash( $_POST['location_notes'] ) ),
 		'is_public'      => isset( $_POST['is_public'] ) ? 1 : 0,
 	);
 
@@ -74,7 +74,7 @@ if ( 'new' === $action || 'edit' === $action ) {
 	?>
 	<div class="wrap">
 		<h1><?php echo $location ? esc_html__( 'Edit Location', 'wp-paradb' ) : esc_html__( 'Add New Location', 'wp-paradb' ); ?></h1>
-		<form method="post" action="">
+		<form method="post" id="paradb-location-form" action="">
 			<?php wp_nonce_field( 'save_location', 'location_nonce' ); ?>
 			<table class="form-table">
 				<tr>
@@ -84,10 +84,8 @@ if ( 'new' === $action || 'edit' === $action ) {
 				<tr>
 					<th scope="row"><label for="address"><?php esc_html_e( 'Address', 'wp-paradb' ); ?></label></th>
 					<td>
-						<div style="display:flex; gap: 5px;">
-							<input name="address" type="text" id="address" value="<?php echo $location ? esc_attr( $location->address ) : ''; ?>" class="regular-text" style="flex:1;" autocomplete="off">
-							<button type="button" class="get-current-location button" data-target="#address" title="<?php esc_attr_e( 'Use current GPS location', 'wp-paradb' ); ?>">📍</button>
-						</div>
+						<input name="address" type="text" id="address" value="<?php echo $location ? esc_attr( $location->address ) : ''; ?>" class="regular-text" autocomplete="off">
+						<button type="button" id="geocode-address" class="button"><?php esc_html_e( 'Find Address on Map', 'wp-paradb' ); ?></button>
 					</td>
 				</tr>
 				<tr>
@@ -95,12 +93,37 @@ if ( 'new' === $action || 'edit' === $action ) {
 					<td><input name="city" type="text" id="city" value="<?php echo $location ? esc_attr( $location->city ) : ''; ?>" class="regular-text" autocomplete="off"></td>
 				</tr>
 				<tr>
+					<th scope="row"><label for="state"><?php esc_html_e( 'State/Province', 'wp-paradb' ); ?></label></th>
+					<td><input name="state" type="text" id="state" value="<?php echo $location ? esc_attr( $location->state ) : ''; ?>" class="regular-text" autocomplete="off"></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="zip"><?php esc_html_e( 'ZIP/Postal Code', 'wp-paradb' ); ?></label></th>
+					<td><input name="zip" type="text" id="zip" value="<?php echo $location ? esc_attr( $location->zip ) : ''; ?>" class="regular-text" autocomplete="off"></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="country"><?php esc_html_e( 'Country', 'wp-paradb' ); ?></label></th>
+					<td><input name="country" type="text" id="country" value="<?php echo $location ? esc_attr( $location->country ) : 'United States'; ?>" class="regular-text" autocomplete="off"></td>
+				</tr>
+				<tr>
 					<th scope="row"><label for="latitude"><?php esc_html_e( 'Coordinates', 'wp-paradb' ); ?></label></th>
 					<td>
 						<input name="latitude" type="number" step="any" id="latitude" value="<?php echo $location ? esc_attr( $location->latitude ) : ''; ?>" placeholder="Latitude">
 						<input name="longitude" type="number" step="any" id="longitude" value="<?php echo $location ? esc_attr( $location->longitude ) : ''; ?>" placeholder="Longitude">
-						<button type="button" id="geocode-address" class="button"><?php esc_html_e( 'Find on Map', 'wp-paradb' ); ?></button>
-						<div id="location-map" style="height: 300px; margin-top: 10px; border: 1px solid #ccc;"></div>
+						<button type="button" class="get-current-location button" data-target="#latitude"><?php esc_html_e( 'Use my Current Location', 'wp-paradb' ); ?></button>
+						<div id="location-map" class="location-map" style="height: 400px; margin-top: 10px; border: 1px solid #ccc;"></div>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="location_notes"><?php esc_html_e( 'Location Notes', 'wp-paradb' ); ?></label></th>
+					<td><textarea name="location_notes" id="location_notes" rows="5" class="large-text"><?php echo $location ? esc_textarea( $location->location_notes ) : ''; ?></textarea></td>
+				</tr>
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Public Access', 'wp-paradb' ); ?></th>
+					<td>
+						<label>
+							<input type="checkbox" name="is_public" value="1" <?php checked( $location ? $location->is_public : 0, 1 ); ?>>
+							<?php esc_html_e( 'Make this location available in the public Address Book', 'wp-paradb' ); ?>
+						</label>
 					</td>
 				</tr>
 			</table>
@@ -137,7 +160,7 @@ if ( 'new' === $action || 'edit' === $action ) {
 							<strong><a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-locations&action=edit&location_id=' . $loc->location_id ) ); ?>"><?php echo esc_html( $loc->location_name ); ?></a></strong>
 							<div class="row-actions">
 								<span class="edit"><a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-paradb-locations&action=edit&location_id=' . $loc->location_id ) ); ?>"><?php esc_html_e( 'Edit', 'wp-paradb' ); ?></a> | </span>
-								<span class="delete"><a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=wp-paradb-locations&action=delete&location_id=' . $loc->location_id ), 'delete_location_' . $loc->location_id ) ); ?>" class="submitdelete" onclick="return confirm('<?php esc_attr_e( 'Are you sure?', 'wp-paradb' ); ?>');"><?php esc_html_e( 'Delete', 'wp-paradb' ); ?></a></span>
+								<span class="delete"><a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=wp-paradb-locations&action=delete&location_id=' . $loc->location_id ), 'delete_location_' . $loc->location_id ) ); ?>" class="submitdelete"><?php esc_html_e( 'Delete', 'wp-paradb' ); ?></a></span>
 							</div>
 						</td>
 						<td><?php echo esc_html( $loc->address ); ?></td>
