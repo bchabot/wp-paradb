@@ -328,6 +328,8 @@ By submitting a witness report, you acknowledge that you have read and understoo
 		// Case statuses.
 		if ( isset( $settings['case_statuses'] ) && is_array( $settings['case_statuses'] ) ) {
 			$sanitized['case_statuses'] = array_map( 'sanitize_text_field', $settings['case_statuses'] );
+		} else {
+			$sanitized['case_statuses'] = self::get_default_settings()['case_statuses'];
 		}
 
 		// Integer settings.

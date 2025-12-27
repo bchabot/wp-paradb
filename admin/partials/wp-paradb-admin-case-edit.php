@@ -93,7 +93,13 @@ if ( isset( $_GET['message'] ) && 'created' === $_GET['message'] ) {
 // Get options.
 require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-settings.php';
 $options = WP_ParaDB_Settings::get_settings();
-$case_statuses = isset( $options['case_statuses'] ) ? $options['case_statuses'] : array();
+$case_statuses = isset( $options['case_statuses'] ) && ! empty( $options['case_statuses'] ) ? $options['case_statuses'] : array(
+	'open'      => __( 'Open', 'wp-paradb' ),
+	'active'    => __( 'Active Investigation', 'wp-paradb' ),
+	'reviewing' => __( 'Under Review', 'wp-paradb' ),
+	'closed'    => __( 'Closed', 'wp-paradb' ),
+	'archived'  => __( 'Archived', 'wp-paradb' ),
+);
 $phenomena_types = isset( $options['phenomena_types'] ) ? $options['phenomena_types'] : array();
 
 // Get clients for dropdown.
