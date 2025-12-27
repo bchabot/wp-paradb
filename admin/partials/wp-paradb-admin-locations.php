@@ -137,7 +137,15 @@ if ( 'new' === $action || 'edit' === $action ) {
 						</td>
 						<td><?php echo esc_html( $loc->address ); ?></td>
 						<td><?php echo esc_html( $loc->city ); ?></td>
-						<td><?php echo $loc->latitude ? esc_html( $loc->latitude . ', ' . $loc->longitude ) : '—'; ?></td>
+						<td>
+							<?php if ( $loc->latitude ) : ?>
+								<a href="#" class="view-loc-map" data-lat="<?php echo esc_attr($loc->latitude); ?>" data-lng="<?php echo esc_attr($loc->longitude); ?>" data-title="<?php echo esc_attr($loc->location_name); ?>">
+									<?php echo esc_html( $loc->latitude . ', ' . $loc->longitude ); ?>
+								</a>
+							<?php else : ?>
+								—
+							<?php endif; ?>
+						</td>
 					</tr>
 				<?php endforeach; else : ?>
 					<tr><td colspan="4"><?php esc_html_e( 'No locations found.', 'wp-paradb' ); ?></td></tr>
@@ -145,5 +153,78 @@ if ( 'new' === $action || 'edit' === $action ) {
 			</tbody>
 		</table>
 	</div>
+
+	<div id="paradb-map-modal" style="display:none; position: fixed; z-index: 100000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+		<div style="background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 80%; height: 80%; position: relative;">
+			<span id="close-map-modal" style="position: absolute; right: 10px; top: 5px; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+			<div id="map-canvas" style="width: 100%; height: 100%;"></div>
+		</div>
+	</div>
+
+	<script>
+	jQuery(document).ready(function($) {
+		var map;
+
+		function initMap() {
+			if (typeof L === 'undefined' && (typeof google === 'undefined' || !google.maps)) {
+				console.error('Map library not loaded');
+				return false;
+			}
+			return true;
+		}
+
+		function showMapModal(locations) {
+			$('#paradb-map-modal').show();
+			if (!initMap()) return;
+
+			var provider = '<?php echo esc_js(get_option("wp_paradb_options")["map_provider"] ?? "osm"); ?>';
+			
+			if (provider === 'osm') {
+				if (map && map.remove) map.remove();
+				map = L.map('map-canvas');
+				L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+					attribution: '© OpenStreetMap contributors'
+				}).addTo(map);
+
+				var group = new L.featureGroup();
+				locations.forEach(function(loc) {
+					var marker = L.marker([loc.lat, loc.lng]).addTo(map).bindPopup(loc.title);
+					group.addLayer(marker);
+				});
+				map.fitBounds(group.getBounds());
+			} else if (provider === 'google') {
+				var mapOptions = {
+					zoom: 12,
+					center: new google.maps.LatLng(locations[0].lat, locations[0].lng)
+				};
+				map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+				var bounds = new google.maps.LatLngBounds();
+				locations.forEach(function(loc) {
+					var latLng = new google.maps.LatLng(loc.lat, loc.lng);
+					var marker = new google.maps.Marker({
+						position: latLng,
+						map: map,
+						title: loc.title
+					});
+					bounds.extend(latLng);
+				});
+				if (locations.length > 1) map.fitBounds(bounds);
+			}
+		}
+
+		$('.view-loc-map').on('click', function(e) {
+			e.preventDefault();
+			showMapModal([{
+				lat: $(this).data('lat'),
+				lng: $(this).data('lng'),
+				title: $(this).data('title')
+			}]);
+		});
+
+		$('#close-map-modal').on('click', function() {
+			$('#paradb-map-modal').hide();
+		});
+	});
+	</script>
 	<?php
 }

@@ -41,6 +41,7 @@ class WP_ParaDB_Activity_Handler {
 		// Prepare activity data.
 		$activity_data = array(
 			'case_id'            => absint( $data['case_id'] ),
+			'location_id'        => isset( $data['location_id'] ) ? absint( $data['location_id'] ) : null,
 			'activity_title'       => sanitize_text_field( $data['activity_title'] ),
 			'activity_type'        => isset( $data['activity_type'] ) ? sanitize_text_field( $data['activity_type'] ) : 'investigation',
 			'activity_date'        => isset( $data['activity_date'] ) ? sanitize_text_field( $data['activity_date'] ) : current_time( 'mysql' ),
@@ -116,7 +117,7 @@ class WP_ParaDB_Activity_Handler {
 			'activity_title', 'activity_type', 'activity_date', 'activity_content', 'activity_summary',
 			'weather_conditions', 'moon_phase', 'temperature', 'astrological_data', 'geomagnetic_data', 
 			'equipment_used', 'evidence_collected', 'phenomena_observed', 'duration_minutes', 'participants', 
-			'visibility', 'sanitize_front_end', 'is_published',
+			'visibility', 'sanitize_front_end', 'is_published', 'location_id',
 		);
 
 		foreach ( $allowed_fields as $field ) {

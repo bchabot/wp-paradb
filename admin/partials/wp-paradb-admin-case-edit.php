@@ -586,20 +586,20 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 							<p>
 								<label for="visibility"><strong><?php esc_html_e( 'Visibility', 'wp-paradb' ); ?></strong></label><br>
 								<select name="visibility" id="visibility" class="widefat">
-									<option value="public" <?php selected( $case ? $case->visibility : 'public', 'public' ); ?>><?php esc_html_e( 'Public', 'wp-paradb' ); ?></option>
-									<option value="private" <?php selected( $case ? $case->visibility : 'public', 'private' ); ?>><?php esc_html_e( 'Private (Protected)', 'wp-paradb' ); ?></option>
-									<option value="internal" <?php selected( $case ? $case->visibility : 'public', 'internal' ); ?>><?php esc_html_e( 'Internal Only', 'wp-paradb' ); ?></option>
+									<option value="public" <?php selected( $case ? $case->visibility : 'internal', 'public' ); ?>><?php esc_html_e( 'Public', 'wp-paradb' ); ?></option>
+									<option value="private" <?php selected( $case ? $case->visibility : 'internal', 'private' ); ?>><?php esc_html_e( 'Private (Protected)', 'wp-paradb' ); ?></option>
+									<option value="internal" <?php selected( $case ? $case->visibility : 'internal', 'internal' ); ?>><?php esc_html_e( 'Internal Only', 'wp-paradb' ); ?></option>
 								</select>
 							</p>
 
 							<p id="password-field" style="display: <?php echo ($case && $case->visibility === 'private') ? 'block' : 'none'; ?>;">
 								<label for="password"><strong><?php esc_html_e( 'Case Password', 'wp-paradb' ); ?></strong></label><br>
-								<input type="text" name="password" id="password" value="<?php echo $case ? esc_attr($case->password) : ''; ?>" class="widefat">
+								<input type="password" name="password" id="password" value="<?php echo $case ? esc_attr($case->password) : ''; ?>" class="widefat">
 							</p>
 
 							<p>
 								<label>
-									<input type="checkbox" name="sanitize_front_end" value="1" <?php checked($case ? $case->sanitize_front_end : 0, 1); ?>>
+									<input type="checkbox" name="sanitize_front_end" value="1" <?php checked($case ? $case->sanitize_front_end : 1, 1); ?>>
 									<strong><?php esc_html_e( 'Sanitize Front End', 'wp-paradb' ); ?></strong>
 								</label>
 								<small class="description" style="display: block; margin-top: 5px;"><?php esc_html_e( 'Redact names and specific locations on public pages.', 'wp-paradb' ); ?></small>

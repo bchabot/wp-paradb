@@ -47,13 +47,43 @@
 		});
 
 		// Confirm before deleting
-		$('a[href*="action=delete"]').on('click', function(e) {
+		$(document).on('click', 'a[href*="action=delete"]', function(e) {
 			if (!$(this).data('confirmed')) {
 				e.preventDefault();
 				if (confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
 					$(this).data('confirmed', true).get(0).click();
 				}
 			}
+		});
+
+		// Geolocation Button Logic
+		$('.get-current-location').on('click', function() {
+			var $btn = $(this);
+			var target = $btn.data('target');
+			var $input = $(target);
+			
+			if (!navigator.geolocation) {
+				alert('Geolocation is not supported by your browser.');
+				return;
+			}
+
+			$btn.text('⌛');
+			navigator.geolocation.getCurrentPosition(function(pos) {
+				var lat = pos.coords.latitude.toFixed(6);
+				var lng = pos.coords.longitude.toFixed(6);
+				
+				if ($input.is('textarea') || $input.attr('type') === 'text') {
+					$input.val(lat + ', ' + lng);
+				} else {
+					// Assume we are in a Lat/Lng pair field
+					$('#latitude').val(lat).trigger('change');
+					$('#longitude').val(lng).trigger('change');
+				}
+				$btn.text('📍');
+			}, function(err) {
+				alert('Error: ' + err.message);
+				$btn.text('📍');
+			});
 		});
 
 		// Location Name Autocomplete
@@ -160,6 +190,7 @@
 					nonce: paradb_admin.nonce,
 					lat: lat,
 					lng: lng,
+					case_id: $('#case_id').val() || 0,
 					datetime: datetime
 				},
 				                                success: function(response) {
@@ -382,6 +413,17 @@
 				} else if (docTypes.indexOf(extension) !== -1) {
 					$typeSelect.val('document');
 				}
+			}
+		});
+
+		// Location ID Dropdown Change
+		$('#location_id').on('change', function() {
+			var $selected = $(this).find('option:selected');
+			if ($(this).val()) {
+				var lat = $selected.data('lat') || 0;
+				var lng = $selected.data('lng') || 0;
+				$('#latitude').val(lat).trigger('change');
+				$('#longitude').val(lng).trigger('change');
 			}
 		});
 

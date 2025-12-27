@@ -28,6 +28,7 @@ if ( isset( $_POST['save_activity'] ) && check_admin_referer( 'save_activity', '
 	
 	$activity_data = array(
 		'case_id'            => isset( $_POST['case_id'] ) ? absint( $_POST['case_id'] ) : 0,
+		'location_id'        => isset( $_POST['location_id'] ) ? absint( $_POST['location_id'] ) : 0,
 		'activity_title'       => isset( $_POST['activity_title'] ) ? sanitize_text_field( wp_unslash( $_POST['activity_title'] ) ) : '',
 		'activity_type'        => isset( $_POST['activity_type'] ) ? sanitize_text_field( wp_unslash( $_POST['activity_type'] ) ) : 'investigation',
 		'activity_date'        => isset( $_POST['activity_date'] ) ? sanitize_text_field( wp_unslash( $_POST['activity_date'] ) ) : current_time( 'mysql' ),
@@ -142,6 +143,30 @@ if ( in_array( $action, array( 'new', 'edit' ), true ) ) {
 								</option>
 							<?php endforeach; ?>
 						</select>
+					</td>
+				</tr>
+
+				<tr>
+					<th scope="row">
+						<label for="location_id"><?php esc_html_e( 'Location', 'wp-paradb' ); ?></label>
+					</th>
+					<td>
+						<?php
+						require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-location-handler.php';
+						$locations = WP_ParaDB_Location_Handler::get_locations();
+						?>
+						<select name="location_id" id="location_id" class="regular-text">
+							<option value=""><?php esc_html_e( 'Select Location', 'wp-paradb' ); ?></option>
+							<?php foreach ( $locations as $loc ) : ?>
+								<option value="<?php echo esc_attr( $loc->location_id ); ?>" 
+									<?php selected( $activity ? $activity->location_id : 0, $loc->location_id ); ?>
+									data-lat="<?php echo esc_attr( $loc->latitude ); ?>"
+									data-lng="<?php echo esc_attr( $loc->longitude ); ?>">
+									<?php echo esc_html( $loc->location_name ); ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
+						<p class="description"><?php esc_html_e( 'Optional: Select a specific location for this activity.', 'wp-paradb' ); ?></p>
 					</td>
 				</tr>
 				

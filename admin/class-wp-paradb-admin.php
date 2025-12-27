@@ -408,6 +408,17 @@ class WP_ParaDB_Admin {
 		$lat = isset( $_POST['lat'] ) ? floatval( $_POST['lat'] ) : 0;
 		$lng = isset( $_POST['lng'] ) ? floatval( $_POST['lng'] ) : 0;
 		$datetime = isset( $_POST['datetime'] ) ? sanitize_text_field( $_POST['datetime'] ) : '';
+		$case_id = isset( $_POST['case_id'] ) ? absint( $_POST['case_id'] ) : 0;
+
+		// Fallback to Case coordinates if Activity coordinates are 0
+		if ( ( ! $lat || ! $lng ) && $case_id ) {
+			require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-case-handler.php';
+			$case = WP_ParaDB_Case_Handler::get_case( $case_id );
+			if ( $case && $case->latitude && $case->longitude ) {
+				$lat = $case->latitude;
+				$lng = $case->longitude;
+			}
+		}
 
 		if ( ! $lat || ! $lng || ! $datetime ) {
 			wp_send_json_error( array( 'message' => __( 'Missing location or date.', 'wp-paradb' ) ) );
