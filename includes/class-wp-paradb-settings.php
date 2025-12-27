@@ -128,6 +128,13 @@ By submitting a witness report, you acknowledge that you have read and understoo
 			'require_client_consent'         => true,
 			'items_per_page'                 => 20,
 			'default_case_status'            => 'open',
+			'case_statuses'                  => array(
+				'open'       => __( 'Open', 'wp-paradb' ),
+				'active'     => __( 'Active Investigation', 'wp-paradb' ),
+				'reviewing'  => __( 'Under Review', 'wp-paradb' ),
+				'closed'     => __( 'Closed', 'wp-paradb' ),
+				'archived'   => __( 'Archived', 'wp-paradb' ),
+			),
 
 			// Consent settings.
 			'consent_default'                => 'none', // none, private, anonymize, publish
@@ -316,6 +323,11 @@ By submitting a witness report, you acknowledge that you have read and understoo
 		// Phenomena types.
 		if ( isset( $settings['phenomena_types'] ) && is_array( $settings['phenomena_types'] ) ) {
 			$sanitized['phenomena_types'] = array_map( 'sanitize_text_field', $settings['phenomena_types'] );
+		}
+
+		// Case statuses.
+		if ( isset( $settings['case_statuses'] ) && is_array( $settings['case_statuses'] ) ) {
+			$sanitized['case_statuses'] = array_map( 'sanitize_text_field', $settings['case_statuses'] );
 		}
 
 		// Integer settings.

@@ -91,7 +91,8 @@ if ( isset( $_GET['message'] ) && 'created' === $_GET['message'] ) {
 }
 
 // Get options.
-$options = get_option( 'wp_paradb_options', array() );
+require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-settings.php';
+$options = WP_ParaDB_Settings::get_settings();
 $case_statuses = isset( $options['case_statuses'] ) ? $options['case_statuses'] : array();
 $phenomena_types = isset( $options['phenomena_types'] ) ? $options['phenomena_types'] : array();
 

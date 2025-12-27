@@ -77,67 +77,14 @@ class WP_ParaDB_Activator {
 	 * @since    1.0.0
 	 */
 	private static function set_default_options() {
-		$default_options = array(
-			'version'                    => WP_PARADB_VERSION,
-			'case_number_format'         => 'CASE-%Y%-%ID%',
-			'require_client_consent'     => true,
-			'allow_public_submissions'   => true,
-			'moderate_submissions'       => true,
-			'default_case_status'        => 'open',
-			'phenomena_types'            => array(
-				'Apparition',
-				'Audio Phenomena',
-				'Cold Spots',
-				'Electronic Voice Phenomena (EVP)',
-				'Full Body Apparition',
-				'Object Movement',
-				'Orbs',
-				'Phantom Smells',
-				'Physical Contact',
-				'Shadow Figures',
-				'Temperature Changes',
-				'Visual Anomalies',
-			),
-			'case_statuses'              => array(
-				'open'       => __( 'Open', 'wp-paradb' ),
-				'active'     => __( 'Active Investigation', 'wp-paradb' ),
-				'reviewing'  => __( 'Under Review', 'wp-paradb' ),
-				'closed'     => __( 'Closed', 'wp-paradb' ),
-				'archived'   => __( 'Archived', 'wp-paradb' ),
-			),
-			                        'evidence_types'             => array(
-			                                'photo'      => __( 'Photograph', 'wp-paradb' ),
-			                                'audio'      => __( 'Audio Recording', 'wp-paradb' ),
-			                                'video'      => __( 'Video Recording', 'wp-paradb' ),
-			                                'document'   => __( 'Document', 'wp-paradb' ),
-			                                'data'       => __( 'Sensor Data', 'wp-paradb' ),
-			                                'other'      => __( 'Other', 'wp-paradb' ),
-			                        ),
-			'activity_types'             => array(
-				'investigation' => __( 'Investigation', 'wp-paradb' ),
-				'research'      => __( 'Research', 'wp-paradb' ),
-				'consultation'  => __( 'Consultation', 'wp-paradb' ),
-				'experiment'    => __( 'Experiment', 'wp-paradb' ),
-				'interview'     => __( 'Interview', 'wp-paradb' ),
-				'surveillance'  => __( 'Surveillance', 'wp-paradb' ),
-				'site_visit'    => __( 'Site Visit', 'wp-paradb' ),
-			),
-			'max_upload_size'            => 10485760, // 10MB
-			'allowed_file_types'         => array(
-				'jpg', 'jpeg', 'png', 'gif',
-				'mp3', 'wav', 'ogg',
-				'mp4', 'avi', 'mov',
-				'pdf', 'doc', 'docx',
-				'txt', 'csv',
-			),
-			'items_per_page'             => 20,
-			'enable_geolocation'         => true,
-			'enable_moon_phase'          => true,
-			'date_format'                => 'Y-m-d H:i:s',
-			'timezone'                   => get_option( 'timezone_string', 'UTC' ),
-		);
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-settings.php';
+		$default_settings = WP_ParaDB_Settings::get_default_settings();
 
-		add_option( 'wp_paradb_options', $default_options );
+		// Add common options if not already set
+		add_option( WP_ParaDB_Settings::OPTION_NAME, $default_settings );
+		
+		// Ensure version is stored correctly
+		update_option( 'wp_paradb_version', WP_PARADB_VERSION );
 	}
 
 	/**
