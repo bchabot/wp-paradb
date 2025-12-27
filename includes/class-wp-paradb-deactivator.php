@@ -35,6 +35,15 @@ class WP_ParaDB_Deactivator {
 	 * @since    1.0.0
 	 */
 	public static function deactivate() {
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-settings.php';
+		$settings = WP_ParaDB_Settings::get_settings();
+
+		// Check if data removal on deactivation is enabled (as requested in Issue #58)
+		if ( ! empty( $settings['delete_data_on_uninstall'] ) ) {
+			require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-database.php';
+			WP_ParaDB_Database::drop_tables();
+		}
+
 		// Clear any cached data.
 		wp_cache_flush();
 

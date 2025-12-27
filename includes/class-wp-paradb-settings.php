@@ -29,7 +29,7 @@ class WP_ParaDB_Settings {
 	 * @since    1.0.0
 	 * @var      string
 	 */
-	const OPTION_NAME = 'wp_paradb_settings';
+	const OPTION_NAME = 'wp_paradb_options';
 
 	/**
 	 * Default privacy policy text
@@ -183,6 +183,7 @@ By submitting a witness report, you acknowledge that you have read and understoo
 			'max_upload_size'                => 10485760, // 10MB
 			'enable_geolocation'             => true,
 			'enable_moon_phase'              => true,
+			'units'                          => 'metric', // metric, imperial
 		);
 	}
 
@@ -256,6 +257,11 @@ By submitting a witness report, you acknowledge that you have read and understoo
 			'redact_witness_names',
 			'redact_investigator_names',
 			'delete_data_on_uninstall',
+			'allow_public_submissions',
+			'moderate_submissions',
+			'require_client_consent',
+			'enable_geolocation',
+			'enable_moon_phase',
 		);
 
 		foreach ( $bool_keys as $key ) {
@@ -271,6 +277,14 @@ By submitting a witness report, you acknowledge that you have read and understoo
 
 		if ( isset( $settings['witness_success_message'] ) ) {
 			$sanitized['witness_success_message'] = sanitize_textarea_field( $settings['witness_success_message'] );
+		}
+
+		if ( isset( $settings['case_number_format'] ) ) {
+			$sanitized['case_number_format'] = sanitize_text_field( $settings['case_number_format'] );
+		}
+
+		if ( isset( $settings['default_case_status'] ) ) {
+			$sanitized['default_case_status'] = sanitize_text_field( $settings['default_case_status'] );
 		}
 
 		if ( isset( $settings['redaction_keywords'] ) ) {
@@ -309,6 +323,19 @@ By submitting a witness report, you acknowledge that you have read and understoo
 			$sanitized['min_description_length'] = absint( $settings['min_description_length'] );
 		}
 
+		if ( isset( $settings['items_per_page'] ) ) {
+			$sanitized['items_per_page'] = absint( $settings['items_per_page'] );
+		}
+
+		if ( isset( $settings['max_upload_size'] ) ) {
+			$sanitized['max_upload_size'] = absint( $settings['max_upload_size'] );
+		}
+
+		// Array settings.
+		if ( isset( $settings['allowed_file_types'] ) && is_array( $settings['allowed_file_types'] ) ) {
+			$sanitized['allowed_file_types'] = array_map( 'sanitize_key', $settings['allowed_file_types'] );
+		}
+
 		// ReCAPTCHA keys.
 		if ( isset( $settings['recaptcha_site_key'] ) ) {
 			$sanitized['recaptcha_site_key'] = sanitize_text_field( $settings['recaptcha_site_key'] );
@@ -322,6 +349,9 @@ By submitting a witness report, you acknowledge that you have read and understoo
 		}
 		if ( isset( $settings['map_provider'] ) ) {
 			$sanitized['map_provider'] = in_array( $settings['map_provider'], array( 'google', 'osm' ), true ) ? $settings['map_provider'] : 'google';
+		}
+		if ( isset( $settings['units'] ) ) {
+			$sanitized['units'] = in_array( $settings['units'], array( 'metric', 'imperial' ), true ) ? $settings['units'] : 'metric';
 		}
 		if ( isset( $settings['locationiq_api_key'] ) ) {
 			$sanitized['locationiq_api_key'] = sanitize_text_field( $settings['locationiq_api_key'] );

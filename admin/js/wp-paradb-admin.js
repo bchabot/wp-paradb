@@ -205,49 +205,67 @@
 					case_id: $('#case_id').val() || 0,
 					datetime: datetime
 				},
-				                                success: function(response) {
-				                                        if (response.success) {
-				                                                var data = response.data;
-				                                                var resultsHtml = '<div class="fetch-results-list" style="background: #f9f9f9; padding: 10px; border: 1px solid #ddd; margin-top: 10px;">';
-				                                                
-				                                                                                                if (data.weather) {
-				                                                                                                        resultsHtml += '<p><label><input type="checkbox" class="apply-env-data" data-target="#temperature" data-value="' + (data.weather.temp ? data.weather.temp + '°C' : '') + '"> <strong>Temperature:</strong> ' + (data.weather.temp ? data.weather.temp + '°C' : 'N/A') + '</label></p>';
-				                                                                                                        var cond = 'Code: ' + data.weather.weather_code + (data.weather.humidity ? ', Humidity: ' + data.weather.humidity + '%' : '');
-				                                                                                                        resultsHtml += '<p><label><input type="checkbox" class="apply-env-data" data-target="#weather_conditions" data-value="' + cond + '"> <strong>Weather Conditions:</strong> ' + cond + '</label></p>';
-				                                                                                                }				                                                
-				                                                if (data.astro && data.astro.moon_phase) {
-				                                                        resultsHtml += '<p><label><input type="checkbox" class="apply-env-data" data-target="#moon_phase" data-value="' + data.astro.moon_phase.toLowerCase().replace(/ /g, '_') + '"> <strong>Moon Phase:</strong> ' + data.astro.moon_phase + '</label></p>';
-				                                                }
-				
-				                                                if (data.astrology) {
-				                                                        var astroText = '';
-				                                                        for (var planet in data.astrology) {
-				                                                                astroText += planet + ': ' + data.astrology[planet].sign + ' (' + data.astrology[planet].full_degree.toFixed(2) + '°); ';
-				                                                        }
-				                                                        resultsHtml += '<p><label><input type="checkbox" class="apply-env-data" data-target="#astrological_data" data-value="' + astroText + '"> <strong>Astrological:</strong> ' + astroText.substring(0, 100) + '...</label></p>';
-				                                                }
-				
-				                                                if (data.geomagnetic) {
-				                                                        var geoText = 'Kp-Index: ' + data.geomagnetic.kp_index + ' (' + data.geomagnetic.source + ')';
-				                                                        resultsHtml += '<p><label><input type="checkbox" class="apply-env-data" data-target="#geomagnetic_data" data-value="' + geoText + '"> <strong>Geomagnetic:</strong> ' + geoText + '</label></p>';
-				                                                }
-				
-				                                                resultsHtml += '<button type="button" id="apply-selected-env-data" class="button button-small">Apply Selected</button>';
-				                                                resultsHtml += '</div>';
-				
-				                                                $('#fetch-results-container').html(resultsHtml);
-				                                                $('#fetch-results-row').show();
-				
-				                                                $('#apply-selected-env-data').on('click', function() {
-				                                                        $('.apply-env-data:checked').each(function() {
-				                                                                $($(this).data('target')).val($(this).data('value'));
-				                                                        });
-				                                                        alert('Selected data applied.');
-				                                                });
-				                                        } else {
-				                                                alert('Error: ' + response.data.message);
-				                                        }
-				                                },				error: function() {
+				                                				success: function(response) {
+				                                					if (response.success) {
+				                                						var data = response.data;
+				                                						var resultsHtml = '<div class="fetch-results-list" style="background: #f9f9f9; padding: 10px; border: 1px solid #ddd; margin-top: 10px;">';
+				                                						var appliedCount = 0;
+				                                
+				                                						if (data.weather) {
+				                                							var tempStr = data.weather.temp ? data.weather.temp + (data.weather.temp_unit || '°C') : '';
+				                                							if (tempStr) {
+				                                								$('#temperature').val(tempStr);
+				                                								resultsHtml += '<p><strong>Applied Temperature:</strong> ' + tempStr + '</p>';
+				                                								appliedCount++;
+				                                							}
+				                                							
+				                                							var cond = data.weather.weather_desc || ('Code: ' + data.weather.weather_code);
+				                                							if (data.weather.humidity) cond += ', Humidity: ' + data.weather.humidity + '%';
+				                                							if (data.weather.wind_speed) cond += ', Wind: ' + data.weather.wind_speed + (paradb_maps.units === 'imperial' ? ' mph' : ' km/h');
+				                                							
+				                                							$('#weather_conditions').val(cond);
+				                                							resultsHtml += '<p><strong>Applied Weather:</strong> ' + cond + '</p>';
+				                                							appliedCount++;
+				                                						}
+				                                
+				                                						if (data.astro && data.astro.moon_phase) {
+				                                							var phase = data.astro.moon_phase.toLowerCase().replace(/ /g, '_');
+				                                							$('#moon_phase').val(phase);
+				                                							resultsHtml += '<p><strong>Applied Moon Phase:</strong> ' + data.astro.moon_phase + '</p>';
+				                                							appliedCount++;
+				                                						}
+				                                
+				                                						if (data.astrology) {
+				                                							var astroText = '';
+				                                							for (var planet in data.astrology) {
+				                                								astroText += planet + ': ' + data.astrology[planet].sign + ' (' + data.astrology[planet].full_degree.toFixed(2) + '°); ';
+				                                							}
+				                                							$('#astrological_data').val(astroText);
+				                                							resultsHtml += '<p><strong>Applied Astrological Data:</strong> ' + astroText.substring(0, 100) + '...</p>';
+				                                							appliedCount++;
+				                                						}
+				                                
+				                                						if (data.geomagnetic) {
+				                                							var geoText = 'Kp-Index: ' + data.geomagnetic.kp_index + ' (' + data.geomagnetic.source + ')';
+				                                							$('#geomagnetic_data').val(geoText);
+				                                							resultsHtml += '<p><strong>Applied Geomagnetic Data:</strong> ' + geoText + '</p>';
+				                                							appliedCount++;
+				                                						}
+				                                
+				                                						if (appliedCount === 0) {
+				                                							resultsHtml += '<p>No data found for this location/time.</p>';
+				                                						} else {
+				                                							resultsHtml += '<p style="color: green; font-weight: bold;">All data automatically applied to fields.</p>';
+				                                						}
+				                                						
+				                                						resultsHtml += '</div>';
+				                                
+				                                						$('#fetch-results-container').html(resultsHtml);
+				                                						$('#fetch-results-row').show();
+				                                					} else {
+				                                						alert('Error: ' + response.data.message);
+				                                					}
+				                                				},				error: function() {
 					alert('An unexpected error occurred during fetching.');
 				},
 				complete: function() {
@@ -265,6 +283,20 @@
 				zoom: (lat !== 0) ? 15 : 2,
 				center: center
 			});
+
+			// If coordinates are 0, try to center on account_address if it exists
+			if (lat === 0 && lng === 0) {
+				var fallbackAddress = $('#account_address').val() || $('#address').val() || '';
+				if (fallbackAddress) {
+					var geocoder = new google.maps.Geocoder();
+					geocoder.geocode({'address': fallbackAddress}, function(results, status) {
+						if (status === 'OK') {
+							map.setCenter(results[0].geometry.location);
+							map.setZoom(12);
+						}
+					});
+				}
+			}
 
 			// Fix for maps in tabs/collapsed containers
 			google.maps.event.addListenerOnce(map, 'idle', function(){
@@ -323,8 +355,11 @@
 
 			// Geocode address
 			$('#geocode-address').on('click', function() {
-				var address = $('#address').val() || $('#location_address').val() || '';
-				if (!address) return;
+				var address = $('#incident_location').val() || $('#address').val() || $('#location_address').val() || $('#account_address').val() || '';
+				if (!address) {
+					alert('Please enter an address first.');
+					return;
+				}
 
 				var geocoder = new google.maps.Geocoder();
 				geocoder.geocode({'address': address}, function(results, status) {
@@ -350,6 +385,23 @@
 			L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 			}).addTo(map);
+
+			// If coordinates are 0, try to center on account_address if it exists
+			if (lat === 0 && lng === 0) {
+				var fallbackAddress = $('#account_address').val() || $('#address').val() || '';
+				if (fallbackAddress) {
+					var url = 'https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(fallbackAddress);
+					if (paradb_maps.locationiq_key) {
+						url = 'https://us1.locationiq.com/v1/search.php?key=' + paradb_maps.locationiq_key + '&q=' + encodeURIComponent(fallbackAddress) + '&format=json';
+					}
+					$.getJSON(url, function(data) {
+						if (data && data.length > 0) {
+							var pos = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+							map.setView(pos, 12);
+						}
+					});
+				}
+			}
 
 			// Fix for maps in hidden containers
 			setTimeout(function() {
@@ -393,8 +445,11 @@
 			});
 
 			$('#geocode-address').on('click', function() {
-				var address = $('#address').val() || $('#location_address').val() || '';
-				if (!address) return;
+				var address = $('#incident_location').val() || $('#address').val() || $('#location_address').val() || $('#account_address').val() || '';
+				if (!address) {
+					alert('Please enter an address first.');
+					return;
+				}
 
 				var url = 'https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(address);
 				if (paradb_maps.locationiq_key) {

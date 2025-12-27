@@ -42,11 +42,16 @@ class WP_ParaDB_Environmental_Fetcher {
 		$date = date( 'Y-m-d', strtotime( $datetime ) );
 		$hour = (int)date( 'H', strtotime( $datetime ) );
 		
+		$options = get_option( 'wp_paradb_options', array() );
+		$units = isset( $options['units'] ) ? $options['units'] : 'metric';
+		$temp_unit = ( 'imperial' === $units ) ? 'fahrenheit' : 'celsius';
+		$wind_unit = ( 'imperial' === $units ) ? 'mph' : 'kmh';
+
 		// Use historical archive if date is in the past, or forecast if near present/future
 		$is_past = strtotime( $date ) < strtotime( 'today' );
 		$base_url = $is_past ? "https://archive-api.open-meteo.com/v1/archive" : "https://api.open-meteo.com/v1/forecast";
 		
-		$url = "{$base_url}?latitude={$lat}&longitude={$lng}&start_date={$date}&end_date={$date}&hourly=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m";
+		$url = "{$base_url}?latitude={$lat}&longitude={$lng}&start_date={$date}&end_date={$date}&hourly=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&temperature_unit={$temp_unit}&wind_speed_unit={$wind_unit}";
 		
 		$response = wp_remote_get( $url );
 		if ( is_wp_error( $response ) ) return null;
@@ -54,11 +59,39 @@ class WP_ParaDB_Environmental_Fetcher {
 		$body = json_decode( wp_remote_retrieve_body( $response ), true );
 		if ( ! $body || ! isset( $body['hourly'] ) ) return null;
 
+		$code = isset($body['hourly']['weather_code'][$hour]) ? $body['hourly']['weather_code'][$hour] : null;
+		$description = self::get_weather_description( $code );
+
 		return array(
 			'temp' => isset($body['hourly']['temperature_2m'][$hour]) ? $body['hourly']['temperature_2m'][$hour] : null,
 			'humidity' => isset($body['hourly']['relative_humidity_2m'][$hour]) ? $body['hourly']['relative_humidity_2m'][$hour] : null,
-			'weather_code' => isset($body['hourly']['weather_code'][$hour]) ? $body['hourly']['weather_code'][$hour] : null
+			'weather_code' => $code,
+			'weather_desc' => $description,
+			'wind_speed' => isset($body['hourly']['wind_speed_10m'][$hour]) ? $body['hourly']['wind_speed_10m'][$hour] : null,
+			'temp_unit' => ( 'fahrenheit' === $temp_unit ) ? '°F' : '°C'
 		);
+	}
+
+	/**
+	 * Convert WMO weather code to human readable description
+	 */
+	private static function get_weather_description( $code ) {
+		if ( null === $code ) return 'Unknown';
+		$codes = array(
+			0 => 'Clear sky',
+			1 => 'Mainly clear', 2 => 'Partly cloudy', 3 => 'Overcast',
+			45 => 'Fog', 48 => 'Depositing rime fog',
+			51 => 'Light drizzle', 53 => 'Moderate drizzle', 55 => 'Dense drizzle',
+			56 => 'Light freezing drizzle', 57 => 'Dense freezing drizzle',
+			61 => 'Slight rain', 63 => 'Moderate rain', 65 => 'Heavy rain',
+			66 => 'Light freezing rain', 67 => 'Heavy freezing rain',
+			71 => 'Slight snow fall', 73 => 'Moderate snow fall', 75 => 'Heavy snow fall',
+			77 => 'Snow grains',
+			80 => 'Slight rain showers', 81 => 'Moderate rain showers', 82 => 'Violent rain showers',
+			85 => 'Slight snow showers', 86 => 'Heavy snow showers',
+			95 => 'Thunderstorm', 96 => 'Thunderstorm with slight hail', 99 => 'Thunderstorm with heavy hail',
+		);
+		return isset( $codes[$code] ) ? $codes[$code] : 'Code ' . $code;
 	}
 
 	/**

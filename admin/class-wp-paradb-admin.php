@@ -635,7 +635,8 @@ class WP_ParaDB_Admin {
 		// Pass provider settings to JS
 		wp_localize_script( $this->plugin_name, 'paradb_maps', array(
 			'provider' => $provider,
-			'locationiq_key' => isset( $options['locationiq_api_key'] ) ? $options['locationiq_api_key'] : ''
+			'locationiq_key' => isset( $options['locationiq_api_key'] ) ? $options['locationiq_api_key'] : '',
+			'units' => isset( $options['units'] ) ? $options['units'] : 'metric'
 		) );
 	}
 
