@@ -20,8 +20,11 @@ $case_id = isset( $_GET['case_id'] ) ? absint( $_GET['case_id'] ) : 0;
 $activity_id = isset( $_GET['activity_id'] ) ? absint( $_GET['activity_id'] ) : 0;
 $investigator_id = isset( $_GET['investigator_id'] ) ? absint( $_GET['investigator_id'] ) : 0;
 
+$readable_case_ids = WP_ParaDB_Case_Handler::get_readable_case_ids( get_current_user_id() );
+
 $args = array(
 	'case_id'     => $case_id,
+	'case_ids'    => $readable_case_ids,
 	'activity_id' => $activity_id,
 	'limit'       => 100,
 );
@@ -30,8 +33,21 @@ if ( $investigator_id ) {
 	$args['investigator_id'] = $investigator_id;
 }
 
-$logs = WP_ParaDB_Field_Log_Handler::get_logs( $args );
-$cases = WP_ParaDB_Case_Handler::get_cases( array( 'limit' => 1000 ) );
+if ( empty( $readable_case_ids ) ) {
+	$logs = array();
+} else {
+	$logs = WP_ParaDB_Field_Log_Handler::get_logs( $args );
+}
+
+$cases = WP_ParaDB_Case_Handler::get_cases( array( 'limit' => 1000 ) ); 
+$filtered_cases = array();
+foreach ( $cases as $c ) {
+	if ( in_array( $c->case_id, $readable_case_ids ) ) {
+		$filtered_cases[] = $c;
+	}
+}
+$cases = $filtered_cases;
+
 $activities = WP_ParaDB_Activity_Handler::get_activities( array( 'limit' => 1000 ) );
 $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 ?>

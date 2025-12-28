@@ -155,7 +155,11 @@ class WP_ParaDB_Admin {
 	public function ajax_submit_log_chat() {
 		check_admin_referer( 'paradb_submit_log', 'paradb_log_nonce' );
 
-		if ( ! current_user_can( 'paradb_view_cases' ) ) {
+		$case_id = absint( $_POST['case_id'] );
+		$user_id = get_current_user_id();
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-case-handler.php';
+
+		if ( ! current_user_can( 'paradb_view_cases' ) && ! WP_ParaDB_Case_Handler::is_user_on_team( $case_id, $user_id ) ) {
 			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wp-paradb' ) ) );
 		}
 
@@ -198,7 +202,15 @@ class WP_ParaDB_Admin {
 	public function ajax_get_log_chat() {
 		check_ajax_referer( 'paradb_chat_nonce', 'nonce' );
 
-		if ( ! current_user_can( 'paradb_view_cases' ) ) {
+		$activity_id = absint( $_POST['activity_id'] );
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-activity-handler.php';
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-case-handler.php';
+		
+		$activity = WP_ParaDB_Activity_Handler::get_activity( $activity_id );
+		$case_id = $activity ? $activity->case_id : 0;
+		$user_id = get_current_user_id();
+
+		if ( ! current_user_can( 'paradb_view_cases' ) && ! WP_ParaDB_Case_Handler::is_user_on_team( $case_id, $user_id ) ) {
 			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wp-paradb' ) ) );
 		}
 

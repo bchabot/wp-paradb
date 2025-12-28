@@ -276,6 +276,18 @@ class WP_ParaDB_Admin_Menu {
 	 * @since    1.6.0
 	 */
 	public static function log_chat_page() {
+		$activity_id = isset( $_GET['activity_id'] ) ? absint( $_GET['activity_id'] ) : 0;
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-activity-handler.php';
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-case-handler.php';
+		
+		$activity = WP_ParaDB_Activity_Handler::get_activity( $activity_id );
+		$case_id = $activity ? $activity->case_id : 0;
+		$user_id = get_current_user_id();
+
+		if ( ! current_user_can( 'paradb_view_cases' ) && ! WP_ParaDB_Case_Handler::is_user_on_team( $case_id, $user_id ) ) {
+			wp_die( __( 'You do not have permission to access this page.', 'wp-paradb' ) );
+		}
+
 		require_once WP_PARADB_PLUGIN_DIR . 'admin/partials/wp-paradb-admin-log-chat.php';
 	}
 }

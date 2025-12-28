@@ -391,6 +391,52 @@ class WP_ParaDB_Case_Handler {
 	}
 
 	/**
+	 * Get all case IDs a user can read
+	 *
+	 * @since    1.6.0
+	 * @param    int    $user_id    User ID.
+	 * @return   array              Array of case IDs.
+	 */
+	public static function get_readable_case_ids( $user_id ) {
+		global $wpdb;
+		
+		// If user can view all cases, return all IDs.
+		if ( user_can( $user_id, 'paradb_view_cases' ) ) {
+			return $wpdb->get_col( "SELECT case_id FROM {$wpdb->prefix}paradb_cases" );
+		}
+
+		// Otherwise, get cases where user is on the team OR cases are public (if applicable).
+		$team_cases = $wpdb->get_col( $wpdb->prepare(
+			"SELECT case_id FROM {$wpdb->prefix}paradb_case_team WHERE user_id = %d",
+			absint( $user_id )
+		) );
+
+		$public_cases = $wpdb->get_col( "SELECT case_id FROM {$wpdb->prefix}paradb_cases WHERE visibility = 'public'" );
+
+		return array_unique( array_merge( $team_cases, $public_cases ) );
+	}
+
+	/**
+	 * Check if user is on case team
+	 *
+	 * @since    1.6.0
+	 * @param    int    $case_id    Case ID.
+	 * @param    int    $user_id    User ID.
+	 * @return   bool               True if on team.
+	 */
+	public static function is_user_on_team( $case_id, $user_id ) {
+		global $wpdb;
+
+		$id = $wpdb->get_var( $wpdb->prepare(
+			"SELECT user_id FROM {$wpdb->prefix}paradb_case_team WHERE case_id = %d AND user_id = %d",
+			absint( $case_id ),
+			absint( $user_id )
+		) );
+
+		return (bool) $id;
+	}
+
+	/**
 	 * Remove team member from case
 	 *
 	 * @since    1.6.0

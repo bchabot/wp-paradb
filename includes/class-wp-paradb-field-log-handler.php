@@ -130,10 +130,11 @@ class WP_ParaDB_Field_Log_Handler {
 
 		$defaults = array(
 			'case_id'     => 0,
+			'case_ids'    => array(),
 			'activity_id' => 0,
 			'limit'       => 100,
 			'offset'      => 0,
-			'order'       => 'DESC', // Requirement says alphabetical, but logs are usually chronological. I'll provide order param.
+			'order'       => 'DESC',
 		);
 
 		$args = wp_parse_args( $args, $defaults );
@@ -144,6 +145,9 @@ class WP_ParaDB_Field_Log_Handler {
 		if ( $args['case_id'] > 0 ) {
 			$where[] = 'case_id = %d';
 			$where_values[] = $args['case_id'];
+		} elseif ( ! empty( $args['case_ids'] ) ) {
+			$case_ids = array_map( 'absint', $args['case_ids'] );
+			$where[] = "case_id IN (" . implode( ',', $case_ids ) . ")";
 		}
 
 		if ( $args['activity_id'] > 0 ) {
