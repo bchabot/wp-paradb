@@ -150,24 +150,14 @@ class WP_ParaDB_Admin_Menu {
 			array( __CLASS__, 'taxonomies_page' )
 		);
 
-		// Settings submenu.
+		// Mobile Log Chat (Hidden from menu but accessible via URL).
 		add_submenu_page(
-			'wp-paradb',
-			__( 'ParaDB Settings', 'wp-paradb' ),
-			__( 'Settings', 'wp-paradb' ),
-			'paradb_manage_settings',
-			'wp-paradb-settings',
-			array( 'WP_ParaDB_Admin_Settings', 'render_settings_page' )
-		);
-
-		// Documentation submenu.
-		add_submenu_page(
-			'wp-paradb',
-			__( 'Documentation', 'wp-paradb' ),
-			__( 'Documentation', 'wp-paradb' ),
+			null, // No parent means it's hidden from the menu.
+			__( 'Log My Actions', 'wp-paradb' ),
+			__( 'Log My Actions', 'wp-paradb' ),
 			'paradb_view_cases',
-			'wp-paradb-docs',
-			array( __CLASS__, 'docs_page' )
+			'wp-paradb-log-chat',
+			array( __CLASS__, 'log_chat_page' )
 		);
 	}
 
@@ -278,5 +268,14 @@ class WP_ParaDB_Admin_Menu {
 	 */
 	public static function taxonomies_page() {
 		require_once WP_PARADB_PLUGIN_DIR . 'admin/partials/wp-paradb-admin-taxonomies.php';
-	}	
+	}
+
+	/**
+	 * Log Chat page
+	 *
+	 * @since    1.6.0
+	 */
+	public static function log_chat_page() {
+		require_once WP_PARADB_PLUGIN_DIR . 'admin/partials/wp-paradb-admin-log-chat.php';
+	}
 }

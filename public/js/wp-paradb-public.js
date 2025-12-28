@@ -160,17 +160,21 @@
 			// Handle AJAX submission
 			e.preventDefault();
 			var $form = $(this);
-			var $button = $form.find('.paradb-submit-button');
+			var $button = $form.find('.paradb-submit-button, button[type="submit"]');
 			var originalText = $button.text();
 			
 			$button.prop('disabled', true).text('Submitting...');
 			$('.paradb-form-messages').empty();
 
+			var formData = new FormData($form[0]);
+			formData.append('action', 'paradb_submit_witness_form');
+
 			$.ajax({
 				url: paradb_public.ajax_url,
 				type: 'POST',
-				data: $form.serialize() + '&action=paradb_submit_witness_form',
-				dataType: 'json',
+				data: formData,
+				processData: false,
+				contentType: false,
 				success: function(response) {
 					if (response.success) {
 						showNotice(response.data.message, 'success');

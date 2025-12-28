@@ -205,71 +205,98 @@
 					case_id: $('#case_id').val() || 0,
 					datetime: datetime
 				},
-				                                				success: function(response) {
-				                                					if (response.success) {
-				                                						var data = response.data;
-				                                						var resultsHtml = '<div class="fetch-results-list" style="background: #f9f9f9; padding: 10px; border: 1px solid #ddd; margin-top: 10px;">';
-				                                						var appliedCount = 0;
-				                                
-				                                						if (data.weather) {
-				                                							var tempStr = data.weather.temp ? data.weather.temp + (data.weather.temp_unit || '°C') : '';
-				                                							if (tempStr) {
-				                                								$('#temperature').val(tempStr);
-				                                								resultsHtml += '<p><strong>Applied Temperature:</strong> ' + tempStr + '</p>';
-				                                								appliedCount++;
-				                                							}
-				                                							
-				                                							var cond = data.weather.weather_desc || ('Code: ' + data.weather.weather_code);
-				                                							if (data.weather.humidity) cond += ', Humidity: ' + data.weather.humidity + '%';
-				                                							if (data.weather.wind_speed) cond += ', Wind: ' + data.weather.wind_speed + (paradb_maps.units === 'imperial' ? ' mph' : ' km/h');
-				                                							
-				                                							$('#weather_conditions').val(cond);
-				                                							resultsHtml += '<p><strong>Applied Weather:</strong> ' + cond + '</p>';
-				                                							appliedCount++;
-				                                						}
-				                                
-				                                						if (data.astro && data.astro.moon_phase) {
-				                                							var phase = data.astro.moon_phase.toLowerCase().replace(/ /g, '_');
-				                                							$('#moon_phase').val(phase);
-				                                							resultsHtml += '<p><strong>Applied Moon Phase:</strong> ' + data.astro.moon_phase + '</p>';
-				                                							appliedCount++;
-				                                						}
-				                                
-				                                						if (data.astrology) {
-				                                							var astroText = '';
-				                                							for (var planet in data.astrology) {
-				                                								astroText += planet + ': ' + data.astrology[planet].sign + ' (' + data.astrology[planet].full_degree.toFixed(2) + '°); ';
-				                                							}
-				                                							$('#astrological_data').val(astroText);
-				                                							resultsHtml += '<p><strong>Applied Astrological Data:</strong> ' + astroText.substring(0, 100) + '...</p>';
-				                                							appliedCount++;
-				                                						}
-				                                
-				                                						if (data.geomagnetic) {
-				                                							var geoText = 'Kp-Index: ' + data.geomagnetic.kp_index + ' (' + data.geomagnetic.source + ')';
-				                                							$('#geomagnetic_data').val(geoText);
-				                                							resultsHtml += '<p><strong>Applied Geomagnetic Data:</strong> ' + geoText + '</p>';
-				                                							appliedCount++;
-				                                						}
-				                                
-				                                						if (appliedCount === 0) {
-				                                							resultsHtml += '<p>No data found for this location/time.</p>';
-				                                						} else {
-				                                							resultsHtml += '<p style="color: green; font-weight: bold;">All data automatically applied to fields.</p>';
-				                                						}
-				                                						
-				                                						resultsHtml += '</div>';
-				                                
-				                                						$('#fetch-results-container').html(resultsHtml);
-				                                						$('#fetch-results-row').show();
-				                                					} else {
-				                                						alert('Error: ' + response.data.message);
-				                                					}
-				                                				},				error: function() {
+				success: function(response) {
+					if (response.success) {
+						var data = response.data;
+						var previewHtml = '<div class="environmental-preview" style="padding: 15px;">';
+						previewHtml += '<h3>' + paradb_admin.i18n.preview_title + '</h3>';
+						previewHtml += '<p>' + paradb_admin.i18n.preview_desc + '</p>';
+						previewHtml += '<table class="widefat striped" style="margin: 15px 0;">';
+						
+						if (data.weather) {
+							var tempStr = data.weather.temp ? data.weather.temp + (data.weather.temp_unit || '°C') : 'N/A';
+							var cond = data.weather.weather_desc || ('Code: ' + data.weather.weather_code);
+							previewHtml += '<tr><td><strong>' + paradb_admin.i18n.weather + '</strong></td><td>' + cond + ' (' + tempStr + ')</td></tr>';
+						}
+						
+						if (data.astro && data.astro.moon_phase) {
+							previewHtml += '<tr><td><strong>' + paradb_admin.i18n.moon_phase + '</strong></td><td>' + data.astro.moon_phase + '</td></tr>';
+						}
+						
+						if (data.astrology) {
+							var astroText = '';
+							for (var planet in data.astrology) {
+								if (data.astrology[planet].sign) {
+									astroText += planet + ': ' + data.astrology[planet].sign + '; ';
+								}
+							}
+							previewHtml += '<tr><td><strong>' + paradb_admin.i18n.astrology + '</strong></td><td>' + (astroText ? astroText.substring(0, 80) + '...' : 'N/A') + '</td></tr>';
+						}
+
+						if (data.geomagnetic) {
+							previewHtml += '<tr><td><strong>' + paradb_admin.i18n.geomagnetic + '</strong></td><td>Kp: ' + data.geomagnetic.kp_index + '</td></tr>';
+						}
+						
+						previewHtml += '</table>';
+						previewHtml += '<div style="text-align: right; margin-top: 20px;">';
+						previewHtml += '<button type="button" class="button" id="cancel-env-apply">' + paradb_admin.i18n.cancel + '</button> ';
+						previewHtml += '<button type="button" class="button button-primary" id="confirm-env-apply">' + paradb_admin.i18n.apply_data + '</button>';
+						previewHtml += '</div></div>';
+
+						// Show modal
+						var $modal = $('<div id="env-preview-modal" style="position: fixed; z-index: 100001; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center;"><div style="background: #fff; width: 500px; max-width: 90%; border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">' + previewHtml + '</div></div>');
+						$('body').append($modal);
+
+						$('#cancel-env-apply').on('click', function() {
+							$modal.remove();
+							$btn.prop('disabled', false).text(paradb_admin.i18n.fetch_data);
+						});
+
+						$('#confirm-env-apply').on('click', function() {
+							if (data.weather) {
+								var tempStr = data.weather.temp ? data.weather.temp + (data.weather.temp_unit || '°C') : '';
+								$('#temperature').val(tempStr);
+								
+								var cond = data.weather.weather_desc || ('Code: ' + data.weather.weather_code);
+								if (data.weather.humidity) cond += ', Humidity: ' + data.weather.humidity + '%';
+								if (data.weather.wind_speed) cond += ', Wind: ' + data.weather.wind_speed + (paradb_maps.units === 'imperial' ? ' mph' : ' km/h');
+								$('#weather_conditions').val(cond);
+							}
+							if (data.astro && data.astro.moon_phase) {
+								var phase = data.astro.moon_phase.toLowerCase().replace(/ /g, '_');
+								$('#moon_phase').val(phase);
+							}
+							if (data.astrology) {
+								var astroText = '';
+								for (var planet in data.astrology) {
+									if (data.astrology[planet].sign) {
+										astroText += planet + ': ' + data.astrology[planet].sign + ' (' + data.astrology[planet].full_degree.toFixed(2) + '°); ';
+									}
+								}
+								$('#astrological_data').val(astroText);
+							}
+							if (data.geomagnetic) {
+								$('#geomagnetic_data').val('Kp-Index: ' + data.geomagnetic.kp_index + ' (' + data.geomagnetic.source + ')');
+							}
+
+							$modal.remove();
+							$btn.prop('disabled', false).text(paradb_admin.i18n.fetch_data);
+							
+							// Visual feedback
+							$('#temperature, #weather_conditions, #moon_phase, #astrological_data, #geomagnetic_data').css('background-color', '#fff9c4').animate({
+								backgroundColor: '#ffffff'
+							}, 1500);
+						});
+					} else {
+						alert('Error: ' + response.data.message);
+						$btn.prop('disabled', false).text(paradb_admin.i18n.fetch_data);
+					}
+				},
+				error: function() {
 					alert('An unexpected error occurred during fetching.');
 				},
 				complete: function() {
-					$btn.prop('disabled', false).text('Auto-fetch Environmental Data');
+					$btn.prop('disabled', false).text(paradb_admin.i18n.fetch_data);
 				}
 			});
 		});

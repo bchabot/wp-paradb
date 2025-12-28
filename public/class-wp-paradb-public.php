@@ -60,6 +60,10 @@ class WP_ParaDB_Public {
 
 		// Handle witness form submission.
 		add_action( 'init', array( $this, 'handle_witness_submission' ) );
+
+		// AJAX handlers
+		add_action( 'wp_ajax_paradb_submit_witness_form', array( $this, 'ajax_submit_witness_form' ) );
+		add_action( 'wp_ajax_nopriv_paradb_submit_witness_form', array( $this, 'ajax_submit_witness_form' ) );
 	}
 
 	/**
@@ -202,6 +206,75 @@ class WP_ParaDB_Public {
 		ob_start();
 		include WP_PARADB_PLUGIN_DIR . 'public/partials/wp-paradb-public-report-single.php';
 		return ob_get_clean();
+	}
+
+	/**
+	 * AJAX handler for witness form submission.
+	 *
+	 * @since    1.0.0
+	 */
+	public function ajax_submit_witness_form() {
+		if ( ! isset( $_POST['witness_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['witness_nonce'] ) ), 'submit_witness_account' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Security check failed.', 'wp-paradb' ) ) );
+		}
+
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-witness-handler.php';
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-case-handler.php';
+		require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-evidence-handler.php';
+
+		$data = array(
+			'account_name'          => isset( $_POST['account_name'] ) ? sanitize_text_field( wp_unslash( $_POST['account_name'] ) ) : '',
+			'account_email'         => isset( $_POST['account_email'] ) ? sanitize_email( wp_unslash( $_POST['account_email'] ) ) : '',
+			'account_phone'         => isset( $_POST['account_phone'] ) ? sanitize_text_field( wp_unslash( $_POST['account_phone'] ) ) : '',
+			'incident_date'        => isset( $_POST['incident_date'] ) ? sanitize_text_field( wp_unslash( $_POST['incident_date'] ) ) : '',
+			'incident_location'    => isset( $_POST['incident_location'] ) ? sanitize_text_field( wp_unslash( $_POST['incident_location'] ) ) : '',
+			'incident_description' => isset( $_POST['incident_description'] ) ? wp_kses_post( wp_unslash( $_POST['incident_description'] ) ) : '',
+			'phenomena_types'       => isset( $_POST['phenomena_types'] ) && is_array( $_POST['phenomena_types'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['phenomena_types'] ) ) : array(),
+		);
+
+		$witness_id = WP_ParaDB_Witness_Handler::create_witness_account( $data );
+
+		if ( is_wp_error( $witness_id ) ) {
+			wp_send_json_error( array( 'message' => $witness_id->get_error_message() ) );
+		}
+
+		// Create a case automatically from the submission if configured, or just link files if we have a case_id
+		// For now, let's create a pending case
+		$case_data = array(
+			'case_name'        => sprintf( __( 'Witness Report: %s', 'wp-paradb' ), $data['incident_location'] ),
+			'case_status'      => 'open',
+			'case_description' => $data['incident_description'],
+			'location_name'    => $data['incident_location'],
+			'phenomena_types'  => $data['phenomena_types'],
+			'visibility'       => 'internal',
+		);
+		$case_id = WP_ParaDB_Case_Handler::create_case( $case_data );
+
+		// Handle file uploads if any
+		if ( ! is_wp_error( $case_id ) && ! empty( $_FILES['witness_evidence'] ) ) {
+			$files = $_FILES['witness_evidence'];
+			foreach ( $files['name'] as $key => $value ) {
+				if ( $files['name'][ $key ] ) {
+					$file = array(
+						'name'     => $files['name'][ $key ],
+						'type'     => $files['type'][ $key ],
+						'tmp_name' => $files['tmp_name'][ $key ],
+						'error'    => $files['error'][ $key ],
+						'size'     => $files['size'][ $key ],
+					);
+
+					WP_ParaDB_Evidence_Handler::upload_evidence( $file, array(
+						'case_id' => $case_id,
+						'title'   => sprintf( __( 'Witness Evidence: %s', 'wp-paradb' ), $files['name'][ $key ] ),
+					) );
+				}
+			}
+		}
+
+		wp_send_json_success( array(
+			'message' => __( 'Thank you for your submission. Our team will review it shortly.', 'wp-paradb' ),
+			'witness_id' => $witness_id
+		) );
 	}
 
 	/**

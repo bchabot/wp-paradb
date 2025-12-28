@@ -54,7 +54,7 @@ $phenomena_types = isset( $options['phenomena_types'] ) ? $options['phenomena_ty
 		<p><em><?php esc_html_e( 'You may submit anonymously by leaving the contact information fields blank.', 'wp-paradb' ); ?></em></p>
 	</div>
 
-	<form method="post" action="" class="witness-submission-form">
+	<form method="post" action="" class="witness-submission-form" enctype="multipart/form-data">
 		<?php wp_nonce_field( 'submit_witness_account', 'witness_nonce' ); ?>
 
 		<fieldset class="form-section">
@@ -94,20 +94,29 @@ $phenomena_types = isset( $options['phenomena_types'] ) ? $options['phenomena_ty
 
 			<?php if ( ! empty( $phenomena_types ) ) : ?>
 				<div class="form-field">
-					<label for="phenomena_types"><?php esc_html_e( 'Type of Phenomena', 'wp-paradb' ); ?></label>
-					<select name="phenomena_types[]" id="phenomena_types" class="form-control">
-						<option value=""><?php esc_html_e( 'Select type...', 'wp-paradb' ); ?></option>
-						<?php foreach ( $phenomena_types as $phenomenon ) : ?>
-							<option value="<?php echo esc_attr( $phenomenon ); ?>"><?php echo esc_html( $phenomenon ); ?></option>
+					<label><?php esc_html_e( 'Type of Phenomena', 'wp-paradb' ); ?> *</label>
+					<div class="phenomena-checkboxes" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 10px;">
+						<?php foreach ( $phenomena_types as $key => $phenomenon ) : ?>
+							<label style="font-weight: normal;">
+								<input type="checkbox" name="phenomena_types[]" value="<?php echo esc_attr( $phenomenon ); ?>">
+								<?php echo esc_html( $phenomenon ); ?>
+							</label>
 						<?php endforeach; ?>
-					</select>
+					</div>
 				</div>
 			<?php endif; ?>
 
 			<div class="form-field">
 				<label for="incident_description"><?php esc_html_e( 'Please describe what you experienced', 'wp-paradb' ); ?> *</label>
-				<textarea name="incident_description" id="incident_description" rows="10" class="form-control" required placeholder="<?php esc_attr_e( 'Provide as much detail as possible about what you witnessed or experienced...', 'wp-paradb' ); ?>"></textarea>
+				<textarea name="incident_description" id="incident_description" rows="10" class="form-control" required placeholder="<?php esc_attr_e( 'Provide as much detail as possible about what you witnessed or experienced...', 'wp-paradb' ); ?>" data-min-length="50"></textarea>
+				<div id="description-counter" class="char-counter" style="text-align: right; margin-top: 5px; font-size: 12px; color: #666;"></div>
 				<p class="field-description"><?php esc_html_e( 'Include details such as what you saw, heard, felt, or otherwise experienced. The more detail you can provide, the better we can investigate.', 'wp-paradb' ); ?></p>
+			</div>
+
+			<div class="form-field">
+				<label for="witness_evidence"><?php esc_html_e( 'Supporting Evidence (Photos, Audio, etc.)', 'wp-paradb' ); ?></label>
+				<input type="file" name="witness_evidence[]" id="witness_evidence" class="form-control" multiple>
+				<p class="field-description"><?php esc_html_e( 'You can upload multiple files (images, audio recordings, or documents).', 'wp-paradb' ); ?></p>
 			</div>
 		</fieldset>
 

@@ -81,6 +81,7 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 ?>
 
 <div class="wrap">
+	<?php WP_ParaDB_Admin::render_breadcrumbs(); ?>
 	<h1 class="wp-heading-inline"><?php esc_html_e( 'Cases', 'wp-paradb' ); ?></h1>
 	
 	<?php if ( current_user_can( 'paradb_create_cases' ) ) : ?>

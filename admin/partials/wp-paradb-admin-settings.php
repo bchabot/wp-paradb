@@ -121,12 +121,14 @@ $active_tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'general';
 ?>
 
 <div class="wrap">
+	<?php WP_ParaDB_Admin::render_breadcrumbs(); ?>
 	<h1><?php esc_html_e( 'ParaDB Settings', 'wp-paradb' ); ?></h1>
 	
 	<h2 class="nav-tab-wrapper">
 		<a href="?page=wp-paradb-settings&tab=general" class="nav-tab <?php echo 'general' === $active_tab ? 'nav-tab-active' : ''; ?>"><?php esc_html_e( 'General', 'wp-paradb' ); ?></a>
 		<a href="?page=wp-paradb-settings&tab=witnesses" class="nav-tab <?php echo 'witnesses' === $active_tab ? 'nav-tab-active' : ''; ?>"><?php esc_html_e( 'Witnesses', 'wp-paradb' ); ?></a>
 		<a href="?page=wp-paradb-settings&tab=maps" class="nav-tab <?php echo 'maps' === $active_tab ? 'nav-tab-active' : ''; ?>"><?php esc_html_e( 'Maps & APIs', 'wp-paradb' ); ?></a>
+		<a href="?page=wp-paradb-settings&tab=shortcodes" class="nav-tab <?php echo 'shortcodes' === $active_tab ? 'nav-tab-active' : ''; ?>"><?php esc_html_e( 'Shortcodes', 'wp-paradb' ); ?></a>
 		<a href="?page=wp-paradb-settings&tab=privacy" class="nav-tab <?php echo 'privacy' === $active_tab ? 'nav-tab-active' : ''; ?>"><?php esc_html_e( 'Privacy Policy', 'wp-paradb' ); ?></a>
 		<a href="?page=wp-paradb-settings&tab=advanced" class="nav-tab <?php echo 'advanced' === $active_tab ? 'nav-tab-active' : ''; ?>"><?php esc_html_e( 'Advanced', 'wp-paradb' ); ?></a>
 	</h2>
@@ -273,6 +275,50 @@ $active_tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'general';
 						</p>
 					</td>
 				</tr>
+			</table>
+		<?php endif; ?>
+
+		<?php if ( 'shortcodes' === $active_tab ) : ?>
+			<h2 class="title"><?php esc_html_e( 'ParaDB Shortcodes', 'wp-paradb' ); ?></h2>
+			<p><?php esc_html_e( 'Use these shortcodes to display ParaDB data on your website.', 'wp-paradb' ); ?></p>
+			
+			<table class="widefat striped" style="margin-top: 20px;">
+				<thead>
+					<tr>
+						<th style="width: 250px;"><?php esc_html_e( 'Shortcode', 'wp-paradb' ); ?></th>
+						<th><?php esc_html_e( 'Description', 'wp-paradb' ); ?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><code>[paradb_witness_form]</code></td>
+						<td>
+							<?php esc_html_e( 'Displays the public witness submission form.', 'wp-paradb' ); ?><br>
+							<small><em><?php esc_html_e( 'No parameters.', 'wp-paradb' ); ?></em></small>
+						</td>
+					</tr>
+					<tr>
+						<td><code>[paradb_cases]</code></td>
+						<td>
+							<?php esc_html_e( 'Displays a list of public cases.', 'wp-paradb' ); ?><br>
+							<small><em><?php esc_html_e( 'Parameters: limit (default: 10), status (default: all).', 'wp-paradb' ); ?></em></small>
+						</td>
+					</tr>
+					<tr>
+						<td><code>[paradb_single_case id="123"]</code></td>
+						<td>
+							<?php esc_html_e( 'Displays detailed information for a specific case.', 'wp-paradb' ); ?><br>
+							<small><em><?php esc_html_e( 'Parameter: id (required).', 'wp-paradb' ); ?></em></small>
+						</td>
+					</tr>
+					<tr>
+						<td><code>[paradb_reports]</code></td>
+						<td>
+							<?php esc_html_e( 'Displays a list of public investigation reports.', 'wp-paradb' ); ?><br>
+							<small><em><?php esc_html_e( 'Parameters: limit (default: 10), case_id (optional).', 'wp-paradb' ); ?></em></small>
+						</td>
+					</tr>
+				</tbody>
 			</table>
 		<?php endif; ?>
 

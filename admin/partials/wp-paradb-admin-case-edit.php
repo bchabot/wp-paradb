@@ -111,6 +111,7 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 ?>
 
 <div class="wrap">
+	<?php WP_ParaDB_Admin::render_breadcrumbs(); ?>
 	<h1><?php echo $is_new ? esc_html__( 'Add New Case', 'wp-paradb' ) : esc_html__( 'Edit Case', 'wp-paradb' ); ?></h1>
 
 	<form method="post" action="">
@@ -120,7 +121,7 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 			<div id="post-body" class="metabox-holder columns-2">
 				<div id="post-body-content">
 					<!-- Main Case Information -->
-					<div class="postbox">
+					<div class="postbox" id="section-case-info">
 						<h2 class="hndle"><?php esc_html_e( 'Case Information', 'wp-paradb' ); ?></h2>
 						<div class="inside">
 							<table class="form-table">
@@ -174,7 +175,7 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 					</div>
 
 					<!-- Location Information -->
-					<div class="postbox">
+					<div class="postbox" id="section-location">
 						<h2 class="hndle"><?php esc_html_e( 'Location Information', 'wp-paradb' ); ?></h2>
 						<div class="inside">
 							<table class="form-table">
@@ -252,7 +253,7 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 					<?php if ( ! $is_new && $case_id > 0 ) : ?>
 						
 						<!-- Activities -->
-						<div class="postbox">
+						<div class="postbox" id="section-activities">
 							<h2 class="hndle">
 								<span><?php esc_html_e( 'Investigation Activities', 'wp-paradb' ); ?></span>
 								<?php if ( current_user_can( 'paradb_add_activities' ) ) : ?>
@@ -293,7 +294,7 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 						</div>
 
 						<!-- Reports -->
-						<div class="postbox">
+						<div class="postbox" id="section-reports">
 							<h2 class="hndle">
 								<span><?php esc_html_e( 'Investigation Reports', 'wp-paradb' ); ?></span>
 								<?php if ( current_user_can( 'paradb_add_reports' ) ) : ?>
@@ -334,7 +335,7 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 						</div>
 
 						<!-- Evidence -->
-						<div class="postbox">
+						<div class="postbox" id="section-evidence">
 							<h2 class="hndle">
 								<span><?php esc_html_e( 'Evidence Files', 'wp-paradb' ); ?></span>
 								<?php if ( current_user_can( 'paradb_upload_evidence' ) ) : ?>
@@ -372,7 +373,7 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 						<?php WP_ParaDB_Admin::render_relationship_section( $case_id, 'case' ); ?>
 
 						<!-- Field Logs -->
-						<div class="postbox closed">
+						<div class="postbox closed" id="section-field-logs">
 							<div class="postbox-header">
 								<h2 class="hndle"><?php esc_html_e( 'Field Log Entries', 'wp-paradb' ); ?></h2>
 								<div class="handle-actions hide-if-no-js">
@@ -513,6 +514,23 @@ $investigators = WP_ParaDB_Roles::get_all_paradb_users();
 
 				<!-- Sidebar -->
 				<div id="postbox-container-1" class="postbox-container">
+					<!-- Navigation -->
+					<div class="postbox" id="paradb-edit-nav" style="position: sticky; top: 40px;">
+						<h2 class="hndle"><?php esc_html_e( 'Quick Nav', 'wp-paradb' ); ?></h2>
+						<div class="inside">
+							<ul style="margin: 0; padding: 0; list-style: none;">
+								<li><a href="#section-case-info" style="display: block; padding: 5px 0; text-decoration: none;"><span class="dashicons dashicons-info"></span> <?php esc_html_e( 'Information', 'wp-paradb' ); ?></a></li>
+								<li><a href="#section-location" style="display: block; padding: 5px 0; text-decoration: none;"><span class="dashicons dashicons-location"></span> <?php esc_html_e( 'Location', 'wp-paradb' ); ?></a></li>
+								<?php if ( ! $is_new ) : ?>
+									<li><a href="#section-activities" style="display: block; padding: 5px 0; text-decoration: none;"><span class="dashicons dashicons-performance"></span> <?php esc_html_e( 'Activities', 'wp-paradb' ); ?></a></li>
+									<li><a href="#section-reports" style="display: block; padding: 5px 0; text-decoration: none;"><span class="dashicons dashicons-clipboard"></span> <?php esc_html_e( 'Reports', 'wp-paradb' ); ?></a></li>
+									<li><a href="#section-evidence" style="display: block; padding: 5px 0; text-decoration: none;"><span class="dashicons dashicons-format-image"></span> <?php esc_html_e( 'Evidence', 'wp-paradb' ); ?></a></li>
+									<li><a href="#section-field-logs" style="display: block; padding: 5px 0; text-decoration: none;"><span class="dashicons dashicons-list-view"></span> <?php esc_html_e( 'Field Logs', 'wp-paradb' ); ?></a></li>
+								<?php endif; ?>
+							</ul>
+						</div>
+					</div>
+
 					<!-- Save Box -->
 					<div class="postbox">
 						<h2 class="hndle"><?php esc_html_e( 'Save', 'wp-paradb' ); ?></h2>

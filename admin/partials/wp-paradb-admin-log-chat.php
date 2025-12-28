@@ -196,7 +196,7 @@ jQuery(document).ready(function($) {
 
 	if (isStandalone) {
 		$('body').addClass('paradb-standalone');
-		$('#toggle-standalone').text('<?php esc_js( esc_html_e( 'Exit Full Screen', 'wp-paradb' ) ); ?>');
+		$('#toggle-standalone').text('<?php echo esc_js( __( 'Exit Full Screen', 'wp-paradb' ) ); ?>');
 	}
 
 	$('#toggle-standalone').on('click', function() {
@@ -344,9 +344,9 @@ jQuery(document).ready(function($) {
 
 					res.data.logs.forEach(function(log) {
 						if ($('#log-msg-' + log.log_id).length === 0) {
-							var isOwn = log.investigator_id == <?php echo get_current_user_id(); ?>;
+							var isOwn = log.is_own;
 							var html = '<div id="log-msg-' + log.log_id + '" class="paradb-log-msg ' + (isOwn ? 'own' : '') + '">';
-							html += '<div class="paradb-log-meta"><strong>' + log.user_name + '</strong> • ' + log.time + '</div>';
+							html += '<div class="paradb-log-meta"><strong>' + log.user_name + '</strong> • ' + log.datetime + '</div>';
 							html += '<div class="paradb-log-msg-inner">' + log.content;
 							if (log.file_url) {
 								var isImg = log.file_url.match(/\.(jpg|jpeg|png|gif)$/i);
@@ -368,7 +368,7 @@ jQuery(document).ready(function($) {
 					// Scroll to bottom
 					$chat.scrollTop($chat[0].scrollHeight);
 				} else if (isInitial) {
-					$('#chat-loading').text('<?php esc_html_e( 'No logs yet.', 'wp-paradb' ); ?>');
+					$('#chat-loading').text('<?php echo esc_js( __( 'No logs yet.', 'wp-paradb' ) ); ?>');
 				}
 			}
 		});

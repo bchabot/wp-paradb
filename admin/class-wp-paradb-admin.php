@@ -237,15 +237,18 @@ class WP_ParaDB_Admin {
 
 		$results = $wpdb->get_results( $query );
 		$logs = array();
+		$current_user_id = get_current_user_id();
 
 		foreach ( $results as $row ) {
 			$logs[] = array(
 				'log_id'          => $row->log_id,
 				'investigator_id' => $row->investigator_id,
+				'is_own'          => (int) $row->investigator_id === $current_user_id,
 				'user_name'       => $row->display_name,
 				'content'         => wpautop( esc_html( $row->log_content ) ),
 				'file_url'        => $row->file_url,
 				'time'            => gmdate( 'H:i', strtotime( $row->date_created ) ),
+				'datetime'        => gmdate( 'M j, H:i', strtotime( $row->date_created ) ),
 			);
 		}
 
@@ -630,6 +633,18 @@ class WP_ParaDB_Admin {
 		wp_localize_script( $this->plugin_name, 'paradb_admin', array(
 			'ajax_url' => admin_url( 'admin-ajax.php' ),
 			'nonce'    => wp_create_nonce( 'paradb_admin_nonce' ),
+			'i18n'     => array(
+				'preview_title' => __( 'Environmental Data Preview', 'wp-paradb' ),
+				'preview_desc'  => __( 'Review the fetched environmental data below. Click "Apply Data" to update the form fields.', 'wp-paradb' ),
+				'weather'       => __( 'Weather', 'wp-paradb' ),
+				'moon_phase'    => __( 'Moon Phase', 'wp-paradb' ),
+				'astrology'     => __( 'Astrology', 'wp-paradb' ),
+				'geomagnetic'   => __( 'Geomagnetic', 'wp-paradb' ),
+				'cancel'        => __( 'Cancel', 'wp-paradb' ),
+				'apply_data'    => __( 'Apply Data', 'wp-paradb' ),
+				'fetch_data'    => __( 'Auto-fetch Environmental Data', 'wp-paradb' ),
+				'data_applied'  => __( 'Environmental data has been applied to the form.', 'wp-paradb' ),
+			)
 		) );
 		
 		// Pass provider settings to JS
@@ -638,6 +653,60 @@ class WP_ParaDB_Admin {
 			'locationiq_key' => isset( $options['locationiq_api_key'] ) ? $options['locationiq_api_key'] : '',
 			'units' => isset( $options['units'] ) ? $options['units'] : 'metric'
 		) );
+	}
+
+	/**
+	 * Render breadcrumb navigation for admin pages.
+	 *
+	 * @since    1.0.0
+	 */
+	public static function render_breadcrumbs() {
+		$page = isset( $_GET['page'] ) ? sanitize_text_field( $_GET['page'] ) : '';
+		if ( ! $page ) return;
+
+		$crumbs = array();
+		$crumbs[] = array( 'title' => __( 'Dashboard', 'wp-paradb' ), 'url' => admin_url( 'admin.php?page=wp-paradb' ) );
+
+		switch ( $page ) {
+			case 'wp-paradb-cases':
+				$crumbs[] = array( 'title' => __( 'Cases', 'wp-paradb' ), 'url' => '' );
+				break;
+			case 'wp-paradb-case-edit':
+				$crumbs[] = array( 'title' => __( 'Cases', 'wp-paradb' ), 'url' => admin_url( 'admin.php?page=wp-paradb-cases' ) );
+				if ( isset( $_GET['case_id'] ) ) {
+					require_once WP_PARADB_PLUGIN_DIR . 'includes/class-wp-paradb-case-handler.php';
+					$case = WP_ParaDB_Case_Handler::get_case( absint( $_GET['case_id'] ) );
+					$crumbs[] = array( 'title' => $case ? $case->case_number : __( 'Edit Case', 'wp-paradb' ), 'url' => '' );
+				} else {
+					$crumbs[] = array( 'title' => __( 'Add New Case', 'wp-paradb' ), 'url' => '' );
+				}
+				break;
+			case 'wp-paradb-activities':
+				$crumbs[] = array( 'title' => __( 'Activities', 'wp-paradb' ), 'url' => '' );
+				break;
+			case 'wp-paradb-reports':
+				$crumbs[] = array( 'title' => __( 'Reports', 'wp-paradb' ), 'url' => '' );
+				break;
+			case 'wp-paradb-witnesses':
+				$crumbs[] = array( 'title' => __( 'Witnesses', 'wp-paradb' ), 'url' => '' );
+				break;
+			case 'wp-paradb-settings':
+				$crumbs[] = array( 'title' => __( 'Settings', 'wp-paradb' ), 'url' => '' );
+				break;
+		}
+
+		if ( count( $crumbs ) > 1 ) {
+			echo '<nav class="paradb-breadcrumbs" style="margin: 10px 0; color: #666; font-size: 13px;">';
+			foreach ( $crumbs as $i => $crumb ) {
+				if ( $i > 0 ) echo ' <span class="dashicons dashicons-arrow-right-alt2" style="font-size: 14px; width: 14px; height: 14px; margin-top: 2px;"></span> ';
+				if ( $crumb['url'] ) {
+					echo '<a href="' . esc_url( $crumb['url'] ) . '" style="text-decoration: none; color: #2271b1;">' . esc_html( $crumb['title'] ) . '</a>';
+				} else {
+					echo '<span>' . esc_html( $crumb['title'] ) . '</span>';
+				}
+			}
+			echo '</nav>';
+		}
 	}
 
 	/**
