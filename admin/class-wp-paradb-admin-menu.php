@@ -150,6 +150,26 @@ class WP_ParaDB_Admin_Menu {
 			array( __CLASS__, 'taxonomies_page' )
 		);
 
+		// Settings submenu.
+		add_submenu_page(
+			'wp-paradb',
+			__( 'ParaDB Settings', 'wp-paradb' ),
+			__( 'Settings', 'wp-paradb' ),
+			'paradb_manage_settings',
+			'wp-paradb-settings',
+			array( 'WP_ParaDB_Admin_Settings', 'render_settings_page' )
+		);
+
+		// Documentation submenu.
+		add_submenu_page(
+			'wp-paradb',
+			__( 'Documentation', 'wp-paradb' ),
+			__( 'Documentation', 'wp-paradb' ),
+			'paradb_view_cases',
+			'wp-paradb-docs',
+			array( __CLASS__, 'docs_page' )
+		);
+
 		// Mobile Log Chat (Hidden from menu but accessible via URL).
 		add_submenu_page(
 			null, // No parent means it's hidden from the menu.
